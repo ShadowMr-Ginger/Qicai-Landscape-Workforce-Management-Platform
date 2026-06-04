@@ -17,6 +17,7 @@ C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\driver\dto\DriverQuery.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\worker\service\impl\WorkerServiceImpl.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\common\exception\BusinessException.java
+C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\driver\dto\CreateDriverDTO.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\driver\vo\DriverDetailVO.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\security\JwtAuthenticationFilter.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\auth\controller\AuthController.java
@@ -39,6 +40,7 @@ C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\common\enums\AttendanceStatusEnum.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\worker\dto\UpdateWorkerDTO.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\config\MybatisPlusConfig.java
+C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\worker\dto\CreateWorkerDTO.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\security\AuthenticationEntryPointImpl.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\utils\WxApiUtil.java
 C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\src\main\java\com\green\module\worker\entity\WorkerEntity.java

@@ -136,10 +136,11 @@ export default function WorkersPage() {
         pageNum: 1,
         pageSize: 100,
       });
-      if (res.code === 200 && res.data?.records && res.data.records.length > 0) {
+      if (res.code === 200 && res.data?.records) {
+        // 后端连上了，始终信任后端数据（即使为空数组）
         setWorkers(res.data.records);
       } else {
-        // fallback 模拟数据
+        // 后端返回异常状态码，fallback 模拟数据
         setWorkers(
           mockWorkers.filter((w) => {
             if (showResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
@@ -151,6 +152,7 @@ export default function WorkersPage() {
         );
       }
     } catch {
+      // 网络错误/后端宕机，fallback 模拟数据
       setWorkers(
         mockWorkers.filter((w) => {
           if (showResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
@@ -241,7 +243,7 @@ export default function WorkersPage() {
         idCard: "",
         emergencyContactPhone: "",
       });
-      fetchWorkers();
+      await fetchWorkers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "新增工人失败，请检查网络或联系管理员");
     }
@@ -261,7 +263,7 @@ export default function WorkersPage() {
       });
       toast.success("修改成功");
       setEditOpen(false);
-      fetchWorkers();
+      await fetchWorkers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "修改失败");
     }
@@ -305,7 +307,7 @@ export default function WorkersPage() {
       await resignWorker(selectedWorker.id);
       toast.success(`已将 ${selectedWorker.name} 设置为离职状态`);
       setResignOpen(false);
-      fetchWorkers();
+      await fetchWorkers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "离职操作失败");
     }
@@ -329,7 +331,7 @@ export default function WorkersPage() {
       await deleteWorker(selectedWorker.id);
       toast.success("删除成功");
       setDeleteOpen(false);
-      fetchWorkers();
+      await fetchWorkers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "删除失败");
     }

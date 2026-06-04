@@ -118,7 +118,8 @@ export default function DriversPage() {
         pageNum: 1,
         pageSize: 100,
       });
-      if (res.code === 200 && res.data?.records && res.data.records.length > 0) {
+      if (res.code === 200 && res.data?.records) {
+        // 后端连上了，始终信任后端数据（即使为空数组）
         setDrivers(res.data.records);
       } else {
         setDrivers(
@@ -200,7 +201,7 @@ export default function DriversPage() {
       toast.success("新增司机成功，默认密码为 123456");
       setCreateOpen(false);
       setCreateForm({ realName: "", gender: "1", phone: "", baseDailySalary: "", overtimeHourlyRate: "" });
-      fetchDrivers();
+      await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "新增司机失败，请检查网络或联系管理员");
     }
@@ -218,7 +219,7 @@ export default function DriversPage() {
       });
       toast.success("修改成功");
       setEditOpen(false);
-      fetchDrivers();
+      await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "修改失败");
     }
@@ -259,7 +260,7 @@ export default function DriversPage() {
       await resignDriver(selectedDriver.id);
       toast.success(`已将 ${selectedDriver.realName} 设置为离职状态`);
       setResignOpen(false);
-      fetchDrivers();
+      await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "离职操作失败");
     }
@@ -277,7 +278,7 @@ export default function DriversPage() {
       await deleteDriver(selectedDriver.id);
       toast.success("删除成功");
       setDeleteOpen(false);
-      fetchDrivers();
+      await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "删除失败");
     }

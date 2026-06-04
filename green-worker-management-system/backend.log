@@ -1,0 +1,1813 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-06-04 22:31:33.227 [main] INFO  com.green.GreenWorkerManagementSystemApplication - Starting GreenWorkerManagementSystemApplication using Java 17.0.12 with PID 38952 (C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system\target\classes started by Ginger-Hsu in C:\Users\Ginger-Hsu\Project\Qicai-Landscape-Workforce-Management-Platform\green-worker-management-system)
+2026-06-04 22:31:33.229 [main] DEBUG com.green.GreenWorkerManagementSystemApplication - Running with Spring Boot v3.2.5, Spring v6.1.6
+2026-06-04 22:31:33.230 [main] INFO  com.green.GreenWorkerManagementSystemApplication - The following 1 profile is active: "dev"
+2026-06-04 22:31:34.096 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-06-04 22:31:34.104 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-06-04 22:31:34.105 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-06-04 22:31:34.141 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-06-04 22:31:34.142 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 884 ms
+2026-06-04 22:31:34.216 [main] DEBUG com.green.security.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
+Use localhost address 
+Get DESKTOP-V7MBC49/192.168.175.129 network interface 
+Get network interface info: name:wlan1 (Realtek 8852CE WiFi 6E PCI-E NIC)
+Initialization Sequence datacenterId:6 workerId:27
+ _ _   |_  _ _|_. ___ _ |    _ 
+| | |\/|_)(_| | |_\  |_)||_|_\ 
+     /               |         
+                        3.5.6 
+2026-06-04 22:31:34.929 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-06-04 22:31:34.940 [main] INFO  com.green.GreenWorkerManagementSystemApplication - Started GreenWorkerManagementSystemApplication in 1.963 seconds (process running for 2.182)
+2026-06-04 22:32:05.919 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-04 22:32:05.920 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-06-04 22:32:05.921 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-06-04 22:32:05.961 [http-nio-8080-exec-1] WARN  com.green.security.AuthenticationEntryPointImpl - [认证失败] URI=/api/admin/workers | Message=Full authentication is required to access this resource
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@f8a43d1] was not registered for synchronization because synchronization is not active
+2026-06-04 22:32:13.309 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+2026-06-04 22:32:13.310 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - GreenHikariPool - Starting...
+2026-06-04 22:32:13.503 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.pool.HikariPool - GreenHikariPool - Added connection com.mysql.cj.jdbc.ConnectionImpl@b40435d
+2026-06-04 22:32:13.506 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - GreenHikariPool - Start completed.
+JDBC Connection [HikariProxyConnection@1968425428 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@f8a43d1]
+2026-06-04 22:32:14.177 [http-nio-8080-exec-4] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+2026-06-04 22:32:14.333 [http-nio-8080-exec-2] ERROR com.green.common.exception.GlobalExceptionHandler - [系统异常] URI=/api/admin/workers | Message=JSON parse error: Invalid UTF-8 start byte 0xb2
+org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Invalid UTF-8 start byte 0xb2
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:406)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.read(AbstractJackson2HttpMessageConverter.java:354)
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver.readWithMessageConverters(AbstractMessageConverterMethodArgumentResolver.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.readWithMessageConverters(RequestResponseBodyMethodProcessor.java:161)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:135)
+	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
+	at org.springframework.web.method.support.InvocableHandlerMethod.getMethodArgumentValues(InvocableHandlerMethod.java:224)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:178)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.green.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:122)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: com.fasterxml.jackson.databind.JsonMappingException: Invalid UTF-8 start byte 0xb2
+ at [Source: (org.springframework.util.StreamUtils$NonClosingInputStream); line: 1, column: 11] (through reference chain: com.green.module.worker.dto.CreateWorkerDTO["name"])
+	at com.fasterxml.jackson.databind.JsonMappingException.wrapWithPath(JsonMappingException.java:402)
+	at com.fasterxml.jackson.databind.JsonMappingException.wrapWithPath(JsonMappingException.java:361)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.wrapAndThrow(BeanDeserializerBase.java:1863)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:394)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:323)
+	at com.fasterxml.jackson.databind.ObjectReader._bindAndClose(ObjectReader.java:2105)
+	at com.fasterxml.jackson.databind.ObjectReader.readValue(ObjectReader.java:1481)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.readJavaType(AbstractJackson2HttpMessageConverter.java:395)
+	... 104 common frames omitted
+Caused by: com.fasterxml.jackson.core.JsonParseException: Invalid UTF-8 start byte 0xb2
+ at [Source: (org.springframework.util.StreamUtils$NonClosingInputStream); line: 1, column: 11]
+	at com.fasterxml.jackson.core.JsonParser._constructError(JsonParser.java:2477)
+	at com.fasterxml.jackson.core.base.ParserMinimalBase._reportError(ParserMinimalBase.java:750)
+	at com.fasterxml.jackson.core.json.UTF8StreamJsonParser._reportInvalidInitial(UTF8StreamJsonParser.java:3712)
+	at com.fasterxml.jackson.core.json.UTF8StreamJsonParser._reportInvalidChar(UTF8StreamJsonParser.java:3708)
+	at com.fasterxml.jackson.core.json.UTF8StreamJsonParser._finishString2(UTF8StreamJsonParser.java:2634)
+	at com.fasterxml.jackson.core.json.UTF8StreamJsonParser._finishAndReturnString(UTF8StreamJsonParser.java:2560)
+	at com.fasterxml.jackson.core.json.UTF8StreamJsonParser.getText(UTF8StreamJsonParser.java:335)
+	at com.fasterxml.jackson.databind.deser.std.StringDeserializer.deserialize(StringDeserializer.java:42)
+	at com.fasterxml.jackson.databind.deser.std.StringDeserializer.deserialize(StringDeserializer.java:11)
+	at com.fasterxml.jackson.databind.deser.impl.MethodProperty.deserializeAndSet(MethodProperty.java:129)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:392)
+	... 109 common frames omitted
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@bf77eca] was not registered for synchronization because synchronization is not active
+2026-06-04 22:32:30.960 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@87069124 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@bf77eca]
+2026-06-04 22:32:31.446 [http-nio-8080-exec-6] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+2026-06-04 22:32:31.528 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name [com.green.module.worker.service.impl.WorkerServiceImpl.create]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+2026-06-04 22:32:31.531 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Acquired Connection [HikariProxyConnection@1264040841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] for JDBC transaction
+2026-06-04 22:32:31.533 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@1264040841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] to manual commit
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b23ff83]
+JDBC Connection [HikariProxyConnection@1264040841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will be managed by Spring
+==>  Preparing: INSERT INTO workers ( name, gender, phone, base_daily_salary, overtime_hourly_rate, is_skilled_worker, is_employed, created_by_type, create_time, update_time, create_by, update_by, deleted, version ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+==> Parameters: TestWorker(String), 1(Integer), 13800138099(String), 200(BigDecimal), 30(BigDecimal), 0(Integer), 1(Integer), 1(Integer), 2026-06-04T22:32:31.544896700(LocalDateTime), 2026-06-04T22:32:31.546864900(LocalDateTime), 0(Long), 0(Long), 0(Integer), 1(Integer)
+<==    Updates: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b23ff83]
+2026-06-04 22:32:31.562 [http-nio-8080-exec-8] INFO  c.g.module.worker.service.impl.WorkerServiceImpl - 新增工人成功: workerId=1, name=TestWorker
+Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b23ff83]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b23ff83]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b23ff83]
+2026-06-04 22:32:31.566 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction commit
+2026-06-04 22:32:31.567 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Committing JDBC transaction on Connection [HikariProxyConnection@1264040841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d]
+2026-06-04 22:32:31.571 [http-nio-8080-exec-8] DEBUG o.s.jdbc.support.JdbcTransactionManager - Releasing JDBC Connection [HikariProxyConnection@1264040841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] after transaction
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d69f2ab] was not registered for synchronization because synchronization is not active
+2026-06-04 22:32:39.313 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@330178422 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d69f2ab]
+2026-06-04 22:32:39.761 [http-nio-8080-exec-9] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+2026-06-04 22:32:39.856 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name [com.green.module.driver.service.impl.DriverServiceImpl.create]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+2026-06-04 22:32:39.858 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Acquired Connection [HikariProxyConnection@1839860405 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] for JDBC transaction
+2026-06-04 22:32:39.858 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@1839860405 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] to manual commit
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34c691f5]
+JDBC Connection [HikariProxyConnection@1839860405 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will be managed by Spring
+==>  Preparing: INSERT INTO drivers ( real_name, phone, gender, base_daily_salary, overtime_hourly_rate, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+==> Parameters: TestDriver(String), 13900139099(String), 1(Integer), 300(BigDecimal), 50(BigDecimal), $2a$10$2UXCxcYVh806qwg/npdX9eRaomHuSayaRgR2aBQaLST2DfqrB8eCS(String), 0(Integer), 1(Integer), 2026-06-04T22:32:39.960468800(LocalDateTime), 2026-06-04T22:32:39.960468800(LocalDateTime), 0(Long), 0(Long), 0(Integer), 1(Integer)
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34c691f5]
+2026-06-04 22:32:40.124 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.SQLErrorCodesFactory - Looking up default SQLErrorCodes for DataSource [com.zaxxer.hikari.HikariDataSource@5ef86b35]
+2026-06-04 22:32:40.128 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.SQLErrorCodesFactory - SQL error codes for 'MySQL' found
+2026-06-04 22:32:40.129 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.SQLErrorCodesFactory - Caching SQL error codes for DataSource [com.zaxxer.hikari.HikariDataSource@5ef86b35]: database product name is 'MySQL'
+2026-06-04 22:32:40.132 [http-nio-8080-exec-1] DEBUG o.s.j.support.SQLErrorCodeSQLExceptionTranslator - Translating SQLException with SQL state '42S22', error code '1054', message [Unknown column 'gender' in 'field list'] for task [
+### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+### The error may exist in com/green/module/driver/mapper/DriverMapper.java (best guess)
+### The error may involve com.green.module.driver.mapper.DriverMapper.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO drivers  ( real_name, phone, gender, base_daily_salary, overtime_hourly_rate,   password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version )  VALUES (  ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?  )
+### Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34c691f5]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@34c691f5]
+2026-06-04 22:32:40.133 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction rollback
+2026-06-04 22:32:40.134 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Rolling back JDBC transaction on Connection [HikariProxyConnection@1839860405 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d]
+2026-06-04 22:32:40.135 [http-nio-8080-exec-1] DEBUG o.s.jdbc.support.JdbcTransactionManager - Releasing JDBC Connection [HikariProxyConnection@1839860405 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] after transaction
+2026-06-04 22:32:40.136 [http-nio-8080-exec-1] ERROR com.green.common.exception.GlobalExceptionHandler - [系统异常] URI=/api/admin/drivers | Message=
+### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+### The error may exist in com/green/module/driver/mapper/DriverMapper.java (best guess)
+### The error may involve com.green.module.driver.mapper.DriverMapper.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO drivers  ( real_name, phone, gender, base_daily_salary, overtime_hourly_rate,   password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version )  VALUES (  ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?  )
+### Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+; bad SQL grammar []
+org.springframework.jdbc.BadSqlGrammarException: 
+### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+### The error may exist in com/green/module/driver/mapper/DriverMapper.java (best guess)
+### The error may involve com.green.module.driver.mapper.DriverMapper.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO drivers  ( real_name, phone, gender, base_daily_salary, overtime_hourly_rate,   password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version )  VALUES (  ?, ?, ?, ?, ?,   ?, ?, ?, ?, ?, ?, ?, ?, ?  )
+### Cause: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+; bad SQL grammar []
+	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:246)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439)
+	at jdk.proxy2/jdk.proxy2.$Proxy83.insert(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.insert(SqlSessionTemplate.java:272)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:59)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:149)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:90)
+	at jdk.proxy2/jdk.proxy2.$Proxy95.insert(Unknown Source)
+	at com.green.module.driver.service.impl.DriverServiceImpl.create(DriverServiceImpl.java:101)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:392)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at com.green.module.driver.service.impl.DriverServiceImpl$$SpringCGLIB$$0.create(<generated>)
+	at com.green.module.driver.controller.DriverController.create(DriverController.java:46)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor.invoke(AuthorizationManagerBeforeMethodInterceptor.java:198)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at com.green.module.driver.controller.DriverController$$SpringCGLIB$$0.create(<generated>)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.green.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:122)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: java.sql.SQLSyntaxErrorException: Unknown column 'gender' in 'field list'
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:912)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.execute(ClientPreparedStatement.java:354)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:58)
+	at jdk.proxy3/jdk.proxy3.$Proxy124.execute(Unknown Source)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
+	at jdk.proxy2/jdk.proxy2.$Proxy122.update(Unknown Source)
+	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50)
+	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
+	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.plugin.Invocation.proceed(Invocation.java:61)
+	at com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.intercept(MybatisPlusInterceptor.java:106)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:59)
+	at jdk.proxy2/jdk.proxy2.$Proxy121.update(Unknown Source)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.insert(DefaultSqlSession.java:184)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425)
+	... 139 common frames omitted
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7fab8a4e] was not registered for synchronization because synchronization is not active
+2026-06-04 22:32:58.977 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@773141145 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7fab8a4e]
+2026-06-04 22:32:59.482 [http-nio-8080-exec-4] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+2026-06-04 22:32:59.525 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name [com.green.module.driver.service.impl.DriverServiceImpl.create]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+2026-06-04 22:32:59.528 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Acquired Connection [HikariProxyConnection@221391251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] for JDBC transaction
+2026-06-04 22:32:59.529 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@221391251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] to manual commit
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4830b651]
+JDBC Connection [HikariProxyConnection@221391251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will be managed by Spring
+==>  Preparing: INSERT INTO drivers ( real_name, phone, gender, base_daily_salary, overtime_hourly_rate, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+==> Parameters: TestDriver(String), 13900139099(String), 1(Integer), 300(BigDecimal), 50(BigDecimal), $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye(String), 0(Integer), 1(Integer), 2026-06-04T22:32:59.676460500(LocalDateTime), 2026-06-04T22:32:59.676460500(LocalDateTime), 0(Long), 0(Long), 0(Integer), 1(Integer)
+<==    Updates: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4830b651]
+2026-06-04 22:32:59.685 [http-nio-8080-exec-5] INFO  c.g.module.driver.service.impl.DriverServiceImpl - 新增司机成功: driverId=1, name=TestDriver
+Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4830b651]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4830b651]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4830b651]
+2026-06-04 22:32:59.687 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction commit
+2026-06-04 22:32:59.688 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Committing JDBC transaction on Connection [HikariProxyConnection@221391251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d]
+2026-06-04 22:32:59.698 [http-nio-8080-exec-5] DEBUG o.s.jdbc.support.JdbcTransactionManager - Releasing JDBC Connection [HikariProxyConnection@221391251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] after transaction
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@37f68d66] was not registered for synchronization because synchronization is not active
+2026-06-04 22:34:45.227 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@637875054 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@37f68d66]
+2026-06-04 22:34:45.632 [http-nio-8080-exec-2] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b2aa58f] was not registered for synchronization because synchronization is not active
+2026-06-04 22:34:47.214 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1605664472 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3b2aa58f]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bccf73e] was not registered for synchronization because synchronization is not active
+2026-06-04 22:34:47.261 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1362402382 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bccf73e]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@658a5592] was not registered for synchronization because synchronization is not active
+2026-06-04 22:34:48.620 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@362503553 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@658a5592]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@638ba3d0] was not registered for synchronization because synchronization is not active
+2026-06-04 22:34:50.658 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@2018484539 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@638ba3d0]
+2026-06-04 22:35:16.861 [http-nio-8080-exec-1] WARN  com.green.common.exception.GlobalExceptionHandler - [参数校验失败] URI=/api/admin/workers | Message=phone: 手机号格式不正确
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1735dd54] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:16.884 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@598040251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1735dd54]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@251633d7] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:22.267 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@804149415 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@251633d7]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c285822] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:22.294 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@743511472 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c285822]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1867cc7d] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:23.379 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1899025149 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1867cc7d]
+2026-06-04 22:35:23.884 [http-nio-8080-exec-2] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@461d09d5] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:25.256 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1890728186 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@461d09d5]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@44126309] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:25.283 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1884811251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@44126309]
+2026-06-04 22:35:34.689 [http-nio-8080-exec-8] WARN  com.green.common.exception.GlobalExceptionHandler - [参数校验失败] URI=/api/admin/workers | Message=phone: 手机号格式不正确
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@634b2e86] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:34.708 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1939060251 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@634b2e86]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c33b95b] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:39.836 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@231031255 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c33b95b]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4171ad04] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:40.589 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1559143777 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4171ad04]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bf4be66] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:41.077 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@778871151 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bf4be66]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@ac33c71] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:44.134 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1275101680 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@ac33c71]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e7d81f8] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:44.851 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1489072744 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e7d81f8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@405d72a3] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:45.282 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1604020239 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@405d72a3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@25230277] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:45.748 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1704681018 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@25230277]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@243774a8] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:48.176 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1649535953 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@243774a8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f44db29] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:48.458 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@651084812 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f44db29]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@51ce67d1] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:48.913 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@827168650 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@51ce67d1]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c1c4614] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:49.162 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@440379303 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c1c4614]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4e9d4fca] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:49.442 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1735470805 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4e9d4fca]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@db8f923] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:50.340 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1432414902 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@db8f923]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6c44e160] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:50.367 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@612622873 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6c44e160]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@62a24b17] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:51.080 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1210993604 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@62a24b17]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68d16611] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:51.100 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1377530020 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68d16611]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@338f5acf] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:51.649 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@243455603 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@338f5acf]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@11f4e9c8] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:51.664 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@288496642 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@11f4e9c8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e3a3669] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:53.063 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@129903380 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e3a3669]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@d3cc407] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:54.332 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1351676909 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@d3cc407]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66c0b883] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:54.599 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1481801385 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66c0b883]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2254cded] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:55.086 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1758128091 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2254cded]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5ab2f0bc] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:55.348 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@596378569 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5ab2f0bc]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@60005be2] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:55.657 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1529409233 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@60005be2]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@785713c0] was not registered for synchronization because synchronization is not active
+2026-06-04 22:35:56.443 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@171379931 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@785713c0]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8abc5ed] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:00.008 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@291300440 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@8abc5ed]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ca4fd8c] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:00.028 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@984399460 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ca4fd8c]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1f2d1164] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:01.930 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@511626383 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1f2d1164]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2e0d14e1] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:03.382 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1640756791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2e0d14e1]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7a0fa8d] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:03.809 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1350073871 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7a0fa8d]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e737c45] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:04.614 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@2098514856 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1e737c45]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19b4ae14] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:08.089 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@654276294 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19b4ae14]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@35659aeb] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:12.074 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@2023730155 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@35659aeb]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1533848c] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:14.902 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@166833821 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1533848c]
+2026-06-04 22:36:20.709 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Creating new transaction with name [com.green.module.worker.service.impl.WorkerServiceImpl.resign]: PROPAGATION_REQUIRED,ISOLATION_DEFAULT,-java.lang.Exception
+2026-06-04 22:36:20.712 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Acquired Connection [HikariProxyConnection@1939738791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] for JDBC transaction
+2026-06-04 22:36:20.713 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Switching JDBC Connection [HikariProxyConnection@1939738791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] to manual commit
+Creating a new SqlSession
+Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b]
+JDBC Connection [HikariProxyConnection@1939738791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b]
+Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b] from current transaction
+==>  Preparing: UPDATE workers SET name=?, gender=?, phone=?, base_daily_salary=?, overtime_hourly_rate=?, is_skilled_worker=?, is_employed=?, created_by_type=?, create_time=?, update_time=?, create_by=?, update_by=?, version=? WHERE id=? AND version=? AND deleted=0
+Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b]
+Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b]
+Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1c9a2e1b]
+2026-06-04 22:36:20.724 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Initiating transaction rollback
+2026-06-04 22:36:20.724 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Rolling back JDBC transaction on Connection [HikariProxyConnection@1939738791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d]
+2026-06-04 22:36:20.725 [http-nio-8080-exec-6] DEBUG o.s.jdbc.support.JdbcTransactionManager - Releasing JDBC Connection [HikariProxyConnection@1939738791 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] after transaction
+2026-06-04 22:36:20.725 [http-nio-8080-exec-6] ERROR com.green.common.exception.GlobalExceptionHandler - [系统异常] URI=/api/admin/workers/1/resign | Message=null
+org.mybatis.spring.MyBatisSystemException: null
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:97)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439)
+	at jdk.proxy2/jdk.proxy2.$Proxy83.update(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.update(SqlSessionTemplate.java:288)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:64)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:149)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:90)
+	at jdk.proxy2/jdk.proxy2.$Proxy100.updateById(Unknown Source)
+	at com.green.module.worker.service.impl.WorkerServiceImpl.resign(WorkerServiceImpl.java:140)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:392)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at com.green.module.worker.service.impl.WorkerServiceImpl$$SpringCGLIB$$0.resign(<generated>)
+	at com.green.module.worker.controller.WorkerController.resign(WorkerController.java:89)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor.invoke(AuthorizationManagerBeforeMethodInterceptor.java:198)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at com.green.module.worker.controller.WorkerController$$SpringCGLIB$$0.resign(<generated>)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPut(FrameworkServlet.java:925)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:593)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at com.green.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:122)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: org.apache.ibatis.binding.BindingException: Parameter 'MP_OPTLOCK_VERSION_ORIGINAL' not found. Available parameters are [param1, et]
+	at org.apache.ibatis.binding.MapperMethod$ParamMap.get(MapperMethod.java:210)
+	at org.apache.ibatis.reflection.wrapper.MapWrapper.get(MapWrapper.java:46)
+	at org.apache.ibatis.reflection.MetaObject.getValue(MetaObject.java:115)
+	at org.apache.ibatis.scripting.defaults.DefaultParameterHandler.setParameters(DefaultParameterHandler.java:82)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.parameterize(PreparedStatementHandler.java:97)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.parameterize(RoutingStatementHandler.java:65)
+	at jdk.internal.reflect.GeneratedMethodAccessor16.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
+	at jdk.proxy2/jdk.proxy2.$Proxy122.parameterize(Unknown Source)
+	at org.apache.ibatis.executor.SimpleExecutor.prepareStatement(SimpleExecutor.java:91)
+	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:49)
+	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
+	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.ibatis.plugin.Invocation.proceed(Invocation.java:61)
+	at com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.intercept(MybatisPlusInterceptor.java:106)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:59)
+	at jdk.proxy2/jdk.proxy2.$Proxy121.update(Unknown Source)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425)
+	... 139 common frames omitted
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@36b65af3] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:20.742 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1765187039 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@36b65af3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@438bb7ff] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:24.267 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@878323931 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@438bb7ff]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5691885] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:24.286 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1001204817 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5691885]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66b0bf2] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:25.349 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@111144224 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@66b0bf2]
+2026-06-04 22:36:25.893 [http-nio-8080-exec-9] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@339fc321] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:26.976 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1754072945 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@339fc321]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@70e5e4dd] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:26.994 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1276981467 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@70e5e4dd]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d007b39] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:27.983 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@69933232 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d007b39]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@46aa8839] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:29.634 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1337226116 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@46aa8839]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6ae4a04b] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:30.993 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@711817156 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6ae4a04b]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@52966643] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:32.355 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1332984839 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@52966643]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@75b60bd0] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:33.170 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@674478300 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@75b60bd0]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31a7b7ac] was not registered for synchronization because synchronization is not active
+2026-06-04 22:36:33.676 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1415470515 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@31a7b7ac]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f04f747] was not registered for synchronization because synchronization is not active
+2026-06-04 22:38:06.434 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1068685657 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,username,password,real_name,phone,avatar,role_type,is_active,last_login_time,last_login_ip,create_time,update_time,create_by,update_by,deleted,version FROM admins WHERE deleted=0 AND (username = ? AND is_active = ?)
+==> Parameters: admin(String), 1(Integer)
+<==    Columns: id, username, password, real_name, phone, avatar, role_type, is_active, last_login_time, last_login_ip, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, admin, $2b$12$StUzvxlKHLBcF4lKPWU7x.0T52iMnu832OIlxLbfCsbVVjEe00lha, 超级管理员, 13800138000, null, 1, 1, null, null, 2026-06-04 22:11:54, 2026-06-04 22:13:14, null, null, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f04f747]
+2026-06-04 22:38:06.701 [http-nio-8080-exec-10] INFO  c.green.module.auth.service.impl.AuthServiceImpl - 管理员登录成功: username=admin
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@498333d7] was not registered for synchronization because synchronization is not active
+2026-06-04 22:38:06.741 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1472479341 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@498333d7]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19a5edf3] was not registered for synchronization because synchronization is not active
+2026-06-04 22:44:14.494 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1480030804 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@19a5edf3]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bbd42e9] was not registered for synchronization because synchronization is not active
+2026-06-04 22:44:14.517 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@159145501 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5bbd42e9]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@533a10aa] was not registered for synchronization because synchronization is not active
+2026-06-04 22:45:54.713 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@19362104 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@533a10aa]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7fccc56f] was not registered for synchronization because synchronization is not active
+2026-06-04 22:45:54.732 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@564553215 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7fccc56f]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@74e2e6be] was not registered for synchronization because synchronization is not active
+2026-06-04 22:45:56.554 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@713846990 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE id=? AND deleted=0
+==> Parameters: 1(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@74e2e6be]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@57526119] was not registered for synchronization because synchronization is not active
+2026-06-04 22:45:59.153 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1928071360 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@57526119]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2b7cc097] was not registered for synchronization because synchronization is not active
+2026-06-04 22:45:59.867 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1590569661 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2b7cc097]
+2026-06-04 22:46:05.874 [http-nio-8080-exec-3] WARN  com.green.common.exception.GlobalExceptionHandler - [参数校验失败] URI=/api/admin/workers | Message=phone: 手机号格式不正确
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@30679ccb] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:05.888 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1407296841 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@30679ccb]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@774c3f68] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:08.855 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@472587050 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@774c3f68]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@682be68b] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:08.870 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@755402965 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@682be68b]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1f8128c] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:10.834 [http-nio-8080-exec-7] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@661484741 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 0(Integer)
+<==    Columns: total
+<==        Row: 0
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1f8128c]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@329b1ae9] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:11.480 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@143590195 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@329b1ae9]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@77fa9e48] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:13.490 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1700889813 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@77fa9e48]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@148ab1f] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:13.509 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1660713630 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@148ab1f]
+2026-06-04 22:46:18.300 [http-nio-8080-exec-4] WARN  com.green.common.exception.GlobalExceptionHandler - [参数校验失败] URI=/api/admin/drivers | Message=phone: 手机号格式不正确
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@36c5f756] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:18.311 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1510054489 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@36c5f756]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@639d6313] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:23.641 [http-nio-8080-exec-2] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1023953348 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@639d6313]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@9d56dd8] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:23.665 [http-nio-8080-exec-6] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1880571281 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@9d56dd8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3cb665b8] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:25.691 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@628032219 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3cb665b8]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7edfca40] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:25.708 [http-nio-8080-exec-5] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@595293850 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7edfca40]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18dd8ec0] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:26.234 [http-nio-8080-exec-8] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1757122675 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18dd8ec0]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d26b3e0] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:26.250 [http-nio-8080-exec-9] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1946733501 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1d26b3e0]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6a40e748] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:26.772 [http-nio-8080-exec-10] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1802065940 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6a40e748]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5746cd84] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:26.784 [http-nio-8080-exec-1] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@324543708 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM workers WHERE deleted = 0 AND (is_employed = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,name,gender,group_id,phone,id_card,base_daily_salary,overtime_hourly_rate,emergency_contact_phone,is_skilled_worker,is_employed,default_project_id,created_by,created_by_type,create_time,update_time,create_by,update_by,deleted,version FROM workers WHERE deleted=0 AND (is_employed = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, name, gender, group_id, phone, id_card, base_daily_salary, overtime_hourly_rate, emergency_contact_phone, is_skilled_worker, is_employed, default_project_id, created_by, created_by_type, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestWorker, 1, null, 13800138099, null, 200.00, 30.00, null, 0, 1, null, null, 1, 2026-06-04 22:32:32, 2026-06-04 22:32:32, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5746cd84]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cf1bc8b] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:27.075 [http-nio-8080-exec-4] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@1294044567 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6cf1bc8b]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@63c65937] was not registered for synchronization because synchronization is not active
+2026-06-04 22:46:27.094 [http-nio-8080-exec-3] DEBUG o.springframework.jdbc.datasource.DataSourceUtils - Fetching JDBC Connection from DataSource
+JDBC Connection [HikariProxyConnection@893633604 wrapping com.mysql.cj.jdbc.ConnectionImpl@b40435d] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM drivers WHERE deleted = 0 AND (is_active = ?)
+==> Parameters: 1(Integer)
+<==    Columns: total
+<==        Row: 1
+<==      Total: 1
+==>  Preparing: SELECT id,real_name,phone,gender,base_daily_salary,overtime_hourly_rate,wx_openid,wx_unionid,password,password_changed,is_active,create_time,update_time,create_by,update_by,deleted,version FROM drivers WHERE deleted=0 AND (is_active = ?) ORDER BY create_time DESC LIMIT ?
+==> Parameters: 1(Integer), 100(Long)
+<==    Columns: id, real_name, phone, gender, base_daily_salary, overtime_hourly_rate, wx_openid, wx_unionid, password, password_changed, is_active, create_time, update_time, create_by, update_by, deleted, version
+<==        Row: 1, TestDriver, 13900139099, 1, 300.00, 50.00, null, null, $2a$10$3IhbcJdCebQx4tUUCC0OLe1teEMaqVgWKaemK.a2Y7cXExbk9MMye, 0, 1, 2026-06-04 22:33:00, 2026-06-04 22:33:00, 0, 0, 0, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@63c65937]

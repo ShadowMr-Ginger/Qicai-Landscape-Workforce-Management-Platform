@@ -28,6 +28,7 @@ com\green\config\Knife4jConfig.class
 com\green\module\auth\vo\DriverLoginVO.class
 com\green\module\auth\vo\LoginVO.class
 com\green\module\worker\controller\WorkerController.class
+com\green\module\driver\dto\CreateDriverDTO.class
 com\green\framework\annotation\OperationLog.class
 com\green\config\MybatisPlusConfig.class
 com\green\module\driver\service\DriverService.class
@@ -54,6 +55,7 @@ com\green\module\project\mapper\ProjectMapper.class
 com\green\common\result\ApiResult.class
 com\green\module\attendance\mapper\WorkerAttendanceRecordMapper.class
 com\green\module\group\mapper\GroupMapper.class
+com\green\module\worker\dto\CreateWorkerDTO.class
 com\green\module\auth\vo\CurrentUserVO.class
 com\green\module\worker\dto\UpdateWorkerDTO.class
 com\green\common\enums\BatchStatusEnum.class
