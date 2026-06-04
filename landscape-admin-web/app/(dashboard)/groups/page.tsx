@@ -306,8 +306,17 @@ export default function GroupsPage() {
                     )}
                   </div>
                 </div>
-                {managing && group.isSystem !== 1 && (
+                {managing && (
                   <div className="flex flex-col gap-1 ml-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      onClick={(e) => { e.stopPropagation(); openEdit(group); }}
+                      title="编辑组别"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -326,20 +335,17 @@ export default function GroupsPage() {
                     >
                       <UserCheck className="w-3.5 h-3.5" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => { e.stopPropagation(); openDelete(group); }}
-                      title="组别删除"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                )}
-                {managing && group.isSystem === 1 && (
-                  <div className="ml-2 text-[10px] text-gray-400 leading-tight">
-                    不可<br/>删除
+                    {group.isSystem !== 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={(e) => { e.stopPropagation(); openDelete(group); }}
+                        title="组别删除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

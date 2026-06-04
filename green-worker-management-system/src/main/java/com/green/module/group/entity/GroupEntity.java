@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("groups")
+@TableName("`groups`")
 public class GroupEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
