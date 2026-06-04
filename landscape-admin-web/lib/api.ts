@@ -68,4 +68,58 @@ export async function logout(): Promise<ApiResult<null>> {
   return res.data;
 }
 
+// ==================== 工人管理 ====================
+
+export async function getWorkerList(params: Record<string, unknown>) {
+  const res = await api.get('/admin/workers', { params });
+  return res.data;
+}
+
+export async function getWorkerDetail(id: number) {
+  const res = await api.get(`/admin/workers/${id}`);
+  return res.data;
+}
+
+export async function updateWorker(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/workers/${id}`, data);
+  return res.data;
+}
+
+export async function resignWorker(id: number) {
+  const res = await api.put(`/admin/workers/${id}/resign`);
+  return res.data;
+}
+
+export async function deleteWorker(id: number) {
+  const res = await api.delete(`/admin/workers/${id}`);
+  return res.data;
+}
+
+// ==================== 司机管理 ====================
+
+export async function getDriverList(params: Record<string, unknown>) {
+  const res = await api.get('/admin/drivers', { params });
+  return res.data;
+}
+
+export async function getDriverDetail(id: number) {
+  const res = await api.get(`/admin/drivers/${id}`);
+  return res.data;
+}
+
+export async function updateDriver(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/drivers/${id}`, data);
+  return res.data;
+}
+
+export async function resignDriver(id: number) {
+  const res = await api.put(`/admin/drivers/${id}/resign`);
+  return res.data;
+}
+
+export async function deleteDriver(id: number) {
+  const res = await api.delete(`/admin/drivers/${id}`);
+  return res.data;
+}
+
 export default api;
