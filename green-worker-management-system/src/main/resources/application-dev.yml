@@ -1,0 +1,90 @@
+# ============================================================
+# 开发环境配置
+# 适用场景：本地开发、前后端联调
+# ============================================================
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # MySQL 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/landscape_workforce?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: root
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+      pool-name: GreenHikariPool
+
+  # Redis 配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      password:       # 本地开发若无密码则留空
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # 开启 SQL 日志（开发环境便于调试）
+#  jpa:
+#    show-sql: true
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 开启 SQL 日志打印（开发环境）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 驼峰命名自动映射
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除值（已删除）
+      logic-delete-value: 1
+      # 逻辑未删除值（未删除）
+      logic-not-delete-value: 0
+      # ID 生成策略
+      id-type: auto
+  # Mapper XML 扫描路径（如有自定义 XML）
+  mapper-locations: classpath*:/mapper/**/*.xml
+
+# JWT 配置
+jwt:
+  # 签名密钥（Base64 编码，开发环境随便写一个，生产环境必须更换为强随机密钥）
+  # 生成命令：echo -n 'your-secret-key' | base64
+  secret: YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY3OA==
+  # Token 有效期：24 小时（毫秒）
+  expiration: 86400000
+
+# 微信小程序配置（开发环境）
+wx:
+  miniapp:
+    app-id: wx_dev_appid_placeholder
+    app-secret: wx_dev_secret_placeholder
+
+#  Knife4j / OpenAPI 文档（开发环境开启）
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+# 日志级别（开发环境更详细）
+logging:
+  level:
+    com.green.mapper: debug
+    org.springframework.jdbc: debug
