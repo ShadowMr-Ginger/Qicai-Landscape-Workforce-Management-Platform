@@ -22,8 +22,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                // 允许的请求来源（生产环境请改为具体域名）
-                .allowedOriginPatterns("*")
+                // 允许的请求来源（开发环境：Next.js 默认端口 3000）
+                .allowedOrigins("http://localhost:3000")
                 // 允许的请求方法
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 // 允许的请求头
