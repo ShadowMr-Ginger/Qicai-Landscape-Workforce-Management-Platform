@@ -69,11 +69,23 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- MyBatis-Plus：ORM 增强 -->
+        <!-- MyBatis-Plus：ORM 增强（Spring Boot 3 专用） -->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
             <version>${mybatis-plus.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis-spring</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- 显式升级 mybatis-spring 以兼容 Spring Boot 3.2 -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>3.0.3</version>
         </dependency>
 
         <!-- ==================== 工具库 ==================== -->
