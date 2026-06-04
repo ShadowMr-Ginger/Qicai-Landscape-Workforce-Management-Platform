@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -13,6 +14,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -52,6 +54,7 @@ public class GlobalExceptionHandler {
      * <p>已知业务规则校验失败，直接返回具体错误信息给前端</p>
      */
     @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResult<Void> handleBusinessException(BusinessException e, HttpServletRequest request) {
         log.warn("[业务异常] URI={} | Code={} | Message={}",
                 request.getRequestURI(), e.getCode(), e.getMessage());
@@ -65,6 +68,7 @@ public class GlobalExceptionHandler {
      * <p>例如：字段为空、长度超限、格式不正确等</p>
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResult<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e,
                                                                   HttpServletRequest request) {
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
@@ -79,6 +83,7 @@ public class GlobalExceptionHandler {
      * 处理 @ModelAttribute / 表单参数绑定校验失败
      */
     @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResult<Void> handleBindException(BindException e, HttpServletRequest request) {
         List<FieldError> fieldErrors = e.getFieldErrors();
         String message = fieldErrors.stream()
@@ -92,6 +97,7 @@ public class GlobalExceptionHandler {
      * 处理 @RequestParam / @PathVariable 参数校验失败（@Validated 注解）
      */
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResult<Void> handleConstraintViolationException(ConstraintViolationException e,
                                                                HttpServletRequest request) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
@@ -108,6 +114,7 @@ public class GlobalExceptionHandler {
      * 处理登录密码错误
      */
     @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiResult<Void> handleBadCredentialsException(BadCredentialsException e,
                                                           HttpServletRequest request) {
         log.warn("[登录失败] URI={} | Message={}", request.getRequestURI(), e.getMessage());
@@ -118,6 +125,7 @@ public class GlobalExceptionHandler {
      * 处理账号被禁用
      */
     @ExceptionHandler(DisabledException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiResult<Void> handleDisabledException(DisabledException e,
                                                     HttpServletRequest request) {
         log.warn("[账号禁用] URI={} | Message={}", request.getRequestURI(), e.getMessage());
@@ -128,6 +136,7 @@ public class GlobalExceptionHandler {
      * 处理权限不足（Spring Security @PreAuthorize 拒绝）
      */
     @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiResult<Void> handleAccessDeniedException(AccessDeniedException e,
                                                         HttpServletRequest request) {
         log.warn("[权限不足] URI={} | Message={}", request.getRequestURI(), e.getMessage());
@@ -140,6 +149,7 @@ public class GlobalExceptionHandler {
      * 处理 404 资源不存在
      */
     @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResult<Void> handleNoHandlerFoundException(NoHandlerFoundException e,
                                                           HttpServletRequest request) {
         log.warn("[资源不存在] URI={} | Message={}", request.getRequestURI(), e.getMessage());
@@ -151,6 +161,7 @@ public class GlobalExceptionHandler {
      * <p>捕获所有未预期的异常，记录完整堆栈，返回通用错误提示（避免暴露敏感信息）</p>
      */
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResult<Void> handleException(Exception e, HttpServletRequest request) {
         log.error("[系统异常] URI={} | Message={}", request.getRequestURI(), e.getMessage(), e);
         return ApiResult.error(ResultCodeEnum.INTERNAL_SERVER_ERROR);

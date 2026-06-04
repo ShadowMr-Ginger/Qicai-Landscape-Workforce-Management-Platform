@@ -29,10 +29,23 @@ api.interceptors.request.use((config) => {
 
 /**
  * 响应拦截器：统一错误处理
- * <p>401 时自动清除 Token 并跳转登录页</p>
+ * <p>1. 后端全局异常处理器返回 HTTP 200 但业务 code 非 200 时，转为错误抛出</p>
+ * <p>2. 401 时自动清除 Token 并跳转登录页</p>
  */
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 后端包装了业务错误但 HTTP 状态码仍是 200，需要检查业务 code
+    if (response.data && typeof response.data.code === 'number' && response.data.code !== 200) {
+      return Promise.reject({
+        response: {
+          status: response.data.code,
+          data: response.data,
+        },
+        message: response.data.message,
+      });
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {

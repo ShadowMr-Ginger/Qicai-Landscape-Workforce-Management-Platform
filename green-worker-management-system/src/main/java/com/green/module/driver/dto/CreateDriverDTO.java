@@ -19,7 +19,6 @@ public class CreateDriverDTO {
     @NotNull(message = "性别不能为空")
     private Integer gender;
 
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
 
     @NotNull(message = "基础日薪不能为空")
