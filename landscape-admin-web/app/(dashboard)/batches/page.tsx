@@ -8,7 +8,9 @@ import {
   Plus,
   ClipboardCheck,
   RotateCcw,
-  ArrowLeft,
+  Eye,
+  Pencil,
+  Building2,
   Wrench,
 } from "lucide-react";
 import {
@@ -35,11 +37,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   getAttendanceBatchList,
   createAttendanceBatch,
-  approveAttendanceBatch,
+  getAttendanceBatchDetail,
+  reviewAttendanceBatch,
   getDriverList,
   getWorkerList,
   getGroupList,
   getWorkTypeList,
+  getAllProjects,
 } from "@/lib/api";
 
 interface BatchItem {
@@ -65,6 +69,24 @@ interface WorkerOption {
   groupId: number;
 }
 
+interface BatchWorkerRecord {
+  id: number;
+  workerId: number;
+  workerName: string;
+  groupName: string;
+  projectId: number | null;
+  projectName: string;
+  workTypeId: number | null;
+  workTypeName: string;
+  attendanceType: number;
+  attendanceTypeText: string;
+  overtimeHours: number;
+  dailyWage: number;
+  overtimeWage: number;
+  totalWage: number;
+  remark: string;
+}
+
 function getToday(): string {
   return new Date().toISOString().split("T")[0];
 }
@@ -82,6 +104,7 @@ export default function BatchesPage() {
   const [dateFrom, setDateFrom] = useState(getWeekAgo());
   const [dateTo, setDateTo] = useState(getToday());
 
+  // 创建弹窗
   const [createOpen, setCreateOpen] = useState(false);
   const [drivers, setDrivers] = useState<DriverOption[]>([]);
   const [workers, setWorkers] = useState<WorkerOption[]>([]);
@@ -92,12 +115,17 @@ export default function BatchesPage() {
   const [remark, setRemark] = useState("");
   const [workerKeyword, setWorkerKeyword] = useState("");
   const [workerGroupFilter, setWorkerGroupFilter] = useState("");
-
-  // 批次级统一字段
   const [batchAttendanceType, setBatchAttendanceType] = useState("2");
   const [batchOvertimeHours, setBatchOvertimeHours] = useState("0");
   const [batchWorkTypeId, setBatchWorkTypeId] = useState("");
   const [workTypeOptions, setWorkTypeOptions] = useState<{ id: number; typeName: string }[]>([]);
+
+  // 详情/审核弹窗
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailBatch, setDetailBatch] = useState<any>(null);
+  const [detailRecords, setDetailRecords] = useState<BatchWorkerRecord[]>([]);
+  const [projectOptions, setProjectOptions] = useState<{ id: number; projectName: string }[]>([]);
+  const [reviewing, setReviewing] = useState(false);
 
   const fetchBatches = async () => {
     setLoading(true);
@@ -129,9 +157,7 @@ export default function BatchesPage() {
       if (res.code === 200 && res.data?.records) {
         setDrivers(res.data.records);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const fetchWorkers = async () => {
@@ -140,9 +166,7 @@ export default function BatchesPage() {
       if (res.code === 200 && res.data?.records) {
         setWorkers(res.data.records);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const fetchGroups = async () => {
@@ -151,9 +175,7 @@ export default function BatchesPage() {
       if (res.code === 200 && res.data) {
         setGroupOptions(res.data);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   };
 
   const fetchWorkTypes = async () => {
@@ -162,9 +184,16 @@ export default function BatchesPage() {
       if (res.code === 200 && res.data) {
         setWorkTypeOptions(res.data);
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const res = await getAllProjects();
+      if (res.code === 200 && res.data) {
+        setProjectOptions(res.data);
+      }
+    } catch { /* ignore */ }
   };
 
   const openCreate = () => {
@@ -205,9 +234,7 @@ export default function BatchesPage() {
       await createAttendanceBatch({
         driverId: Number(selectedDriver),
         batchDate,
-        workers: selectedWorkers.map((wid) => ({
-          workerId: wid,
-        })),
+        workers: selectedWorkers.map((wid) => ({ workerId: wid })),
         attendanceType: Number(batchAttendanceType),
         overtimeHours: Number(batchOvertimeHours) || 0,
         workTypeId: Number(batchWorkTypeId),
@@ -221,13 +248,43 @@ export default function BatchesPage() {
     }
   };
 
-  const handleApprove = async (id: number) => {
+  const openDetail = async (batch: BatchItem) => {
     try {
-      await approveAttendanceBatch(id);
+      const res = await getAttendanceBatchDetail(batch.id);
+      if (res.code === 200 && res.data) {
+        setDetailBatch(res.data);
+        setDetailRecords(res.data.workerRecords || []);
+        await fetchWorkTypes();
+        await fetchProjects();
+        setDetailOpen(true);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "获取批次详情失败");
+    }
+  };
+
+  const handleReview = async () => {
+    if (!detailBatch) return;
+    setReviewing(true);
+    try {
+      await reviewAttendanceBatch(detailBatch.id, {
+        batchId: detailBatch.id,
+        workerRecords: detailRecords.map((r) => ({
+          recordId: r.id,
+          workTypeId: r.workTypeId,
+          projectId: r.projectId,
+          attendanceType: r.attendanceType,
+          overtimeHours: r.overtimeHours,
+          remark: r.remark,
+        })),
+      });
       toast.success("审核通过");
+      setDetailOpen(false);
       fetchBatches();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "审核失败");
+    } finally {
+      setReviewing(false);
     }
   };
 
@@ -318,7 +375,7 @@ export default function BatchesPage() {
                 <TableHead className="text-gray-600 font-medium">工人数</TableHead>
                 <TableHead className="text-gray-600 font-medium">提交时间</TableHead>
                 <TableHead className="text-gray-600 font-medium">备注</TableHead>
-                <TableHead className="text-gray-600 font-medium w-24">操作</TableHead>
+                <TableHead className="text-gray-600 font-medium w-32">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -339,17 +396,15 @@ export default function BatchesPage() {
                     <TableCell className="text-gray-500 text-xs">{batch.submitTime}</TableCell>
                     <TableCell className="text-gray-500 text-xs max-w-[200px] truncate">{batch.remark || "-"}</TableCell>
                     <TableCell>
-                      {batch.status === 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => handleApprove(batch.id)}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          通过
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => openDetail(batch)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        查看
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -484,6 +539,150 @@ export default function BatchesPage() {
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setCreateOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleCreate}>提交批次</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 详情/审核弹窗 */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="rounded-2xl max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg flex items-center gap-2">
+              <Eye className="w-5 h-5 text-green-600" />
+              批次详情
+            </DialogTitle>
+            <DialogDescription>
+              审核司机：{detailBatch?.driverName} · 考勤日期：{detailBatch?.batchDate} · 状态：{detailBatch?.statusText}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* 工人记录表格 */}
+            <div className="rounded-xl border border-gray-100 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50/70">
+                  <tr>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">工人</th>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">组别</th>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">出勤</th>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">加班</th>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">作业类型</th>
+                    <th className="text-left px-3 py-2 text-gray-600 font-medium">项目</th>
+                    <th className="text-right px-3 py-2 text-gray-600 font-medium">工资</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {detailRecords.map((record, idx) => (
+                    <tr key={record.id} className="hover:bg-green-50/20">
+                      <td className="px-3 py-2 font-medium text-gray-800">{record.workerName}</td>
+                      <td className="px-3 py-2 text-gray-500 text-xs">{record.groupName || "-"}</td>
+                      <td className="px-3 py-2">
+                        {detailBatch?.status === 0 ? (
+                          <select
+                            value={record.attendanceType}
+                            onChange={(e) => {
+                              const newRecords = [...detailRecords];
+                              newRecords[idx].attendanceType = Number(e.target.value);
+                              setDetailRecords(newRecords);
+                            }}
+                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                          >
+                            <option value={2}>全天</option>
+                            <option value={1}>半天</option>
+                          </select>
+                        ) : (
+                          <span className="text-gray-600 text-xs">{record.attendanceTypeText}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {detailBatch?.status === 0 ? (
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={record.overtimeHours}
+                            onChange={(e) => {
+                              const newRecords = [...detailRecords];
+                              newRecords[idx].overtimeHours = Number(e.target.value);
+                              setDetailRecords(newRecords);
+                            }}
+                            className="h-8 rounded-lg w-20 text-xs px-2"
+                          />
+                        ) : (
+                          <span className="text-gray-600 text-xs">{record.overtimeHours}h</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {detailBatch?.status === 0 ? (
+                          <select
+                            value={record.workTypeId || ""}
+                            onChange={(e) => {
+                              const newRecords = [...detailRecords];
+                              newRecords[idx].workTypeId = e.target.value ? Number(e.target.value) : null;
+                              setDetailRecords(newRecords);
+                            }}
+                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                          >
+                            <option value="">请选择</option>
+                            {workTypeOptions.map((wt) => (
+                              <option key={wt.id} value={wt.id}>{wt.typeName}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-gray-600 text-xs">{record.workTypeName || "-"}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {detailBatch?.status === 0 ? (
+                          <select
+                            value={record.projectId || ""}
+                            onChange={(e) => {
+                              const newRecords = [...detailRecords];
+                              newRecords[idx].projectId = e.target.value ? Number(e.target.value) : null;
+                              setDetailRecords(newRecords);
+                            }}
+                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                          >
+                            <option value="">请选择</option>
+                            {projectOptions.map((p) => (
+                              <option key={p.id} value={p.id}>{p.projectName}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-gray-600 text-xs">{record.projectName || "-"}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 text-xs font-medium">
+                        ¥{record.totalWage}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>共 {detailRecords.length} 人</span>
+              <span>
+                合计工资：¥{detailRecords.reduce((sum, r) => sum + (r.totalWage || 0), 0).toFixed(2)}
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setDetailOpen(false)}>
+              关闭
+            </Button>
+            {detailBatch?.status === 0 && (
+              <Button
+                className="rounded-lg bg-green-600 hover:bg-green-700"
+                onClick={handleReview}
+                disabled={reviewing}
+              >
+                <CheckCircle className="w-4 h-4 mr-1" />
+                {reviewing ? "审核中..." : "保存并审核通过"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

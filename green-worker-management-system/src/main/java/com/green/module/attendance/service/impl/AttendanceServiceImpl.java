@@ -9,6 +9,7 @@ import com.green.common.result.ResultCodeEnum;
 import com.green.module.attendance.dto.BatchQuery;
 import com.green.module.attendance.dto.CreateBatchDTO;
 import com.green.module.attendance.dto.DriverRecordQuery;
+import com.green.module.attendance.dto.ReviewBatchDTO;
 import com.green.module.attendance.dto.WorkerRecordQuery;
 import com.green.module.attendance.entity.AttendanceBatchEntity;
 import com.green.module.attendance.entity.WorkerAttendanceRecordEntity;
@@ -29,6 +30,7 @@ import com.green.module.system.entity.AdminEntity;
 import com.green.module.system.mapper.AdminMapper;
 import com.green.module.worker.entity.WorkerEntity;
 import com.green.module.worker.mapper.WorkerMapper;
+import com.green.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -229,8 +231,69 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         batch.setStatus(BatchStatusEnum.APPROVED.getCode());
         batch.setReviewTime(LocalDateTime.now());
+        batch.setReviewerId(SecurityUtils.getCurrentUserId());
         batchMapper.updateById(batch);
         log.info("考勤批次审核通过: batchId={}", id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void reviewBatch(ReviewBatchDTO dto) {
+        Long batchId = dto.getBatchId();
+        AttendanceBatchEntity batch = batchMapper.selectById(batchId);
+        if (batch == null) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "批次不存在");
+        }
+        if (!BatchStatusEnum.PENDING.getCode().equals(batch.getStatus())) {
+            throw new BusinessException(ResultCodeEnum.BATCH_STATUS_ERROR, "当前批次不处于待审核状态");
+        }
+
+        // 批量更新工人考勤记录
+        if (dto.getWorkerRecords() != null && !dto.getWorkerRecords().isEmpty()) {
+            for (ReviewBatchDTO.WorkerRecordUpdateItem item : dto.getWorkerRecords()) {
+                WorkerAttendanceRecordEntity record = workerRecordMapper.selectById(item.getRecordId());
+                if (record == null || !record.getBatchId().equals(batchId)) {
+                    continue;
+                }
+
+                WorkerEntity worker = workerMapper.selectById(record.getWorkerId());
+                if (worker == null) continue;
+
+                // 更新可修改字段
+                if (item.getWorkTypeId() != null) {
+                    record.setWorkTypeId(item.getWorkTypeId());
+                }
+                if (item.getProjectId() != null) {
+                    record.setProjectId(item.getProjectId());
+                }
+                if (item.getAttendanceType() != null) {
+                    record.setAttendanceType(item.getAttendanceType());
+                }
+                if (item.getOvertimeHours() != null) {
+                    record.setOvertimeHours(item.getOvertimeHours());
+                }
+                if (item.getRemark() != null) {
+                    record.setRemark(item.getRemark());
+                }
+
+                // 重新计算工资
+                BigDecimal dailyWage = calculateDailyWage(worker, record.getAttendanceType());
+                BigDecimal overtimeWage = calculateOvertimeWage(worker, record.getOvertimeHours());
+                BigDecimal totalWage = dailyWage.add(overtimeWage);
+                record.setDailyWage(dailyWage);
+                record.setOvertimeWage(overtimeWage);
+                record.setTotalWage(totalWage);
+
+                workerRecordMapper.updateById(record);
+            }
+        }
+
+        // 审核通过
+        batch.setStatus(BatchStatusEnum.APPROVED.getCode());
+        batch.setReviewTime(LocalDateTime.now());
+        batch.setReviewerId(SecurityUtils.getCurrentUserId());
+        batchMapper.updateById(batch);
+        log.info("考勤批次审核通过(含修改): batchId={}", batchId);
     }
 
     // ==================== 工人考勤记录 ====================

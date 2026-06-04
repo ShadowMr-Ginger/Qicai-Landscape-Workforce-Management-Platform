@@ -5,6 +5,7 @@ import com.green.common.result.ApiResult;
 import com.green.module.attendance.dto.BatchQuery;
 import com.green.module.attendance.dto.CreateBatchDTO;
 import com.green.module.attendance.dto.DriverRecordQuery;
+import com.green.module.attendance.dto.ReviewBatchDTO;
 import com.green.module.attendance.dto.WorkerRecordQuery;
 import com.green.module.attendance.service.AttendanceService;
 import com.green.module.attendance.vo.*;
@@ -47,6 +48,13 @@ public class AttendanceController {
     @PutMapping("/batches/{id}/approve")
     public ApiResult<Void> approveBatch(@PathVariable Long id) {
         attendanceService.approveBatch(id);
+        return ApiResult.success("审核通过");
+    }
+
+    @PutMapping("/batches/{id}/review")
+    public ApiResult<Void> reviewBatch(@PathVariable Long id, @RequestBody @Valid ReviewBatchDTO dto) {
+        dto.setBatchId(id);
+        attendanceService.reviewBatch(dto);
         return ApiResult.success("审核通过");
     }
 

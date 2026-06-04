@@ -209,6 +209,38 @@ export async function approveAttendanceBatch(id: number) {
   return res.data;
 }
 
+export async function reviewAttendanceBatch(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/attendance/batches/${id}/review`, data);
+  return res.data;
+}
+
+// ==================== 项目管理 ====================
+
+export async function getProjectList(params: Record<string, unknown>) {
+  const res = await api.get('/admin/projects', { params });
+  return res.data;
+}
+
+export async function getAllProjects() {
+  const res = await api.get('/admin/projects/all');
+  return res.data;
+}
+
+export async function createProject(data: Record<string, unknown>) {
+  const res = await api.post('/admin/projects', data);
+  return res.data;
+}
+
+export async function updateProject(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/projects/${id}`, data);
+  return res.data;
+}
+
+export async function deleteProject(id: number) {
+  const res = await api.delete(`/admin/projects/${id}`);
+  return res.data;
+}
+
 export async function getWorkerAttendanceRecords(params: Record<string, unknown>) {
   const res = await api.get('/admin/attendance/worker-records', { params });
   return res.data;

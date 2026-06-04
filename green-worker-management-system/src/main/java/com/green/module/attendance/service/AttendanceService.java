@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.green.module.attendance.dto.BatchQuery;
 import com.green.module.attendance.dto.CreateBatchDTO;
 import com.green.module.attendance.dto.DriverRecordQuery;
+import com.green.module.attendance.dto.ReviewBatchDTO;
 import com.green.module.attendance.dto.WorkerRecordQuery;
 import com.green.module.attendance.vo.*;
 
@@ -24,6 +25,8 @@ public interface AttendanceService {
     Long createBatchByAdmin(CreateBatchDTO dto);
 
     void approveBatch(Long id);
+
+    void reviewBatch(ReviewBatchDTO dto);
 
     // ==================== 工人考勤记录 ====================
 
