@@ -25,20 +25,6 @@ spring:
       connection-timeout: 30000
       pool-name: GreenHikariPool-Prod
 
-  # Redis 配置（生产环境建议使用哨兵或集群模式）
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      database: 0
-      password: ${REDIS_PASSWORD:}
-      timeout: 5000ms
-      lettuce:
-        pool:
-          max-active: 20
-          max-idle: 20
-          min-idle: 5
-
 # MyBatis-Plus 配置（生产环境关闭 SQL 日志）
 mybatis-plus:
   configuration:

@@ -91,6 +91,7 @@ CREATE TABLE `drivers` (
     `wx_openid` VARCHAR(100) DEFAULT NULL COMMENT '微信OpenID',
     `wx_unionid` VARCHAR(100) DEFAULT NULL COMMENT '微信UnionID',
     `password` VARCHAR(100) NOT NULL COMMENT '登录密码(默认123456，加密存储)',
+    `password_changed` TINYINT NOT NULL DEFAULT 0 COMMENT '是否已修改默认密码: 1-已修改, 0-未修改(首次登录必须修改)',
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否在职: 1-在职, 0-离职',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

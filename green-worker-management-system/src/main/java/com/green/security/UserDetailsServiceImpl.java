@@ -20,9 +20,14 @@ import org.springframework.stereotype.Service;
  * <p>系统存在两套用户体系（管理员 + 司机），本服务统一处理：</p>
  * <ol>
  *     <li>先按管理员查询（用户名匹配）</li>
- *     <li>未找到则按司机查询（手机号匹配）</li>
+ *     <li>未找到则按司机查询（姓名匹配 real_name）</li>
  *     <li>找到后封装为 {@link LoginUser} 返回</li>
  * </ol>
+ *
+ * <h3>设计原因</h3>
+ * <p>Spring Security 的认证流程要求传入一个 username 字符串，
+ * 本系统管理员用 username 登录，司机用姓名登录。
+ * 通过"先查 admin 再查 driver"的顺序，一套代码兼容两套身份。</p>
  *
  * @author Green Team
  * @version 1.0.0
@@ -56,21 +61,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .build();
         }
 
-        // 第二步：尝试查找司机（按手机号）
+        // 第二步：尝试查找司机（按姓名 real_name）
         DriverEntity driver = driverMapper.selectOne(
                 new LambdaQueryWrapper<DriverEntity>()
-                        .eq(DriverEntity::getPhone, username)
+                        .eq(DriverEntity::getRealName, username)
                         .eq(DriverEntity::getIsActive, 1)
         );
 
         if (driver != null) {
             return LoginUser.builder()
                     .userId(driver.getId())
-                    .username(driver.getPhone())
+                    .username(driver.getRealName()) // 司机的 username 即姓名
                     .realName(driver.getRealName())
                     .role(RoleEnum.DRIVER)
                     .password(driver.getPassword())
-                    .passwordChanged(driver.getPasswordChanged() != null ? driver.getPasswordChanged() : false)
+                    .passwordChanged(driver.getPasswordChanged() != null && driver.getPasswordChanged() == 1)
                     .enabled(driver.getIsActive() == 1)
                     .build();
         }

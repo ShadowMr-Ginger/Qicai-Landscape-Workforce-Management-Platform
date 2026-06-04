@@ -1,6 +1,5 @@
 package com.green.security;
 
-import com.green.common.constants.SystemConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -17,20 +16,28 @@ import java.util.Map;
 /**
  * JWT Token 提供者
  *
- * <p>负责 JWT 的生成、解析和校验。</p>
- * <p>系统存在两种身份（管理员、司机），Token 中通过 {@code role} 字段区分。</p>
+ * <p>负责 JWT 的生成、解析和校验。本系统用户规模极小（管理员1~2人，司机约10人），
+ * 因此采用极简设计：不使用 Redis 存储 Token，仅靠 JWT 自包含信息完成认证。</p>
  *
  * <h3>Token 结构（Payload）</h3>
  * <pre>
  * {
- *   "sub": "用户名/手机号",
+ *   "sub": "用户名/姓名",
  *   "userId": 10001,
- *   "role": "ADMIN",
+ *   "userType": "ADMIN",
  *   "realName": "张三",
+ *   "passwordChanged": true,
  *   "iat": 1717491600,
- *   "exp": 1717578000
+ *   "exp": 1718096400
  * }
  * </pre>
+ *
+ * <h3>设计原因</h3>
+ * <ul>
+ *     <li>无 Redis：系统用户极少，无需分布式会话，JWT 自解析即可</li>
+ *     <li>7 天有效期：司机使用小程序频率较低，减少频繁登录</li>
+ *     <li>Token 中包含 passwordChanged：首次登录校验无需再查数据库</li>
+ * </ul>
  *
  * @author Green Team
  * @version 1.0.0
@@ -46,9 +53,10 @@ public class JwtTokenProvider {
     private String jwtSecret;
 
     /**
-     * Token 有效期（毫秒），默认 24 小时
+     * Token 有效期（毫秒），默认 7 天
+     * <p>计算：7 * 24 * 60 * 60 * 1000 = 604800000</p>
      */
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration:604800000}")
     private long jwtExpiration;
 
     /**
@@ -60,7 +68,7 @@ public class JwtTokenProvider {
     public String generateToken(LoginUser loginUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", loginUser.getUserId());
-        claims.put("role", loginUser.getRole().getCode());
+        claims.put("userType", loginUser.getRole().getCode());
         claims.put("realName", loginUser.getRealName());
         claims.put("passwordChanged", loginUser.getPasswordChanged());
 
@@ -106,10 +114,18 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 从 Token 中提取角色
+     * 从 Token 中提取用户类型（ADMIN / DRIVER）
      */
-    public String getRoleFromToken(String token) {
-        return (String) parseToken(token).get("role");
+    public String getUserTypeFromToken(String token) {
+        return (String) parseToken(token).get("userType");
+    }
+
+    /**
+     * 从 Token 中提取是否已修改密码
+     */
+    public Boolean getPasswordChangedFromToken(String token) {
+        Object value = parseToken(token).get("passwordChanged");
+        return value != null ? Boolean.valueOf(value.toString()) : true;
     }
 
     /**
@@ -126,32 +142,6 @@ public class JwtTokenProvider {
             log.warn("JWT 校验失败: {}", e.getMessage());
             return false;
         }
-    }
-
-    /**
-     * 判断 Token 是否即将过期（预留方法，用于自动刷新 Token 场景）
-     *
-     * @param token     JWT 字符串
-     * @param threshold 提前阈值（毫秒）
-     * @return true = 即将过期
-     */
-    public boolean isTokenExpiringSoon(String token, long threshold) {
-        Date expiration = parseToken(token).getExpiration();
-        return expiration.getTime() - System.currentTimeMillis() < threshold;
-    }
-
-    /**
-     * 获取 Token 在 Redis 中的缓存键
-     *
-     * @param role    角色代码（ADMIN / DRIVER）
-     * @param userId  用户ID
-     * @return Redis Key
-     */
-    public String getTokenRedisKey(String role, Long userId) {
-        if (SystemConstants.ROLE_ADMIN.equalsIgnoreCase(role)) {
-            return SystemConstants.ADMIN_TOKEN_KEY_PREFIX + userId;
-        }
-        return SystemConstants.DRIVER_TOKEN_KEY_PREFIX + userId;
     }
 
     /**

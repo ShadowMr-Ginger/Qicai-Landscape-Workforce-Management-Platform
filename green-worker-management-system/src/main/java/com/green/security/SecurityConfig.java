@@ -22,12 +22,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * Spring Security 配置类
  *
  * <p>配置安全策略：无状态会话、JWT 认证、密码加密、接口权限控制。</p>
+ * <p>本系统用户规模极小，安全策略以"够用即可"为原则，不引入复杂 RBAC。</p>
  *
  * <h3>核心配置说明</h3>
  * <ul>
  *     <li>无 Session：采用 JWT 无状态认证，不创建 HTTP Session</li>
  *     <li>CSRF 禁用：前后端分离 + Token 认证，无需 CSRF 防护</li>
  *     <li>方法级权限：通过 {@code @PreAuthorize("hasRole('ADMIN')")} 控制接口访问</li>
+ *     <li>登录接口放行：/api/auth/admin/login 和 /api/auth/driver/login 无需认证</li>
  * </ul>
  *
  * @author Green Team
@@ -64,9 +66,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // OPTIONS 预检请求放行（CORS 需要）
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // 公开接口：登录、注册、文档、静态资源
-                        .requestMatchers("/api/admin/auth/login").permitAll()
-                        .requestMatchers("/api/driver/auth/**").permitAll()
+                        // 公开接口：管理员登录、司机登录、接口文档
+                        .requestMatchers("/api/auth/admin/login").permitAll()
+                        .requestMatchers("/api/auth/driver/login").permitAll()
                         .requestMatchers("/doc.html", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         // 其他所有请求需要认证
