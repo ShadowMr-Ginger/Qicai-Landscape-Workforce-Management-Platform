@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Search,
   RotateCcw,
@@ -211,6 +212,10 @@ export default function WorkersPage() {
   };
 
   const handleCreateSave = async () => {
+    if (!createForm.name.trim()) {
+      toast.error("姓名不能为空");
+      return;
+    }
     try {
       await createWorker({
         name: createForm.name,
@@ -223,22 +228,23 @@ export default function WorkersPage() {
         idCard: createForm.idCard || null,
         emergencyContactPhone: createForm.emergencyContactPhone || null,
       });
-    } catch {
-      // ignore
+      toast.success("新增工人成功");
+      setCreateOpen(false);
+      setCreateForm({
+        name: "",
+        gender: "1",
+        phone: "",
+        baseDailySalary: "",
+        overtimeHourlyRate: "",
+        isSkilledWorker: "0",
+        groupId: "",
+        idCard: "",
+        emergencyContactPhone: "",
+      });
+      fetchWorkers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "新增工人失败，请检查网络或联系管理员");
     }
-    setCreateOpen(false);
-    setCreateForm({
-      name: "",
-      gender: "1",
-      phone: "",
-      baseDailySalary: "",
-      overtimeHourlyRate: "",
-      isSkilledWorker: "0",
-      groupId: "",
-      idCard: "",
-      emergencyContactPhone: "",
-    });
-    fetchWorkers();
   };
 
   const handleEditSave = async () => {
@@ -253,11 +259,12 @@ export default function WorkersPage() {
         isSkilledWorker: Number(editForm.isSkilledWorker),
         groupId: editForm.groupId ? Number(editForm.groupId) : null,
       });
-    } catch {
-      // ignore
+      toast.success("修改成功");
+      setEditOpen(false);
+      fetchWorkers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "修改失败");
     }
-    setEditOpen(false);
-    fetchWorkers();
   };
 
   const openDetail = async (worker: WorkerItem) => {
@@ -296,11 +303,12 @@ export default function WorkersPage() {
     if (!selectedWorker) return;
     try {
       await resignWorker(selectedWorker.id);
-    } catch {
-      // ignore
+      toast.success(`已将 ${selectedWorker.name} 设置为离职状态`);
+      setResignOpen(false);
+      fetchWorkers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "离职操作失败");
     }
-    setResignOpen(false);
-    fetchWorkers();
   };
 
   const openDelete = async (worker: WorkerItem) => {
@@ -319,11 +327,12 @@ export default function WorkersPage() {
     if (!selectedWorker) return;
     try {
       await deleteWorker(selectedWorker.id);
-    } catch {
-      // ignore
+      toast.success("删除成功");
+      setDeleteOpen(false);
+      fetchWorkers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "删除失败");
     }
-    setDeleteOpen(false);
-    fetchWorkers();
   };
 
   return (

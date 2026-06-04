@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Search,
   RotateCcw,
@@ -184,6 +185,10 @@ export default function DriversPage() {
   };
 
   const handleCreateSave = async () => {
+    if (!createForm.realName.trim()) {
+      toast.error("姓名不能为空");
+      return;
+    }
     try {
       await createDriver({
         realName: createForm.realName,
@@ -192,10 +197,13 @@ export default function DriversPage() {
         baseDailySalary: Number(createForm.baseDailySalary),
         overtimeHourlyRate: Number(createForm.overtimeHourlyRate),
       });
-    } catch {}
-    setCreateOpen(false);
-    setCreateForm({ realName: "", gender: "1", phone: "", baseDailySalary: "", overtimeHourlyRate: "" });
-    fetchDrivers();
+      toast.success("新增司机成功，默认密码为 123456");
+      setCreateOpen(false);
+      setCreateForm({ realName: "", gender: "1", phone: "", baseDailySalary: "", overtimeHourlyRate: "" });
+      fetchDrivers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "新增司机失败，请检查网络或联系管理员");
+    }
   };
 
   const handleEditSave = async () => {
@@ -208,9 +216,12 @@ export default function DriversPage() {
         baseDailySalary: Number(editForm.baseDailySalary),
         overtimeHourlyRate: Number(editForm.overtimeHourlyRate),
       });
-    } catch {}
-    setEditOpen(false);
-    fetchDrivers();
+      toast.success("修改成功");
+      setEditOpen(false);
+      fetchDrivers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "修改失败");
+    }
   };
 
   const openDetail = async (driver: DriverItem) => {
@@ -246,9 +257,12 @@ export default function DriversPage() {
     if (!selectedDriver) return;
     try {
       await resignDriver(selectedDriver.id);
-    } catch {}
-    setResignOpen(false);
-    fetchDrivers();
+      toast.success(`已将 ${selectedDriver.realName} 设置为离职状态`);
+      setResignOpen(false);
+      fetchDrivers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "离职操作失败");
+    }
   };
 
   const openDelete = async (driver: DriverItem) => {
@@ -261,9 +275,12 @@ export default function DriversPage() {
     if (!selectedDriver) return;
     try {
       await deleteDriver(selectedDriver.id);
-    } catch {}
-    setDeleteOpen(false);
-    fetchDrivers();
+      toast.success("删除成功");
+      setDeleteOpen(false);
+      fetchDrivers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "删除失败");
+    }
   };
 
   return (
