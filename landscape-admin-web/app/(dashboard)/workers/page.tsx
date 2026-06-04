@@ -125,6 +125,24 @@ export default function WorkersPage() {
     groupId: "",
   });
 
+  /** 根据默认薪资规则计算基础日薪与加班时薪 */
+  const computeDefaultSalary = (gender: string, isSkilledWorker: string) => {
+    if (typeof window === "undefined") return { base: "", overtime: "" };
+    let defaults = { maleBase: 120, femaleBase: 90, overtimeRate: 15, skilledExtra: 30 };
+    try {
+      const raw = localStorage.getItem("workerDefaultSalary");
+      if (raw) defaults = { ...defaults, ...JSON.parse(raw) };
+    } catch {
+      // ignore
+    }
+    const base = gender === "1" ? defaults.maleBase : defaults.femaleBase;
+    const extra = isSkilledWorker === "1" ? defaults.skilledExtra : 0;
+    return {
+      base: String(base + extra),
+      overtime: String(defaults.overtimeRate),
+    };
+  };
+
   const fetchWorkers = async () => {
     setLoading(true);
     try {
@@ -519,6 +537,7 @@ export default function WorkersPage() {
                 <TableHead className="text-gray-600 font-medium">性别</TableHead>
                 <TableHead className="text-gray-600 font-medium">技术工</TableHead>
                 <TableHead className="text-gray-600 font-medium">联系方式</TableHead>
+                <TableHead className="text-gray-600 font-medium">组别</TableHead>
                 <TableHead className="text-gray-600 font-medium">日薪（元）</TableHead>
                 <TableHead className="text-gray-600 font-medium">加班时薪（元）</TableHead>
                 {managing && <TableHead className="text-gray-600 font-medium w-32">操作</TableHead>}
@@ -527,7 +546,7 @@ export default function WorkersPage() {
             <TableBody>
               {workers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={managing ? 7 : 6} className="text-center py-16 text-gray-400">
+                  <TableCell colSpan={managing ? 8 : 7} className="text-center py-16 text-gray-400">
                     <Users className="w-10 h-10 mx-auto mb-3 text-gray-300" />
                     暂无数据
                   </TableCell>
@@ -554,6 +573,7 @@ export default function WorkersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-gray-600">{worker.phone}</TableCell>
+                    <TableCell className="text-gray-600">{worker.groupName || "-"}</TableCell>
                     <TableCell className="text-gray-800 font-medium">
                       ¥{worker.baseDailySalary}
                     </TableCell>
@@ -624,14 +644,22 @@ export default function WorkersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>性别 <span className="text-red-500">*</span></Label>
-                <select value={createForm.gender} onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <select value={createForm.gender} onChange={(e) => {
+                  const gender = e.target.value;
+                  const { base, overtime } = createForm.baseDailySalary === "" ? computeDefaultSalary(gender, createForm.isSkilledWorker) : { base: createForm.baseDailySalary, overtime: createForm.overtimeHourlyRate };
+                  setCreateForm({ ...createForm, gender, baseDailySalary: base, overtimeHourlyRate: overtime });
+                }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="1">男</option>
                   <option value="2">女</option>
                 </select>
               </div>
               <div className="space-y-1.5">
                 <Label>是否技术工</Label>
-                <select value={createForm.isSkilledWorker} onChange={(e) => setCreateForm({ ...createForm, isSkilledWorker: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <select value={createForm.isSkilledWorker} onChange={(e) => {
+                  const isSkilledWorker = e.target.value;
+                  const { base, overtime } = createForm.baseDailySalary === "" ? computeDefaultSalary(createForm.gender, isSkilledWorker) : { base: createForm.baseDailySalary, overtime: createForm.overtimeHourlyRate };
+                  setCreateForm({ ...createForm, isSkilledWorker, baseDailySalary: base, overtimeHourlyRate: overtime });
+                }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="0">否</option>
                   <option value="1">是</option>
                 </select>
@@ -763,6 +791,10 @@ export default function WorkersPage() {
                   <div className="bg-gray-50 rounded-xl p-3">
                     <p className="text-gray-400 text-xs mb-1">是否技术工</p>
                     <p className="font-medium text-gray-800">{workerDetail.isSkilledWorkerText}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3">
+                    <p className="text-gray-400 text-xs mb-1">所属组别</p>
+                    <p className="font-medium text-gray-800">{workerDetail.groupName || "-"}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-3">
                     <p className="text-gray-400 text-xs mb-1">基础日薪</p>

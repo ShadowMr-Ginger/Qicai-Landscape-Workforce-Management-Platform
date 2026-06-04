@@ -41,6 +41,7 @@ const navItems: NavItem[] = [
     children: [
       { title: "工人列表", href: "/workers" },
       { title: "组别管理", href: "/groups" },
+      { title: "默认薪资", href: "/workers/salary-defaults" },
     ],
   },
   { title: "司机管理", href: "/drivers", icon: UserCircle },
