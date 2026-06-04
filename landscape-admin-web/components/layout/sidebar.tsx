@@ -45,7 +45,14 @@ const navItems: NavItem[] = [
     ],
   },
   { title: "司机管理", href: "/drivers", icon: UserCircle },
-  { title: "考勤审核", href: "/batches", icon: ClipboardCheck, badge: 3 },
+  {
+    title: "考勤管理",
+    icon: ClipboardCheck,
+    children: [
+      { title: "考勤审核", href: "/batches" },
+      { title: "考勤记录", href: "/attendance-records" },
+    ],
+  },
   { title: "工资结算", href: "/wages", icon: Wallet },
   { title: "项目管理", href: "/projects", icon: Building2 },
   { title: "系统设置", href: "/settings", icon: Settings },

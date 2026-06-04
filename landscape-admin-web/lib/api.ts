@@ -187,4 +187,56 @@ export async function deleteDriver(id: number) {
   return res.data;
 }
 
+// ==================== 考勤管理 ====================
+
+export async function getAttendanceBatchList(params: Record<string, unknown>) {
+  const res = await api.get('/admin/attendance/batches', { params });
+  return res.data;
+}
+
+export async function getAttendanceBatchDetail(id: number) {
+  const res = await api.get(`/admin/attendance/batches/${id}`);
+  return res.data;
+}
+
+export async function createAttendanceBatch(data: Record<string, unknown>) {
+  const res = await api.post('/admin/attendance/batches', data);
+  return res.data;
+}
+
+export async function approveAttendanceBatch(id: number) {
+  const res = await api.put(`/admin/attendance/batches/${id}/approve`);
+  return res.data;
+}
+
+export async function getWorkerAttendanceRecords(params: Record<string, unknown>) {
+  const res = await api.get('/admin/attendance/worker-records', { params });
+  return res.data;
+}
+
+export async function getWorkerAttendanceDetail(id: number) {
+  const res = await api.get(`/admin/attendance/worker-records/${id}`);
+  return res.data;
+}
+
+export async function getWorkerCalendar(workerId: number, year: number, month: number) {
+  const res = await api.get(`/admin/attendance/workers/${workerId}/calendar`, { params: { year, month } });
+  return res.data;
+}
+
+export async function getDriverAttendanceRecords(params: Record<string, unknown>) {
+  const res = await api.get('/admin/attendance/driver-records', { params });
+  return res.data;
+}
+
+export async function getDriverAttendanceDetail(id: number) {
+  const res = await api.get(`/admin/attendance/driver-records/${id}`);
+  return res.data;
+}
+
+export async function getDriverCalendar(driverId: number, year: number, month: number) {
+  const res = await api.get(`/admin/attendance/drivers/${driverId}/calendar`, { params: { year, month } });
+  return res.data;
+}
+
 export default api;
