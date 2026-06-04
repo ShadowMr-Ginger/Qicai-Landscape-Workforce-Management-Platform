@@ -70,6 +70,11 @@ export async function logout(): Promise<ApiResult<null>> {
 
 // ==================== 工人管理 ====================
 
+export async function createWorker(data: Record<string, unknown>) {
+  const res = await api.post('/admin/workers', data);
+  return res.data;
+}
+
 export async function getWorkerList(params: Record<string, unknown>) {
   const res = await api.get('/admin/workers', { params });
   return res.data;
@@ -96,6 +101,11 @@ export async function deleteWorker(id: number) {
 }
 
 // ==================== 司机管理 ====================
+
+export async function createDriver(data: Record<string, unknown>) {
+  const res = await api.post('/admin/drivers', data);
+  return res.data;
+}
 
 export async function getDriverList(params: Record<string, unknown>) {
   const res = await api.get('/admin/drivers', { params });

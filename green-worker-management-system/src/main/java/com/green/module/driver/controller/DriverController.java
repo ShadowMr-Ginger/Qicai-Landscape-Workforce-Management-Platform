@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.green.common.result.ApiResult;
 import com.green.module.auth.dto.AdminResetDriverPasswordDTO;
 import com.green.module.auth.dto.DriverChangePasswordDTO;
+import com.green.module.driver.dto.CreateDriverDTO;
 import com.green.module.driver.dto.DriverQuery;
 import com.green.module.driver.dto.UpdateDriverDTO;
 import com.green.module.driver.service.DriverService;
@@ -38,6 +39,13 @@ public class DriverController {
     }
 
     // ==================== 管理端接口 ====================
+
+    @PostMapping("/api/admin/drivers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResult<Long> create(@RequestBody @Valid CreateDriverDTO dto) {
+        Long id = driverService.create(dto);
+        return ApiResult.success(id);
+    }
 
     @GetMapping("/api/admin/drivers")
     @PreAuthorize("hasRole('ADMIN')")

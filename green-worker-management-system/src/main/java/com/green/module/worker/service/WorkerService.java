@@ -1,6 +1,7 @@
 package com.green.module.worker.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.green.module.worker.dto.CreateWorkerDTO;
 import com.green.module.worker.dto.UpdateWorkerDTO;
 import com.green.module.worker.dto.WorkerQuery;
 import com.green.module.worker.vo.WorkerDetailVO;
@@ -13,6 +14,14 @@ import com.green.module.worker.vo.WorkerListVO;
  * @version 1.0.0
  */
 public interface WorkerService {
+
+    /**
+     * 新增工人
+     *
+     * @param dto 新增参数
+     * @return 工人ID
+     */
+    Long create(CreateWorkerDTO dto);
 
     /**
      * 分页查询工人列表

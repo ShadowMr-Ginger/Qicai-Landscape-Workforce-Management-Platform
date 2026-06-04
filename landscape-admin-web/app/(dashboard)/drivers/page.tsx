@@ -42,7 +42,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver } from "@/lib/api";
+import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver } from "@/lib/api";
 
 interface DriverItem {
   id: number;
@@ -82,6 +82,7 @@ export default function DriversPage() {
   const [showResigned, setShowResigned] = useState(false);
   const [managing, setManaging] = useState(false);
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [resignOpen, setResignOpen] = useState(false);
@@ -89,6 +90,14 @@ export default function DriversPage() {
   const [selectedDriver, setSelectedDriver] = useState<DriverItem | null>(null);
   const [driverDetail, setDriverDetail] = useState<DriverDetail | null>(null);
   const [deleteAttendanceCount, setDeleteAttendanceCount] = useState(0);
+
+  const [createForm, setCreateForm] = useState({
+    realName: "",
+    gender: "1",
+    phone: "",
+    baseDailySalary: "",
+    overtimeHourlyRate: "",
+  });
 
   const [editForm, setEditForm] = useState({
     realName: "",
@@ -108,7 +117,7 @@ export default function DriversPage() {
         pageNum: 1,
         pageSize: 100,
       });
-      if (res.code === 200 && res.data?.records) {
+      if (res.code === 200 && res.data?.records && res.data.records.length > 0) {
         setDrivers(res.data.records);
       } else {
         setDrivers(
@@ -172,6 +181,21 @@ export default function DriversPage() {
       });
     }
     setEditOpen(true);
+  };
+
+  const handleCreateSave = async () => {
+    try {
+      await createDriver({
+        realName: createForm.realName,
+        gender: Number(createForm.gender),
+        phone: createForm.phone,
+        baseDailySalary: Number(createForm.baseDailySalary),
+        overtimeHourlyRate: Number(createForm.overtimeHourlyRate),
+      });
+    } catch {}
+    setCreateOpen(false);
+    setCreateForm({ realName: "", gender: "1", phone: "", baseDailySalary: "", overtimeHourlyRate: "" });
+    fetchDrivers();
   };
 
   const handleEditSave = async () => {
@@ -274,10 +298,21 @@ export default function DriversPage() {
               </Button>
             </>
           ) : (
-            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setManaging(false)}>
-              <X className="w-4 h-4 mr-1" />
-              退出管理
-            </Button>
+            <>
+              <Button
+                variant="default"
+                size="sm"
+                className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Car className="w-4 h-4 mr-1" />
+                新增司机
+              </Button>
+              <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setManaging(false)}>
+                <X className="w-4 h-4 mr-1" />
+                退出管理
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -374,6 +409,47 @@ export default function DriversPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* 新增弹窗 */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">新增司机</DialogTitle>
+            <DialogDescription>填写司机信息后点击保存，默认密码为 123456</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>姓名 <span className="text-red-500">*</span></Label>
+              <Input value={createForm.realName} onChange={(e) => setCreateForm({ ...createForm, realName: e.target.value })} className="rounded-lg" placeholder="请输入姓名" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>性别 <span className="text-red-500">*</span></Label>
+              <select value={createForm.gender} onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <option value="1">男</option>
+                <option value="2">女</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>手机号</Label>
+              <Input value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="rounded-lg" placeholder="请输入手机号" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>基础日薪（元）<span className="text-red-500">*</span></Label>
+                <Input type="number" value={createForm.baseDailySalary} onChange={(e) => setCreateForm({ ...createForm, baseDailySalary: e.target.value })} className="rounded-lg" placeholder="300" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>加班时薪（元）<span className="text-red-500">*</span></Label>
+                <Input type="number" value={createForm.overtimeHourlyRate} onChange={(e) => setCreateForm({ ...createForm, overtimeHourlyRate: e.target.value })} className="rounded-lg" placeholder="50" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setCreateOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleCreateSave}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 修改弹窗 */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

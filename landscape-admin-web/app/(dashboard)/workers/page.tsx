@@ -43,7 +43,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker } from "@/lib/api";
+import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker } from "@/lib/api";
 
 interface WorkerItem {
   id: number;
@@ -92,6 +92,7 @@ export default function WorkersPage() {
   const [showResigned, setShowResigned] = useState(false);
   const [managing, setManaging] = useState(false);
 
+  const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [resignOpen, setResignOpen] = useState(false);
@@ -99,6 +100,18 @@ export default function WorkersPage() {
   const [selectedWorker, setSelectedWorker] = useState<WorkerItem | null>(null);
   const [workerDetail, setWorkerDetail] = useState<WorkerDetail | null>(null);
   const [deleteAttendanceCount, setDeleteAttendanceCount] = useState(0);
+
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    gender: "1",
+    phone: "",
+    baseDailySalary: "",
+    overtimeHourlyRate: "",
+    isSkilledWorker: "0",
+    groupId: "",
+    idCard: "",
+    emergencyContactPhone: "",
+  });
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -122,7 +135,7 @@ export default function WorkersPage() {
         pageNum: 1,
         pageSize: 100,
       });
-      if (res.code === 200 && res.data?.records) {
+      if (res.code === 200 && res.data?.records && res.data.records.length > 0) {
         setWorkers(res.data.records);
       } else {
         // fallback 模拟数据
@@ -195,6 +208,37 @@ export default function WorkersPage() {
       });
     }
     setEditOpen(true);
+  };
+
+  const handleCreateSave = async () => {
+    try {
+      await createWorker({
+        name: createForm.name,
+        gender: Number(createForm.gender),
+        phone: createForm.phone,
+        baseDailySalary: Number(createForm.baseDailySalary),
+        overtimeHourlyRate: Number(createForm.overtimeHourlyRate),
+        isSkilledWorker: Number(createForm.isSkilledWorker),
+        groupId: createForm.groupId ? Number(createForm.groupId) : null,
+        idCard: createForm.idCard || null,
+        emergencyContactPhone: createForm.emergencyContactPhone || null,
+      });
+    } catch {
+      // ignore
+    }
+    setCreateOpen(false);
+    setCreateForm({
+      name: "",
+      gender: "1",
+      phone: "",
+      baseDailySalary: "",
+      overtimeHourlyRate: "",
+      isSkilledWorker: "0",
+      groupId: "",
+      idCard: "",
+      emergencyContactPhone: "",
+    });
+    fetchWorkers();
   };
 
   const handleEditSave = async () => {
@@ -337,15 +381,26 @@ export default function WorkersPage() {
               </Button>
             </>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-lg"
-              onClick={() => setManaging(false)}
-            >
-              <X className="w-4 h-4 mr-1" />
-              退出管理
-            </Button>
+            <>
+              <Button
+                variant="default"
+                size="sm"
+                className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Users className="w-4 h-4 mr-1" />
+                新增工人
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                onClick={() => setManaging(false)}
+              >
+                <X className="w-4 h-4 mr-1" />
+                退出管理
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -525,6 +580,73 @@ export default function WorkersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* 新增弹窗 */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">新增工人</DialogTitle>
+            <DialogDescription>填写工人信息后点击保存</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>姓名 <span className="text-red-500">*</span></Label>
+              <Input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="rounded-lg" placeholder="请输入姓名" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>性别 <span className="text-red-500">*</span></Label>
+                <select value={createForm.gender} onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                  <option value="1">男</option>
+                  <option value="2">女</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>是否技术工</Label>
+                <select value={createForm.isSkilledWorker} onChange={(e) => setCreateForm({ ...createForm, isSkilledWorker: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                  <option value="0">否</option>
+                  <option value="1">是</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>手机号</Label>
+              <Input value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="rounded-lg" placeholder="请输入手机号" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>基础日薪（元）<span className="text-red-500">*</span></Label>
+                <Input type="number" value={createForm.baseDailySalary} onChange={(e) => setCreateForm({ ...createForm, baseDailySalary: e.target.value })} className="rounded-lg" placeholder="200" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>加班时薪（元）<span className="text-red-500">*</span></Label>
+                <Input type="number" value={createForm.overtimeHourlyRate} onChange={(e) => setCreateForm({ ...createForm, overtimeHourlyRate: e.target.value })} className="rounded-lg" placeholder="30" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>组别</Label>
+              <select value={createForm.groupId} onChange={(e) => setCreateForm({ ...createForm, groupId: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <option value="">未分组</option>
+                <option value="1">一组</option>
+                <option value="2">二组</option>
+                <option value="3">技术组</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>身份证号</Label>
+              <Input value={createForm.idCard} onChange={(e) => setCreateForm({ ...createForm, idCard: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>紧急联系人电话</Label>
+              <Input value={createForm.emergencyContactPhone} onChange={(e) => setCreateForm({ ...createForm, emergencyContactPhone: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setCreateOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleCreateSave}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 修改弹窗 */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

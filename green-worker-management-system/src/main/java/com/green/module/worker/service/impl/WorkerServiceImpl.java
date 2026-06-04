@@ -10,6 +10,7 @@ import com.green.module.group.entity.GroupEntity;
 import com.green.module.group.mapper.GroupMapper;
 import com.green.module.project.entity.ProjectEntity;
 import com.green.module.project.mapper.ProjectMapper;
+import com.green.module.worker.dto.CreateWorkerDTO;
 import com.green.module.worker.dto.UpdateWorkerDTO;
 import com.green.module.worker.dto.WorkerQuery;
 import com.green.module.worker.entity.WorkerEntity;
@@ -42,6 +43,28 @@ public class WorkerServiceImpl implements WorkerService {
     private final GroupMapper groupMapper;
     private final ProjectMapper projectMapper;
     private final WorkerAttendanceRecordMapper workerAttendanceRecordMapper;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long create(CreateWorkerDTO dto) {
+        WorkerEntity entity = new WorkerEntity();
+        entity.setName(dto.getName());
+        entity.setGender(dto.getGender());
+        entity.setGroupId(dto.getGroupId());
+        entity.setPhone(dto.getPhone());
+        entity.setIdCard(dto.getIdCard());
+        entity.setBaseDailySalary(dto.getBaseDailySalary());
+        entity.setOvertimeHourlyRate(dto.getOvertimeHourlyRate());
+        entity.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+        entity.setIsSkilledWorker(dto.getIsSkilledWorker());
+        entity.setDefaultProjectId(dto.getDefaultProjectId());
+        // 新增工人一定是在职的
+        entity.setIsEmployed(1);
+        entity.setCreatedByType(1);
+        workerMapper.insert(entity);
+        log.info("新增工人成功: workerId={}, name={}", entity.getId(), entity.getName());
+        return entity.getId();
+    }
 
     @Override
     public IPage<WorkerListVO> list(WorkerQuery query) {

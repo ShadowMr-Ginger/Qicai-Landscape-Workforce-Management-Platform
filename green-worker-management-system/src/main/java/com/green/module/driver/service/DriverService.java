@@ -3,6 +3,7 @@ package com.green.module.driver.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.green.module.auth.dto.AdminResetDriverPasswordDTO;
 import com.green.module.auth.dto.DriverChangePasswordDTO;
+import com.green.module.driver.dto.CreateDriverDTO;
 import com.green.module.driver.dto.DriverQuery;
 import com.green.module.driver.dto.UpdateDriverDTO;
 import com.green.module.driver.vo.DriverDetailVO;
@@ -23,6 +24,8 @@ public interface DriverService {
     void resetPassword(AdminResetDriverPasswordDTO dto);
 
     // ==================== 管理相关 ====================
+
+    Long create(CreateDriverDTO dto);
 
     IPage<DriverListVO> list(DriverQuery query);
 

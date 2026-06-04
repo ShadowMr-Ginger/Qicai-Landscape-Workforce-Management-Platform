@@ -85,6 +85,7 @@ CREATE TABLE `admins` (
 CREATE TABLE `drivers` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `real_name` VARCHAR(50) NOT NULL COMMENT '姓名',
+    `gender` TINYINT NOT NULL DEFAULT 1 COMMENT '性别: 1-男, 2-女',
     `phone` VARCHAR(20) NOT NULL COMMENT '手机号',
     `base_daily_salary` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '基础日薪(元)',
     `overtime_hourly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '加班时薪(元/小时)',

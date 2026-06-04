@@ -9,6 +9,7 @@ import com.green.common.result.ResultCodeEnum;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
 import com.green.module.auth.dto.AdminResetDriverPasswordDTO;
 import com.green.module.auth.dto.DriverChangePasswordDTO;
+import com.green.module.driver.dto.CreateDriverDTO;
 import com.green.module.driver.dto.DriverQuery;
 import com.green.module.driver.dto.UpdateDriverDTO;
 import com.green.module.driver.entity.DriverEntity;
@@ -82,6 +83,25 @@ public class DriverServiceImpl implements DriverService {
     }
 
     // ==================== 管理相关 ====================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long create(CreateDriverDTO dto) {
+        DriverEntity entity = new DriverEntity();
+        entity.setRealName(dto.getRealName());
+        entity.setGender(dto.getGender());
+        entity.setPhone(dto.getPhone());
+        entity.setBaseDailySalary(dto.getBaseDailySalary());
+        entity.setOvertimeHourlyRate(dto.getOvertimeHourlyRate());
+        // 新增司机默认密码 123456，未修改密码标志
+        entity.setPassword(passwordEncoder.encode("123456"));
+        entity.setPasswordChanged(0);
+        // 新增司机一定是在职的
+        entity.setIsActive(1);
+        driverMapper.insert(entity);
+        log.info("新增司机成功: driverId={}, name={}", entity.getId(), entity.getRealName());
+        return entity.getId();
+    }
 
     @Override
     public IPage<DriverListVO> list(DriverQuery query) {

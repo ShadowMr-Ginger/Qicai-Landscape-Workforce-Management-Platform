@@ -1,6 +1,7 @@
 package com.green.module.worker.controller;
 
 import com.green.common.result.ApiResult;
+import com.green.module.worker.dto.CreateWorkerDTO;
 import com.green.module.worker.dto.UpdateWorkerDTO;
 import com.green.module.worker.dto.WorkerQuery;
 import com.green.module.worker.service.WorkerService;
@@ -27,6 +28,18 @@ import org.springframework.web.bind.annotation.*;
 public class WorkerController {
 
     private final WorkerService workerService;
+
+    /**
+     * 新增工人
+     *
+     * @param dto 新增参数
+     * @return 工人ID
+     */
+    @PostMapping
+    public ApiResult<Long> create(@RequestBody @Valid CreateWorkerDTO dto) {
+        Long id = workerService.create(dto);
+        return ApiResult.success(id);
+    }
 
     /**
      * 查询工人列表
