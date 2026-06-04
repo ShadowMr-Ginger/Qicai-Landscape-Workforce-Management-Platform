@@ -183,8 +183,9 @@ public class WorkerServiceImpl implements WorkerService {
         vo.setOvertimeHourlyRate(entity.getOvertimeHourlyRate());
         vo.setIsEmployed(entity.getIsEmployed());
 
-        // 查询组别名称
+        // 查询组别
         if (entity.getGroupId() != null) {
+            vo.setGroupId(entity.getGroupId());
             GroupEntity group = groupMapper.selectById(entity.getGroupId());
             vo.setGroupName(group != null ? group.getGroupName() : "-");
         } else {

@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   RotateCcw,
   ArrowLeft,
+  Wrench,
 } from "lucide-react";
 import {
   Table,
@@ -38,6 +39,7 @@ import {
   getDriverList,
   getWorkerList,
   getGroupList,
+  getWorkTypeList,
 } from "@/lib/api";
 
 interface BatchItem {
@@ -90,6 +92,12 @@ export default function BatchesPage() {
   const [remark, setRemark] = useState("");
   const [workerKeyword, setWorkerKeyword] = useState("");
   const [workerGroupFilter, setWorkerGroupFilter] = useState("");
+
+  // 批次级统一字段
+  const [batchAttendanceType, setBatchAttendanceType] = useState("2");
+  const [batchOvertimeHours, setBatchOvertimeHours] = useState("0");
+  const [batchWorkTypeId, setBatchWorkTypeId] = useState("");
+  const [workTypeOptions, setWorkTypeOptions] = useState<{ id: number; typeName: string }[]>([]);
 
   const fetchBatches = async () => {
     setLoading(true);
@@ -148,6 +156,17 @@ export default function BatchesPage() {
     }
   };
 
+  const fetchWorkTypes = async () => {
+    try {
+      const res = await getWorkTypeList();
+      if (res.code === 200 && res.data) {
+        setWorkTypeOptions(res.data);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const openCreate = () => {
     setSelectedDriver("");
     setBatchDate(getToday());
@@ -155,9 +174,13 @@ export default function BatchesPage() {
     setRemark("");
     setWorkerKeyword("");
     setWorkerGroupFilter("");
+    setBatchAttendanceType("2");
+    setBatchOvertimeHours("0");
+    setBatchWorkTypeId("");
     fetchDrivers();
     fetchWorkers();
     fetchGroups();
+    fetchWorkTypes();
     setCreateOpen(true);
   };
 
@@ -174,18 +197,23 @@ export default function BatchesPage() {
       toast.error("请至少选择一名工人");
       return;
     }
+    if (!batchWorkTypeId) {
+      toast.error("请选择作业类型");
+      return;
+    }
     try {
       await createAttendanceBatch({
         driverId: Number(selectedDriver),
         batchDate,
         workers: selectedWorkers.map((wid) => ({
           workerId: wid,
-          attendanceType: 2,
-          overtimeHours: 0,
         })),
+        attendanceType: Number(batchAttendanceType),
+        overtimeHours: Number(batchOvertimeHours) || 0,
+        workTypeId: Number(batchWorkTypeId),
         remark,
       });
-      toast.success("考勤批次创建成功，已自动通过审核");
+      toast.success("考勤批次创建成功，请等待审核");
       setCreateOpen(false);
       fetchBatches();
     } catch (err: any) {
@@ -339,7 +367,7 @@ export default function BatchesPage() {
               <Plus className="w-5 h-5 text-green-600" />
               新增考勤批次
             </DialogTitle>
-            <DialogDescription>选择审核司机、考勤日期和参与工人，提交后自动通过审核</DialogDescription>
+            <DialogDescription>选择审核司机、考勤日期、统一考勤信息并添加参与工人</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-3">
@@ -359,6 +387,44 @@ export default function BatchesPage() {
               <div className="space-y-1.5">
                 <Label>考勤日期 <span className="text-red-500">*</span></Label>
                 <Input type="date" value={batchDate} onChange={(e) => setBatchDate(e.target.value)} className="rounded-lg" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label>出勤类型 <span className="text-red-500">*</span></Label>
+                <select
+                  value={batchAttendanceType}
+                  onChange={(e) => setBatchAttendanceType(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                >
+                  <option value="2">全天</option>
+                  <option value="1">半天</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>加班时长(小时)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={batchOvertimeHours}
+                  onChange={(e) => setBatchOvertimeHours(e.target.value)}
+                  className="rounded-lg h-10"
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>作业类型 <span className="text-red-500">*</span></Label>
+                <select
+                  value={batchWorkTypeId}
+                  onChange={(e) => setBatchWorkTypeId(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">请选择</option>
+                  {workTypeOptions.map((wt) => (
+                    <option key={wt.id} value={wt.id}>{wt.typeName}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -417,7 +483,7 @@ export default function BatchesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setCreateOpen(false)}>取消</Button>
-            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleCreate}>提交并审核通过</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleCreate}>提交批次</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

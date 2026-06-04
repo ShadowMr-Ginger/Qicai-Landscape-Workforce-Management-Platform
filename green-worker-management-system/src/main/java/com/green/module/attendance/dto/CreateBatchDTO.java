@@ -23,6 +23,16 @@ public class CreateBatchDTO {
     @NotEmpty(message = "至少选择一名工人")
     private List<WorkerAttendanceItem> workers;
 
+    /** 批次统一出勤类型: 1-半天, 2-全天 */
+    @NotNull(message = "出勤类型不能为空")
+    private Integer attendanceType;
+
+    /** 批次统一加班时长 */
+    private BigDecimal overtimeHours;
+
+    /** 批次统一作业类型ID */
+    private Long workTypeId;
+
     private String remark;
 
     @Data

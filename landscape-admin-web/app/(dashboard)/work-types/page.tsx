@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import api from "@/lib/api";
+import { getWorkTypeList, createWorkType, updateWorkType, deleteWorkType } from "@/lib/api";
 
 interface WorkTypeItem {
   id: number;
@@ -44,9 +44,9 @@ export default function WorkTypesPage() {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/admin/work-types");
-      if (res.data.code === 200 && res.data.data) {
-        setItems(res.data.data);
+      const res = await getWorkTypeList();
+      if (res.code === 200 && res.data) {
+        setItems(res.data);
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "获取作业类型失败");
@@ -65,7 +65,7 @@ export default function WorkTypesPage() {
       return;
     }
     try {
-      await api.post("/admin/work-types", createForm);
+      await createWorkType(createForm);
       toast.success("新增作业类型成功");
       setCreateOpen(false);
       setCreateForm({ typeName: "", description: "" });
@@ -87,7 +87,7 @@ export default function WorkTypesPage() {
       return;
     }
     try {
-      await api.put(`/admin/work-types/${selectedId}`, editForm);
+      await updateWorkType(selectedId, editForm);
       toast.success("修改成功");
       setEditOpen(false);
       fetchItems();
@@ -103,7 +103,7 @@ export default function WorkTypesPage() {
     }
     if (!confirm(`确定删除作业类型「${item.typeName}」吗？关联的考勤记录将迁移到默认类型。`)) return;
     try {
-      await api.delete(`/admin/work-types/${item.id}`);
+      await deleteWorkType(item.id);
       toast.success("删除成功");
       fetchItems();
     } catch (err: any) {

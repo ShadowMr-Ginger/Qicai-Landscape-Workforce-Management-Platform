@@ -51,6 +51,11 @@ public class WorkerListVO {
     private BigDecimal overtimeHourlyRate;
 
     /**
+     * 所属组别ID
+     */
+    private Long groupId;
+
+    /**
      * 所属组别名称
      */
     private String groupName;

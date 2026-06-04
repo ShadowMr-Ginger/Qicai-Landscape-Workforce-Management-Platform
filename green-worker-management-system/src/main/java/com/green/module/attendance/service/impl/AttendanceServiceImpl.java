@@ -161,9 +161,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         AttendanceBatchEntity batch = new AttendanceBatchEntity();
         batch.setDriverId(dto.getDriverId());
         batch.setBatchDate(dto.getBatchDate());
-        batch.setStatus(BatchStatusEnum.APPROVED.getCode()); // 管理员创建自动通过
+        batch.setStatus(BatchStatusEnum.PENDING.getCode());
         batch.setSubmitTime(LocalDateTime.now());
-        batch.setReviewTime(LocalDateTime.now());
         batch.setTotalWorkers(dto.getWorkers().size());
         batch.setRemark(dto.getRemark());
         batchMapper.insert(batch);
@@ -183,9 +182,9 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
             record.setAttendanceDate(dto.getBatchDate());
-            record.setAttendanceType(item.getAttendanceType());
-            record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
-            record.setWorkTypeId(item.getWorkTypeId());
+            record.setAttendanceType(dto.getAttendanceType());
+            record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
+            record.setWorkTypeId(dto.getWorkTypeId());
             record.setDailyWage(dailyWage);
             record.setOvertimeWage(overtimeWage);
             record.setTotalWage(totalWage);

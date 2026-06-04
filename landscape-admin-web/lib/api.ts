@@ -239,4 +239,26 @@ export async function getDriverCalendar(driverId: number, year: number, month: n
   return res.data;
 }
 
+// ==================== 作业类型管理 ====================
+
+export async function getWorkTypeList() {
+  const res = await api.get('/admin/work-types');
+  return res.data;
+}
+
+export async function createWorkType(data: Record<string, unknown>) {
+  const res = await api.post('/admin/work-types', data);
+  return res.data;
+}
+
+export async function updateWorkType(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/work-types/${id}`, data);
+  return res.data;
+}
+
+export async function deleteWorkType(id: number) {
+  const res = await api.delete(`/admin/work-types/${id}`);
+  return res.data;
+}
+
 export default api;
