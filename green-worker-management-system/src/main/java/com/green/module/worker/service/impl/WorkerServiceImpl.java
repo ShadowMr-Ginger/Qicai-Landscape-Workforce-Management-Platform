@@ -127,17 +127,15 @@ public class WorkerServiceImpl implements WorkerService {
         }
 
         // 1. 查询关联的考勤记录数量
-        Long attendanceCount = workerAttendanceRecordMapper.selectCount(
-                new LambdaQueryWrapper<>()
-                        .eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id)
-        );
+        LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
+        Long attendanceCount = workerAttendanceRecordMapper.selectCount(countWrapper);
 
         // 2. 删除关联的考勤记录
         if (attendanceCount > 0) {
-            workerAttendanceRecordMapper.delete(
-                    new LambdaQueryWrapper<>()
-                            .eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id)
-            );
+            LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
+            workerAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除工人关联考勤记录: workerId={}, count={}", id, attendanceCount);
         }
 

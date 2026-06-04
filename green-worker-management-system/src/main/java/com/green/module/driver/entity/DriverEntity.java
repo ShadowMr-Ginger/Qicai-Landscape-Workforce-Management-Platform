@@ -46,6 +46,12 @@ public class DriverEntity extends BaseEntity {
     private String phone;
 
     /**
+     * 性别
+     * <p>1-男，0-女</p>
+     */
+    private Integer gender;
+
+    /**
      * 基础日薪（元）
      */
     private BigDecimal baseDailySalary;

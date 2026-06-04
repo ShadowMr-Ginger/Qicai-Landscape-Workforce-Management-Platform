@@ -73,6 +73,18 @@ public class ApiResult<T> {
     }
 
     /**
+     * 成功响应（自定义消息，无数据）
+     *
+     * @param message 自定义成功消息
+     */
+    public static <T> ApiResult<T> success(String message) {
+        ApiResult<T> result = new ApiResult<>();
+        result.setCode(ResultCodeEnum.SUCCESS.getCode());
+        result.setMessage(message);
+        return result;
+    }
+
+    /**
      * 成功响应（携带数据）
      *
      * @param data 业务数据

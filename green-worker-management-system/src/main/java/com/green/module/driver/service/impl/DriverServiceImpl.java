@@ -149,15 +149,13 @@ public class DriverServiceImpl implements DriverService {
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
-        Long attendanceCount = driverAttendanceRecordMapper.selectCount(
-                new LambdaQueryWrapper<>()
-                        .eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id)
-        );
+        LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> countWrapper = new LambdaQueryWrapper<>();
+        countWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
+        Long attendanceCount = driverAttendanceRecordMapper.selectCount(countWrapper);
         if (attendanceCount > 0) {
-            driverAttendanceRecordMapper.delete(
-                    new LambdaQueryWrapper<>()
-                            .eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id)
-            );
+            LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
+            driverAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除司机关联考勤记录: driverId={}, count={}", id, attendanceCount);
         }
         driverMapper.deleteById(id);
