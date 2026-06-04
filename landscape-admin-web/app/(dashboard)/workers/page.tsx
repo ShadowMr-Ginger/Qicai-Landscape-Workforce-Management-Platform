@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker } from "@/lib/api";
+import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker, getGroupList } from "@/lib/api";
 
 interface WorkerItem {
   id: number;
@@ -92,6 +92,7 @@ export default function WorkersPage() {
   const [groupId, setGroupId] = useState("");
   const [showResigned, setShowResigned] = useState(false);
   const [managing, setManaging] = useState(false);
+  const [groupOptions, setGroupOptions] = useState<{ id: number; groupName: string }[]>([]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -171,6 +172,14 @@ export default function WorkersPage() {
     fetchWorkers();
   }, [showResigned]);
 
+  useEffect(() => {
+    getGroupList().then((res) => {
+      if (res.code === 200 && res.data) {
+        setGroupOptions(res.data);
+      }
+    }).catch(() => {});
+  }, []);
+
   const handleApplyFilter = () => {
     fetchWorkers();
   };
@@ -218,6 +227,10 @@ export default function WorkersPage() {
       toast.error("姓名不能为空");
       return;
     }
+    if (!createForm.groupId) {
+      toast.error("请选择所属组别");
+      return;
+    }
     try {
       await createWorker({
         name: createForm.name,
@@ -251,6 +264,10 @@ export default function WorkersPage() {
 
   const handleEditSave = async () => {
     if (!selectedWorker) return;
+    if (!editForm.groupId) {
+      toast.error("请选择所属组别");
+      return;
+    }
     try {
       await updateWorker(selectedWorker.id, {
         name: editForm.name,
@@ -461,12 +478,12 @@ export default function WorkersPage() {
               <select
                 value={groupId}
                 onChange={(e) => setGroupId(e.target.value)}
-                className="h-9 rounded-lg border border-input bg-background px-3 text-sm w-28"
+                className="h-9 rounded-lg border border-input bg-background px-3 text-sm w-36"
               >
                 <option value="">全部</option>
-                <option value="1">一组</option>
-                <option value="2">二组</option>
-                <option value="3">技术组</option>
+                {groupOptions.map((g) => (
+                  <option key={g.id} value={g.id}>{g.groupName}</option>
+                ))}
               </select>
             </div>
             <div className="flex items-center gap-2 ml-auto">
@@ -635,12 +652,12 @@ export default function WorkersPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>组别</Label>
+              <Label>组别 <span className="text-red-500">*</span></Label>
               <select value={createForm.groupId} onChange={(e) => setCreateForm({ ...createForm, groupId: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
-                <option value="">未分组</option>
-                <option value="1">一组</option>
-                <option value="2">二组</option>
-                <option value="3">技术组</option>
+                <option value="">请选择组别</option>
+                {groupOptions.map((g) => (
+                  <option key={g.id} value={g.id}>{g.groupName}</option>
+                ))}
               </select>
             </div>
             <div className="space-y-1.5">
@@ -700,6 +717,15 @@ export default function WorkersPage() {
                 <Label>加班时薪（元）</Label>
                 <Input type="number" value={editForm.overtimeHourlyRate} onChange={(e) => setEditForm({ ...editForm, overtimeHourlyRate: e.target.value })} className="rounded-lg" />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>组别 <span className="text-red-500">*</span></Label>
+              <select value={editForm.groupId} onChange={(e) => setEditForm({ ...editForm, groupId: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <option value="">请选择组别</option>
+                {groupOptions.map((g) => (
+                  <option key={g.id} value={g.id}>{g.groupName}</option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>

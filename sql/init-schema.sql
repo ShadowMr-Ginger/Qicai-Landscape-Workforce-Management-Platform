@@ -110,7 +110,7 @@ CREATE TABLE `workers` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name` VARCHAR(50) NOT NULL COMMENT '姓名',
     `gender` TINYINT NOT NULL DEFAULT 1 COMMENT '性别: 1-男, 2-女',
-    `group_id` BIGINT DEFAULT NULL COMMENT '所属组别ID',
+    `group_id` BIGINT NOT NULL DEFAULT 5 COMMENT '所属组别ID',
     `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     `id_card` VARCHAR(18) DEFAULT NULL COMMENT '身份证号',
     `base_daily_salary` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '基础日薪(元)',
@@ -285,7 +285,7 @@ CREATE TABLE `operation_logs` (
 
 -- 工人表外键
 ALTER TABLE `workers`
-    ADD CONSTRAINT `fk_workers_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_workers_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_workers_default_project` FOREIGN KEY (`default_project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- 项目表外键

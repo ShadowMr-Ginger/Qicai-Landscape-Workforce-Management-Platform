@@ -30,6 +30,7 @@ public class UpdateWorkerDTO {
     /**
      * 所属组别ID
      */
+    @NotNull(message = "所属组别不能为空")
     private Long groupId;
 
     /**

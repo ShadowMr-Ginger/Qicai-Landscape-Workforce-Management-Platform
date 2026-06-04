@@ -19,6 +19,7 @@ public class CreateWorkerDTO {
     @NotNull(message = "性别不能为空")
     private Integer gender;
 
+    @NotNull(message = "所属组别不能为空")
     private Long groupId;
 
     private String phone;
