@@ -38,7 +38,7 @@ public class WorkerAttendanceRecordEntity extends BaseEntity {
     /** 加班时长(小时) */
     private BigDecimal overtimeHours;
 
-    /** 工作类型ID */
+    /** 作业类型ID */
     private Long workTypeId;
 
     /** 当日基础工资(元) */

@@ -24,7 +24,7 @@ public class CalendarDetailVO {
     /** 考勤员（司机） */
     private String driverName;
 
-    /** 工作类型 */
+    /** 作业类型 */
     private String workTypeName;
 
     /** 工地/项目 */

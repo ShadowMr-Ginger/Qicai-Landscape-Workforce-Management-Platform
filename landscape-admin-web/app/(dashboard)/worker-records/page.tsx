@@ -7,7 +7,9 @@ import {
   RotateCcw,
   Eye,
   ClipboardList,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -126,6 +128,12 @@ export default function WorkerRecordsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">工人考勤记录总表</h2>
+        <Link href="/attendance-records">
+          <Button variant="outline" size="sm" className="rounded-lg">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            返回
+          </Button>
+        </Link>
       </div>
 
       {/* 筛选 */}
@@ -298,7 +306,7 @@ export default function WorkerRecordsPage() {
                 <p className="font-medium">{detail.projectName || "-"}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">
-                <p className="text-gray-400 text-xs">工作类型</p>
+                <p className="text-gray-400 text-xs">作业类型</p>
                 <p className="font-medium">{detail.workTypeName || "-"}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { UserCircle, CalendarDays } from "lucide-react";
+import { UserCircle, CalendarDays, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -98,6 +99,12 @@ export default function DriverSummaryPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">司机考勤信息汇总</h2>
+        <Link href="/attendance-records">
+          <Button variant="outline" size="sm" className="rounded-lg">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            返回
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -171,7 +178,7 @@ export default function DriverSummaryPage() {
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">
-                <p className="text-gray-400 text-xs">工作类型</p>
+                <p className="text-gray-400 text-xs">作业类型</p>
                 <p className="font-medium">{detail.workTypeName || "-"}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">

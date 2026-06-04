@@ -7,9 +7,8 @@ import {
   CheckCircle,
   Plus,
   ClipboardCheck,
-  CalendarDays,
-  Users,
-  X,
+  RotateCcw,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Table,
@@ -34,11 +33,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   getAttendanceBatchList,
-  getAttendanceBatchDetail,
   createAttendanceBatch,
   approveAttendanceBatch,
   getDriverList,
   getWorkerList,
+  getGroupList,
 } from "@/lib/api";
 
 interface BatchItem {
@@ -52,26 +51,45 @@ interface BatchItem {
   remark: string;
 }
 
+interface DriverOption {
+  id: number;
+  realName: string;
+}
+
 interface WorkerOption {
   id: number;
   name: string;
   groupName: string;
+  groupId: number;
+}
+
+function getToday(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getWeekAgo(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return d.toISOString().split("T")[0];
 }
 
 export default function BatchesPage() {
   const [batches, setBatches] = useState<BatchItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState("0");
+  const [dateFrom, setDateFrom] = useState(getWeekAgo());
+  const [dateTo, setDateTo] = useState(getToday());
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
+  const [drivers, setDrivers] = useState<DriverOption[]>([]);
   const [workers, setWorkers] = useState<WorkerOption[]>([]);
+  const [groupOptions, setGroupOptions] = useState<{ id: number; groupName: string }[]>([]);
   const [selectedDriver, setSelectedDriver] = useState("");
-  const [batchDate, setBatchDate] = useState("");
+  const [batchDate, setBatchDate] = useState(getToday());
   const [selectedWorkers, setSelectedWorkers] = useState<number[]>([]);
   const [remark, setRemark] = useState("");
+  const [workerKeyword, setWorkerKeyword] = useState("");
+  const [workerGroupFilter, setWorkerGroupFilter] = useState("");
 
   const fetchBatches = async () => {
     setLoading(true);
@@ -119,13 +137,27 @@ export default function BatchesPage() {
     }
   };
 
+  const fetchGroups = async () => {
+    try {
+      const res = await getGroupList();
+      if (res.code === 200 && res.data) {
+        setGroupOptions(res.data);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const openCreate = () => {
     setSelectedDriver("");
-    setBatchDate("");
+    setBatchDate(getToday());
     setSelectedWorkers([]);
     setRemark("");
+    setWorkerKeyword("");
+    setWorkerGroupFilter("");
     fetchDrivers();
     fetchWorkers();
+    fetchGroups();
     setCreateOpen(true);
   };
 
@@ -170,6 +202,19 @@ export default function BatchesPage() {
       toast.error(err?.response?.data?.message || "审核失败");
     }
   };
+
+  const handleReset = () => {
+    setStatusFilter("0");
+    setDateFrom(getWeekAgo());
+    setDateTo(getToday());
+    fetchBatches();
+  };
+
+  const filteredWorkers = workers.filter((w) => {
+    if (workerKeyword && !w.name.includes(workerKeyword)) return false;
+    if (workerGroupFilter && String(w.groupId) !== workerGroupFilter) return false;
+    return true;
+  });
 
   const statusBadge = (status: number) => {
     if (status === 0)
@@ -220,7 +265,8 @@ export default function BatchesPage() {
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 rounded-lg w-40" />
             </div>
             <div className="flex items-center gap-2 ml-auto">
-              <Button variant="outline" size="sm" className="rounded-lg h-9" onClick={() => { setStatusFilter(""); setDateFrom(""); setDateTo(""); fetchBatches(); }}>
+              <Button variant="outline" size="sm" className="rounded-lg h-9" onClick={handleReset}>
+                <RotateCcw className="w-3.5 h-3.5 mr-1" />
                 重置
               </Button>
               <Button size="sm" className="rounded-lg h-9 bg-green-600 hover:bg-green-700" onClick={fetchBatches}>
@@ -306,7 +352,7 @@ export default function BatchesPage() {
                 >
                   <option value="">请选择</option>
                   {drivers.map((d) => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
+                    <option key={d.id} value={d.id}>{d.realName}</option>
                   ))}
                 </select>
               </div>
@@ -317,11 +363,29 @@ export default function BatchesPage() {
             </div>
             <div className="space-y-1.5">
               <Label>选择工人 <span className="text-red-500">*</span></Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="搜索工人姓名"
+                  value={workerKeyword}
+                  onChange={(e) => setWorkerKeyword(e.target.value)}
+                  className="rounded-lg h-9 text-sm"
+                />
+                <select
+                  value={workerGroupFilter}
+                  onChange={(e) => setWorkerGroupFilter(e.target.value)}
+                  className="h-9 rounded-lg border border-input bg-background px-3 text-sm w-32 shrink-0"
+                >
+                  <option value="">全部组别</option>
+                  {groupOptions.map((g) => (
+                    <option key={g.id} value={g.id}>{g.groupName}</option>
+                  ))}
+                </select>
+              </div>
               <div className="max-h-48 overflow-y-auto rounded-xl border border-gray-100 p-2 space-y-1">
-                {workers.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-2">暂无在职工人</p>
+                {filteredWorkers.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-2">暂无符合条件的工人</p>
                 ) : (
-                  workers.map((w) => (
+                  filteredWorkers.map((w) => (
                     <label
                       key={w.id}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-green-50/30 cursor-pointer text-sm"

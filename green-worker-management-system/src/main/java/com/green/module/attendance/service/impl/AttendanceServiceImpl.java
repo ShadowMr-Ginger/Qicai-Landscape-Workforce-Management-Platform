@@ -16,6 +16,7 @@ import com.green.module.attendance.entity.DriverAttendanceRecordEntity;
 import com.green.module.attendance.mapper.AttendanceBatchMapper;
 import com.green.module.attendance.mapper.WorkerAttendanceRecordMapper;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
+import com.green.module.attendance.mapper.WorkTypeMapper;
 import com.green.module.attendance.service.AttendanceService;
 import com.green.module.attendance.vo.*;
 import com.green.module.driver.entity.DriverEntity;
@@ -59,6 +60,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final GroupMapper groupMapper;
     private final ProjectMapper projectMapper;
     private final AdminMapper adminMapper;
+    private final WorkTypeMapper workTypeMapper;
 
     // ==================== 考勤批次 ====================
 
@@ -494,6 +496,12 @@ public class AttendanceServiceImpl implements AttendanceService {
             vo.setProjectName(project != null ? project.getProjectName() : "-");
         }
 
+        // 查询作业类型名称
+        if (rec.getWorkTypeId() != null) {
+            com.green.module.attendance.entity.WorkTypeEntity wt = workTypeMapper.selectById(rec.getWorkTypeId());
+            vo.setWorkTypeName(wt != null ? wt.getTypeName() : "-");
+        }
+
         // 查询批次对应的司机
         if (rec.getBatchId() != null) {
             AttendanceBatchEntity batch = batchMapper.selectById(rec.getBatchId());
@@ -526,6 +534,12 @@ public class AttendanceServiceImpl implements AttendanceService {
         DriverEntity driver = driverMapper.selectById(rec.getDriverId());
         if (driver != null) {
             vo.setDriverName(driver.getRealName());
+        }
+
+        // 查询作业类型名称
+        if (rec.getWorkTypeId() != null) {
+            com.green.module.attendance.entity.WorkTypeEntity wt = workTypeMapper.selectById(rec.getWorkTypeId());
+            vo.setWorkTypeName(wt != null ? wt.getTypeName() : "-");
         }
         return vo;
     }
