@@ -27,4 +27,10 @@ public class GroupEntity extends BaseEntity {
      * 描述
      */
     private String description;
+
+    /**
+     * 是否系统预设组别（不可删除）
+     * <p>1-系统预设，0-自定义</p>
+     */
+    private Integer isSystem;
 }

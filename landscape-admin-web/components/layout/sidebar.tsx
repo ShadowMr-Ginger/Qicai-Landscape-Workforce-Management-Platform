@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -12,8 +13,11 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Leaf,
   ShieldCheck,
+  List,
+  FolderTree,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
@@ -21,9 +25,24 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 
-const navItems = [
+interface NavItem {
+  title: string;
+  href?: string;
+  icon?: React.ElementType;
+  badge?: number;
+  children?: { title: string; href: string }[];
+}
+
+const navItems: NavItem[] = [
   { title: "首页概览", href: "/", icon: LayoutDashboard },
-  { title: "工人管理", href: "/workers", icon: Users },
+  {
+    title: "工人管理",
+    icon: Users,
+    children: [
+      { title: "工人列表", href: "/workers" },
+      { title: "组别管理", href: "/groups" },
+    ],
+  },
   { title: "司机管理", href: "/drivers", icon: UserCircle },
   { title: "考勤审核", href: "/batches", icon: ClipboardCheck, badge: 3 },
   { title: "工资结算", href: "/wages", icon: Wallet },
@@ -33,13 +52,17 @@ const navItems = [
 
 /**
  * 侧边栏组件
- *
- * <p>左侧固定导航菜单，包含项目 Logo、导航项和底部用户信息。</p>
- * <p>支持折叠/展开，当前路由高亮显示。</p>
  */
 export function Sidebar() {
   const pathname = usePathname();
   const { user, sidebarCollapsed, toggleSidebar, logout } = useAuthStore();
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    "工人管理": pathname === "/workers" || pathname === "/groups",
+  });
+
+  const toggleMenu = (title: string) => {
+    setExpandedMenus((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   return (
     <aside
@@ -78,11 +101,98 @@ export function Sidebar() {
       {/* 导航菜单 */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         {navItems.map((item) => {
+          if (item.children && !sidebarCollapsed) {
+            const isChildActive = item.children.some((c) => pathname === c.href);
+            const isExpanded = expandedMenus[item.title] || isChildActive;
+            return (
+              <div key={item.title}>
+                <button
+                  onClick={() => toggleMenu(item.title)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                    isChildActive
+                      ? "bg-green-50 text-green-700 shadow-sm"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
+                >
+                  {item.icon && (
+                    <item.icon
+                      className={cn(
+                        "w-5 h-5 shrink-0",
+                        isChildActive ? "text-green-600" : "text-gray-400"
+                      )}
+                    />
+                  )}
+                  <span className="truncate flex-1 text-left">{item.title}</span>
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 text-gray-400 transition-transform duration-200",
+                      isExpanded && "rotate-180"
+                    )}
+                  />
+                </button>
+                {isExpanded && (
+                  <div className="mt-1 ml-4 pl-4 border-l border-gray-200 space-y-1">
+                    {item.children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                            childActive
+                              ? "bg-green-50 text-green-700 font-medium"
+                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          )}
+                        >
+                          {child.title === "工人列表" ? (
+                            <List className="w-4 h-4" />
+                          ) : (
+                            <FolderTree className="w-4 h-4" />
+                          )}
+                          <span>{child.title}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          // 折叠状态或没有子菜单：直接渲染为链接
+          if (item.children && sidebarCollapsed) {
+            const isChildActive = item.children.some((c) => pathname === c.href);
+            return (
+              <Link
+                key={item.title}
+                href={item.children[0].href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
+                  isChildActive
+                    ? "bg-green-50 text-green-700 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                )}
+                title={item.title}
+              >
+                {item.icon && (
+                  <item.icon
+                    className={cn(
+                      "w-5 h-5 shrink-0",
+                      isChildActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600"
+                    )}
+                  />
+                )}
+              </Link>
+            );
+          }
+
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href!}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative",
                 isActive
@@ -91,12 +201,14 @@ export function Sidebar() {
               )}
               title={sidebarCollapsed ? item.title : undefined}
             >
-              <item.icon
-                className={cn(
-                  "w-5 h-5 shrink-0",
-                  isActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600"
-                )}
-              />
+              {item.icon && (
+                <item.icon
+                  className={cn(
+                    "w-5 h-5 shrink-0",
+                    isActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600"
+                  )}
+                />
+              )}
               {!sidebarCollapsed && (
                 <span className="truncate">{item.title}</span>
               )}

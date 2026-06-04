@@ -113,6 +113,48 @@ export async function deleteWorker(id: number) {
   return res.data;
 }
 
+// ==================== 组别管理 ====================
+
+export async function getGroupList() {
+  const res = await api.get('/admin/groups');
+  return res.data;
+}
+
+export async function getGroupDetail(id: number) {
+  const res = await api.get(`/admin/groups/${id}`);
+  return res.data;
+}
+
+export async function getGroupWorkers(id: number) {
+  const res = await api.get(`/admin/groups/${id}/workers`);
+  return res.data;
+}
+
+export async function createGroup(data: Record<string, unknown>) {
+  const res = await api.post('/admin/groups', data);
+  return res.data;
+}
+
+export async function updateGroup(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/groups/${id}`, data);
+  return res.data;
+}
+
+export async function deleteGroup(id: number, targetGroupId: number) {
+  const res = await api.delete(`/admin/groups/${id}?targetGroupId=${targetGroupId}`);
+  return res.data;
+}
+
+export async function resignAllWorkers(id: number) {
+  const res = await api.put(`/admin/groups/${id}/resign-all`);
+  return res.data;
+}
+
+export async function restoreAllWorkers(id: number) {
+  const res = await api.put(`/admin/groups/${id}/restore-all`);
+  return res.data;
+}
+
 // ==================== 司机管理 ====================
 
 export async function createDriver(data: Record<string, unknown>) {
