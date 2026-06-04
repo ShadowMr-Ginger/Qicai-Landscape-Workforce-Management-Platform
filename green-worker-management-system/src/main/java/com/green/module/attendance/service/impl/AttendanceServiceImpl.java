@@ -157,24 +157,43 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
 
+        // 预检查：筛选出该日期尚无考勤记录的工人
+        List<Long> existingWorkerIds = new ArrayList<>();
+        List<CreateBatchDTO.WorkerAttendanceItem> validWorkers = new ArrayList<>();
+        for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
+            LambdaQueryWrapper<WorkerAttendanceRecordEntity> checkWrapper = new LambdaQueryWrapper<>();
+            checkWrapper.eq(WorkerAttendanceRecordEntity::getWorkerId, item.getWorkerId());
+            checkWrapper.eq(WorkerAttendanceRecordEntity::getAttendanceDate, dto.getBatchDate());
+            if (workerRecordMapper.selectCount(checkWrapper) > 0) {
+                existingWorkerIds.add(item.getWorkerId());
+                continue;
+            }
+            validWorkers.add(item);
+        }
+
+        if (validWorkers.isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BUSINESS_ERROR,
+                    "所选工人在该日期均已存在考勤记录，无法重复创建");
+        }
+
         // 创建批次
         AttendanceBatchEntity batch = new AttendanceBatchEntity();
         batch.setDriverId(dto.getDriverId());
         batch.setBatchDate(dto.getBatchDate());
         batch.setStatus(BatchStatusEnum.PENDING.getCode());
         batch.setSubmitTime(LocalDateTime.now());
-        batch.setTotalWorkers(dto.getWorkers().size());
+        batch.setTotalWorkers(validWorkers.size());
         batch.setRemark(dto.getRemark());
         batchMapper.insert(batch);
 
         // 创建工人考勤记录
-        for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
+        for (CreateBatchDTO.WorkerAttendanceItem item : validWorkers) {
             WorkerEntity worker = workerMapper.selectById(item.getWorkerId());
             if (worker == null) continue;
 
             // 计算工资
-            BigDecimal dailyWage = calculateDailyWage(worker, item.getAttendanceType());
-            BigDecimal overtimeWage = calculateOvertimeWage(worker, item.getOvertimeHours());
+            BigDecimal dailyWage = calculateDailyWage(worker, dto.getAttendanceType());
+            BigDecimal overtimeWage = calculateOvertimeWage(worker, dto.getOvertimeHours());
             BigDecimal totalWage = dailyWage.add(overtimeWage);
 
             WorkerAttendanceRecordEntity record = new WorkerAttendanceRecordEntity();
@@ -193,7 +212,8 @@ public class AttendanceServiceImpl implements AttendanceService {
             workerRecordMapper.insert(record);
         }
 
-        log.info("管理员创建考勤批次并自动通过: batchId={}", batch.getId());
+        log.info("管理员创建考勤批次: batchId={}, 工人总数={}, 跳过已有记录工人={}",
+                batch.getId(), validWorkers.size(), existingWorkerIds);
         return batch.getId();
     }
 
