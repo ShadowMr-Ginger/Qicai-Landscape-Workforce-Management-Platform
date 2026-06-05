@@ -33,6 +33,11 @@ public class WorkerDetailVO {
     private String genderText;
 
     /**
+     * 所属组别ID
+     */
+    private Long groupId;
+
+    /**
      * 所属组别名称
      */
     private String groupName;
@@ -71,11 +76,6 @@ public class WorkerDetailVO {
      * 是否在职文本
      */
     private String isEmployedText;
-
-    /**
-     * 默认项目名称
-     */
-    private String defaultProjectName;
 
     /**
      * 创建时间

@@ -212,20 +212,13 @@ public class WorkerServiceImpl implements WorkerService {
         vo.setIsEmployedText(entity.getIsEmployed() != null && entity.getIsEmployed() == 1 ? "在职" : "离职");
         vo.setCreateTime(entity.getCreateTime());
 
-        // 查询组别名称
+        // 查询组别
         if (entity.getGroupId() != null) {
+            vo.setGroupId(entity.getGroupId());
             GroupEntity group = groupMapper.selectById(entity.getGroupId());
             vo.setGroupName(group != null ? group.getGroupName() : "-");
         } else {
             vo.setGroupName("-");
-        }
-
-        // 查询默认项目名称
-        if (entity.getDefaultProjectId() != null) {
-            ProjectEntity project = projectMapper.selectById(entity.getDefaultProjectId());
-            vo.setDefaultProjectName(project != null ? project.getProjectName() : "-");
-        } else {
-            vo.setDefaultProjectName("-");
         }
 
         return vo;

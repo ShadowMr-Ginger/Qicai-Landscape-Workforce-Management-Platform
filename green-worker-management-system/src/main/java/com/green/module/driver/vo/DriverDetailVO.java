@@ -19,6 +19,8 @@ public class DriverDetailVO {
     private String realName;
     private String genderText;
     private String phone;
+    private String idCard;
+    private String emergencyContactPhone;
     private BigDecimal baseDailySalary;
     private BigDecimal overtimeHourlyRate;
     private String wxOpenid;

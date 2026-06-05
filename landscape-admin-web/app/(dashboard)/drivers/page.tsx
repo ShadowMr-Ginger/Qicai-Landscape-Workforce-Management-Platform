@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   X,
   Car,
+  KeyRound,
 } from "lucide-react";
 import {
   Table,
@@ -43,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver } from "@/lib/api";
+import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver, resetDriverPassword } from "@/lib/api";
 
 interface DriverItem {
   id: number;
@@ -60,6 +61,8 @@ interface DriverDetail {
   realName: string;
   genderText: string;
   phone: string;
+  idCard: string;
+  emergencyContactPhone: string;
   baseDailySalary: number;
   overtimeHourlyRate: number;
   wxOpenid: string;
@@ -88,6 +91,7 @@ export default function DriversPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [resignOpen, setResignOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [resetPwdOpen, setResetPwdOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<DriverItem | null>(null);
   const [driverDetail, setDriverDetail] = useState<DriverDetail | null>(null);
   const [deleteAttendanceCount, setDeleteAttendanceCount] = useState(0);
@@ -96,6 +100,8 @@ export default function DriversPage() {
     realName: "",
     gender: "1",
     phone: "",
+    idCard: "",
+    emergencyContactPhone: "",
     baseDailySalary: "",
     overtimeHourlyRate: "",
   });
@@ -104,6 +110,8 @@ export default function DriversPage() {
     realName: "",
     gender: "1",
     phone: "",
+    idCard: "",
+    emergencyContactPhone: "",
     baseDailySalary: "",
     overtimeHourlyRate: "",
   });
@@ -169,6 +177,8 @@ export default function DriversPage() {
           realName: d.realName,
           gender: d.genderText === "男" ? "1" : "2",
           phone: d.phone || "",
+          idCard: d.idCard || "",
+          emergencyContactPhone: d.emergencyContactPhone || "",
           baseDailySalary: String(d.baseDailySalary),
           overtimeHourlyRate: String(d.overtimeHourlyRate),
         });
@@ -178,6 +188,8 @@ export default function DriversPage() {
         realName: driver.realName,
         gender: driver.genderText === "男" ? "1" : "2",
         phone: driver.phone,
+        idCard: "",
+        emergencyContactPhone: "",
         baseDailySalary: String(driver.baseDailySalary),
         overtimeHourlyRate: String(driver.overtimeHourlyRate),
       });
@@ -195,12 +207,14 @@ export default function DriversPage() {
         realName: createForm.realName,
         gender: Number(createForm.gender),
         phone: createForm.phone,
+        idCard: createForm.idCard || undefined,
+        emergencyContactPhone: createForm.emergencyContactPhone || undefined,
         baseDailySalary: Number(createForm.baseDailySalary),
         overtimeHourlyRate: Number(createForm.overtimeHourlyRate),
       });
       toast.success("新增司机成功，默认密码为 123456");
       setCreateOpen(false);
-      setCreateForm({ realName: "", gender: "1", phone: "", baseDailySalary: "", overtimeHourlyRate: "" });
+      setCreateForm({ realName: "", gender: "1", phone: "", idCard: "", emergencyContactPhone: "", baseDailySalary: "", overtimeHourlyRate: "" });
       await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "新增司机失败，请检查网络或联系管理员");
@@ -214,6 +228,8 @@ export default function DriversPage() {
         realName: editForm.realName,
         gender: Number(editForm.gender),
         phone: editForm.phone,
+        idCard: editForm.idCard || undefined,
+        emergencyContactPhone: editForm.emergencyContactPhone || undefined,
         baseDailySalary: Number(editForm.baseDailySalary),
         overtimeHourlyRate: Number(editForm.overtimeHourlyRate),
       });
@@ -240,6 +256,8 @@ export default function DriversPage() {
         phone: driver.phone,
         baseDailySalary: driver.baseDailySalary,
         overtimeHourlyRate: driver.overtimeHourlyRate,
+        idCard: "",
+        emergencyContactPhone: "",
         wxOpenid: "wx_xxxxxxxxx",
         isActiveText: driver.isActive === 1 ? "在职" : "离职",
         passwordChanged: 1,
@@ -252,6 +270,22 @@ export default function DriversPage() {
   const openResign = (driver: DriverItem) => {
     setSelectedDriver(driver);
     setResignOpen(true);
+  };
+
+  const openResetPwd = (driver: DriverItem) => {
+    setSelectedDriver(driver);
+    setResetPwdOpen(true);
+  };
+
+  const handleResetPwd = async () => {
+    if (!selectedDriver) return;
+    try {
+      await resetDriverPassword(selectedDriver.id);
+      toast.success(`已将 ${selectedDriver.realName} 的密码重置为 123456`);
+      setResetPwdOpen(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "重置密码失败");
+    }
   };
 
   const handleResign = async () => {
@@ -406,10 +440,16 @@ export default function DriversPage() {
                             <Pencil className="w-4 h-4" />
                           </Button>
                           {!showResigned && (
-                            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                              onClick={(e) => { e.stopPropagation(); openResign(driver); }}>
-                              <UserX className="w-4 h-4" />
-                            </Button>
+                            <>
+                              <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                onClick={(e) => { e.stopPropagation(); openResign(driver); }}>
+                                <UserX className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                onClick={(e) => { e.stopPropagation(); openResetPwd(driver); }}>
+                                <KeyRound className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                           {showResigned && (
                             <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -451,6 +491,14 @@ export default function DriversPage() {
               <Label>手机号</Label>
               <Input value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="rounded-lg" placeholder="请输入手机号" />
             </div>
+            <div className="space-y-1.5">
+              <Label>身份证号</Label>
+              <Input value={createForm.idCard} onChange={(e) => setCreateForm({ ...createForm, idCard: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>紧急联系人电话</Label>
+              <Input value={createForm.emergencyContactPhone} onChange={(e) => setCreateForm({ ...createForm, emergencyContactPhone: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>基础日薪（元）<span className="text-red-500">*</span></Label>
@@ -491,6 +539,14 @@ export default function DriversPage() {
             <div className="space-y-1.5">
               <Label>手机号</Label>
               <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="rounded-lg" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>身份证号</Label>
+              <Input value={editForm.idCard} onChange={(e) => setEditForm({ ...editForm, idCard: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>紧急联系人电话</Label>
+              <Input value={editForm.emergencyContactPhone} onChange={(e) => setEditForm({ ...editForm, emergencyContactPhone: e.target.value })} className="rounded-lg" placeholder="选填" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -552,6 +608,14 @@ export default function DriversPage() {
                     <p className="font-medium text-gray-800">{driverDetail.phone}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-3 col-span-2">
+                    <p className="text-gray-400 text-xs mb-1">身份证号</p>
+                    <p className="font-medium text-gray-800">{driverDetail.idCard || "-"}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
+                    <p className="text-gray-400 text-xs mb-1">紧急联系人电话</p>
+                    <p className="font-medium text-gray-800">{driverDetail.emergencyContactPhone || "-"}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
                     <p className="text-gray-400 text-xs mb-1">微信 OpenID</p>
                     <p className="font-medium text-gray-800 font-mono text-xs">{driverDetail.wxOpenid}</p>
                   </div>
@@ -580,6 +644,29 @@ export default function DriversPage() {
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setResignOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-orange-600 hover:bg-orange-700" onClick={handleResign}>确认离职</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 重置密码确认 */}
+      <Dialog open={resetPwdOpen} onOpenChange={setResetPwdOpen}>
+        <DialogContent className="rounded-2xl max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-purple-600">
+              <KeyRound className="w-5 h-5" />
+              重置密码
+            </DialogTitle>
+            <DialogDescription>
+              确定要重置司机 <strong>{selectedDriver?.realName}</strong> 的密码吗？
+              <br />
+              重置后密码将变为 <strong>123456</strong>，司机下次登录时必须重新修改密码。
+              <br />
+              <span className="text-red-500">此操作不可撤销！</span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setResetPwdOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-purple-600 hover:bg-purple-700" onClick={handleResetPwd}>确认重置</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

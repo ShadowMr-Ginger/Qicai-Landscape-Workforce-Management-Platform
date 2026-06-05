@@ -91,6 +91,8 @@ public class DriverServiceImpl implements DriverService {
         entity.setRealName(dto.getRealName());
         entity.setGender(dto.getGender());
         entity.setPhone(dto.getPhone());
+        entity.setIdCard(dto.getIdCard());
+        entity.setEmergencyContactPhone(dto.getEmergencyContactPhone());
         entity.setBaseDailySalary(dto.getBaseDailySalary());
         entity.setOvertimeHourlyRate(dto.getOvertimeHourlyRate());
         // 新增司机默认密码 123456，未修改密码标志

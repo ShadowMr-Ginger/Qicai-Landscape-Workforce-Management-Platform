@@ -70,7 +70,6 @@ interface WorkerDetail {
   emergencyContactPhone: string;
   isSkilledWorkerText: string;
   isEmployedText: string;
-  defaultProjectName: string;
   createTime: string;
 }
 
@@ -123,6 +122,8 @@ export default function WorkersPage() {
     overtimeHourlyRate: "",
     isSkilledWorker: "0",
     groupId: "",
+    idCard: "",
+    emergencyContactPhone: "",
   });
 
   /** 根据默认薪资规则计算基础日薪与加班时薪 */
@@ -190,6 +191,18 @@ export default function WorkersPage() {
     fetchWorkers();
   }, [showResigned]);
 
+  // 新增弹窗打开时自动填充默认薪资
+  useEffect(() => {
+    if (createOpen) {
+      const { base, overtime } = computeDefaultSalary(createForm.gender, createForm.isSkilledWorker);
+      setCreateForm((prev) => ({
+        ...prev,
+        baseDailySalary: base,
+        overtimeHourlyRate: overtime,
+      }));
+    }
+  }, [createOpen]);
+
   useEffect(() => {
     getGroupList().then((res) => {
       if (res.code === 200 && res.data) {
@@ -224,6 +237,8 @@ export default function WorkersPage() {
           overtimeHourlyRate: String(d.overtimeHourlyRate),
           isSkilledWorker: d.isSkilledWorkerText === "是" ? "1" : "0",
           groupId: String(d.groupId || ""),
+          idCard: d.idCard || "",
+          emergencyContactPhone: d.emergencyContactPhone || "",
         });
       }
     } catch {
@@ -235,6 +250,8 @@ export default function WorkersPage() {
         overtimeHourlyRate: String(worker.overtimeHourlyRate),
         isSkilledWorker: worker.isSkilledWorkerText === "是" ? "1" : "0",
         groupId: "",
+        idCard: "",
+        emergencyContactPhone: "",
       });
     }
     setEditOpen(true);
@@ -258,8 +275,8 @@ export default function WorkersPage() {
         overtimeHourlyRate: Number(createForm.overtimeHourlyRate),
         isSkilledWorker: Number(createForm.isSkilledWorker),
         groupId: createForm.groupId ? Number(createForm.groupId) : null,
-        idCard: createForm.idCard || null,
-        emergencyContactPhone: createForm.emergencyContactPhone || null,
+        idCard: createForm.idCard || undefined,
+        emergencyContactPhone: createForm.emergencyContactPhone || undefined,
       });
       toast.success("新增工人成功");
       setCreateOpen(false);
@@ -295,6 +312,8 @@ export default function WorkersPage() {
         overtimeHourlyRate: Number(editForm.overtimeHourlyRate),
         isSkilledWorker: Number(editForm.isSkilledWorker),
         groupId: editForm.groupId ? Number(editForm.groupId) : null,
+        idCard: editForm.idCard || undefined,
+        emergencyContactPhone: editForm.emergencyContactPhone || undefined,
       });
       toast.success("修改成功");
       setEditOpen(false);
@@ -318,13 +337,12 @@ export default function WorkersPage() {
         genderText: worker.genderText,
         groupName: worker.groupName,
         phone: worker.phone,
-        idCard: "11010119900101****",
+        idCard: "",
         baseDailySalary: worker.baseDailySalary,
         overtimeHourlyRate: worker.overtimeHourlyRate,
-        emergencyContactPhone: "139****8888",
+        emergencyContactPhone: "",
         isSkilledWorkerText: worker.isSkilledWorkerText,
         isEmployedText: worker.isEmployed === 1 ? "在职" : "离职",
-        defaultProjectName: "朝阳公园绿化项目",
         createTime: "2026-01-15 10:30:00",
       });
     }
@@ -755,6 +773,14 @@ export default function WorkersPage() {
                 ))}
               </select>
             </div>
+            <div className="space-y-1.5">
+              <Label>身份证号</Label>
+              <Input value={editForm.idCard} onChange={(e) => setEditForm({ ...editForm, idCard: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>紧急联系人电话</Label>
+              <Input value={editForm.emergencyContactPhone} onChange={(e) => setEditForm({ ...editForm, emergencyContactPhone: e.target.value })} className="rounded-lg" placeholder="选填" />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setEditOpen(false)}>取消</Button>
@@ -814,11 +840,7 @@ export default function WorkersPage() {
                   </div>
                   <div className="bg-gray-50 rounded-xl p-3 col-span-2">
                     <p className="text-gray-400 text-xs mb-1">紧急联系人</p>
-                    <p className="font-medium text-gray-800">{workerDetail.emergencyContactPhone}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">默认项目</p>
-                    <p className="font-medium text-gray-800">{workerDetail.defaultProjectName}</p>
+                    <p className="font-medium text-gray-800">{workerDetail.emergencyContactPhone || "-"}</p>
                   </div>
                 </div>
               </>

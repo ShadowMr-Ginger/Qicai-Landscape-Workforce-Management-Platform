@@ -21,6 +21,10 @@ public class CreateDriverDTO {
 
     private String phone;
 
+    private String idCard;
+
+    private String emergencyContactPhone;
+
     @NotNull(message = "基础日薪不能为空")
     private BigDecimal baseDailySalary;
 

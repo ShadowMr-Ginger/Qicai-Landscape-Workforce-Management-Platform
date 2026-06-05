@@ -46,6 +46,16 @@ public class DriverEntity extends BaseEntity {
     private String phone;
 
     /**
+     * 身份证号
+     */
+    private String idCard;
+
+    /**
+     * 紧急联系人电话
+     */
+    private String emergencyContactPhone;
+
+    /**
      * 性别
      * <p>1-男，0-女</p>
      */

@@ -187,6 +187,11 @@ export async function deleteDriver(id: number) {
   return res.data;
 }
 
+export async function resetDriverPassword(id: number) {
+  const res = await api.post('/admin/driver/reset-password', { driverId: id });
+  return res.data;
+}
+
 // ==================== 考勤管理 ====================
 
 export async function getAttendanceBatchList(params: Record<string, unknown>) {
