@@ -159,37 +159,18 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
 
-        // 预检查：筛选出该日期尚无考勤记录的工人
-        List<Long> existingWorkerIds = new ArrayList<>();
-        List<CreateBatchDTO.WorkerAttendanceItem> validWorkers = new ArrayList<>();
-        for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
-            LambdaQueryWrapper<WorkerAttendanceRecordEntity> checkWrapper = new LambdaQueryWrapper<>();
-            checkWrapper.eq(WorkerAttendanceRecordEntity::getWorkerId, item.getWorkerId());
-            checkWrapper.eq(WorkerAttendanceRecordEntity::getAttendanceDate, dto.getBatchDate());
-            if (workerRecordMapper.selectCount(checkWrapper) > 0) {
-                existingWorkerIds.add(item.getWorkerId());
-                continue;
-            }
-            validWorkers.add(item);
-        }
-
-        if (validWorkers.isEmpty()) {
-            throw new BusinessException(ResultCodeEnum.BUSINESS_ERROR,
-                    "所选工人在该日期均已存在考勤记录，无法重复创建");
-        }
-
         // 创建批次
         AttendanceBatchEntity batch = new AttendanceBatchEntity();
         batch.setDriverId(dto.getDriverId());
         batch.setBatchDate(dto.getBatchDate());
         batch.setStatus(BatchStatusEnum.PENDING.getCode());
         batch.setSubmitTime(LocalDateTime.now());
-        batch.setTotalWorkers(validWorkers.size());
+        batch.setTotalWorkers(dto.getWorkers().size());
         batch.setRemark(dto.getRemark());
         batchMapper.insert(batch);
 
         // 创建工人考勤记录
-        for (CreateBatchDTO.WorkerAttendanceItem item : validWorkers) {
+        for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
             WorkerEntity worker = workerMapper.selectById(item.getWorkerId());
             if (worker == null) continue;
 
@@ -214,8 +195,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             workerRecordMapper.insert(record);
         }
 
-        log.info("管理员创建考勤批次: batchId={}, 工人总数={}, 跳过已有记录工人={}",
-                batch.getId(), validWorkers.size(), existingWorkerIds);
+        log.info("管理员创建考勤批次: batchId={}, 工人总数={}", batch.getId(), dto.getWorkers().size());
         return batch.getId();
     }
 
@@ -276,13 +256,25 @@ public class AttendanceServiceImpl implements AttendanceService {
                     record.setRemark(item.getRemark());
                 }
 
-                // 重新计算工资
-                BigDecimal dailyWage = calculateDailyWage(worker, record.getAttendanceType());
-                BigDecimal overtimeWage = calculateOvertimeWage(worker, record.getOvertimeHours());
-                BigDecimal totalWage = dailyWage.add(overtimeWage);
-                record.setDailyWage(dailyWage);
-                record.setOvertimeWage(overtimeWage);
-                record.setTotalWage(totalWage);
+                // 工资处理：前端传入则优先使用，否则重新计算
+                if (item.getDailyWage() != null) {
+                    record.setDailyWage(item.getDailyWage());
+                }
+                if (item.getOvertimeWage() != null) {
+                    record.setOvertimeWage(item.getOvertimeWage());
+                }
+                if (item.getTotalWage() != null) {
+                    record.setTotalWage(item.getTotalWage());
+                } else {
+                    // 如果没有传 totalWage，自动计算
+                    BigDecimal dailyWage = record.getDailyWage() != null ? record.getDailyWage()
+                            : calculateDailyWage(worker, record.getAttendanceType());
+                    BigDecimal overtimeWage = record.getOvertimeWage() != null ? record.getOvertimeWage()
+                            : calculateOvertimeWage(worker, record.getOvertimeHours());
+                    record.setDailyWage(dailyWage);
+                    record.setOvertimeWage(overtimeWage);
+                    record.setTotalWage(dailyWage.add(overtimeWage));
+                }
 
                 workerRecordMapper.updateById(record);
             }
@@ -567,6 +559,8 @@ public class AttendanceServiceImpl implements AttendanceService {
             vo.setWorkerName(worker.getName());
             vo.setGenderText(worker.getGender() != null && worker.getGender() == 1 ? "男" : "女");
             vo.setIsSkilledWorkerText(worker.getIsSkilledWorker() != null && worker.getIsSkilledWorker() == 1 ? "是" : "否");
+            vo.setBaseDailySalary(worker.getBaseDailySalary());
+            vo.setOvertimeHourlyRate(worker.getOvertimeHourlyRate());
             if (worker.getGroupId() != null) {
                 GroupEntity group = groupMapper.selectById(worker.getGroupId());
                 vo.setGroupName(group != null ? group.getGroupName() : "-");

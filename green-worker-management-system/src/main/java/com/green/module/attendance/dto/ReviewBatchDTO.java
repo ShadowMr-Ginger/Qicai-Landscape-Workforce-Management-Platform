@@ -35,6 +35,15 @@ public class ReviewBatchDTO {
         /** 加班时长 */
         private BigDecimal overtimeHours;
 
+        /** 当日基础工资 */
+        private BigDecimal dailyWage;
+
+        /** 当日加班工资 */
+        private BigDecimal overtimeWage;
+
+        /** 当日总工资 */
+        private BigDecimal totalWage;
+
         /** 备注 */
         private String remark;
     }

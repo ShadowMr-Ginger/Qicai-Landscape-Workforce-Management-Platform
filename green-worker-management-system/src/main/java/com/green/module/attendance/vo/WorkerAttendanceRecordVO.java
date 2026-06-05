@@ -32,6 +32,11 @@ public class WorkerAttendanceRecordVO {
     private BigDecimal dailyWage;
     private BigDecimal overtimeWage;
     private BigDecimal totalWage;
+
+    /** 工人基础日薪（用于前端计算） */
+    private BigDecimal baseDailySalary;
+    /** 工人加班时薪（用于前端计算） */
+    private BigDecimal overtimeHourlyRate;
     private String remark;
     private Integer isSettled;
     private String isSettledText;

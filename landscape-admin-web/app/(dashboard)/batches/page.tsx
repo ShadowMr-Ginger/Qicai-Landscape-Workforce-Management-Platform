@@ -84,6 +84,8 @@ interface BatchWorkerRecord {
   dailyWage: number;
   overtimeWage: number;
   totalWage: number;
+  baseDailySalary: number;
+  overtimeHourlyRate: number;
   remark: string;
 }
 
@@ -275,6 +277,9 @@ export default function BatchesPage() {
           projectId: r.projectId,
           attendanceType: r.attendanceType,
           overtimeHours: r.overtimeHours,
+          dailyWage: r.dailyWage,
+          overtimeWage: r.overtimeWage,
+          totalWage: r.totalWage,
           remark: r.remark,
         })),
       });
@@ -286,6 +291,18 @@ export default function BatchesPage() {
     } finally {
       setReviewing(false);
     }
+  };
+
+  /** 根据出勤类型和加班时长重新计算工资 */
+  const recalcWages = (record: BatchWorkerRecord) => {
+    const base = Number(record.baseDailySalary) || 0;
+    const rate = Number(record.overtimeHourlyRate) || 0;
+    const attendanceType = record.attendanceType;
+    const overtimeHours = Number(record.overtimeHours) || 0;
+    const dailyWage = attendanceType === 1 ? Math.round((base / 2) * 100) / 100 : base;
+    const overtimeWage = Math.round(rate * overtimeHours * 100) / 100;
+    const totalWage = Math.round((dailyWage + overtimeWage) * 100) / 100;
+    return { dailyWage, overtimeWage, totalWage };
   };
 
   const handleReset = () => {
@@ -545,7 +562,7 @@ export default function BatchesPage() {
 
       {/* 详情/审核弹窗 */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="rounded-2xl max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="rounded-2xl max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg flex items-center gap-2">
               <Eye className="w-5 h-5 text-green-600" />
@@ -556,112 +573,145 @@ export default function BatchesPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2">
-            {/* 工人记录表格 */}
-            <div className="rounded-xl border border-gray-100 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50/70">
-                  <tr>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">工人</th>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">组别</th>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">出勤</th>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">加班</th>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">作业类型</th>
-                    <th className="text-left px-3 py-2 text-gray-600 font-medium">项目</th>
-                    <th className="text-right px-3 py-2 text-gray-600 font-medium">工资</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {detailRecords.map((record, idx) => (
-                    <tr key={record.id} className="hover:bg-green-50/20">
-                      <td className="px-3 py-2 font-medium text-gray-800">{record.workerName}</td>
-                      <td className="px-3 py-2 text-gray-500 text-xs">{record.groupName || "-"}</td>
-                      <td className="px-3 py-2">
-                        {detailBatch?.status === 0 ? (
-                          <select
-                            value={record.attendanceType}
-                            onChange={(e) => {
-                              const newRecords = [...detailRecords];
-                              newRecords[idx].attendanceType = Number(e.target.value);
-                              setDetailRecords(newRecords);
-                            }}
-                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
-                          >
-                            <option value={2}>全天</option>
-                            <option value={1}>半天</option>
-                          </select>
-                        ) : (
-                          <span className="text-gray-600 text-xs">{record.attendanceTypeText}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2">
-                        {detailBatch?.status === 0 ? (
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.5"
-                            value={record.overtimeHours}
-                            onChange={(e) => {
-                              const newRecords = [...detailRecords];
-                              newRecords[idx].overtimeHours = Number(e.target.value);
-                              setDetailRecords(newRecords);
-                            }}
-                            className="h-8 rounded-lg w-20 text-xs px-2"
-                          />
-                        ) : (
-                          <span className="text-gray-600 text-xs">{record.overtimeHours}h</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2">
-                        {detailBatch?.status === 0 ? (
-                          <select
-                            value={record.workTypeId || ""}
-                            onChange={(e) => {
-                              const newRecords = [...detailRecords];
-                              newRecords[idx].workTypeId = e.target.value ? Number(e.target.value) : null;
-                              setDetailRecords(newRecords);
-                            }}
-                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
-                          >
-                            <option value="">请选择</option>
-                            {workTypeOptions.map((wt) => (
-                              <option key={wt.id} value={wt.id}>{wt.typeName}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="text-gray-600 text-xs">{record.workTypeName || "-"}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2">
-                        {detailBatch?.status === 0 ? (
-                          <select
-                            value={record.projectId || ""}
-                            onChange={(e) => {
-                              const newRecords = [...detailRecords];
-                              newRecords[idx].projectId = e.target.value ? Number(e.target.value) : null;
-                              setDetailRecords(newRecords);
-                            }}
-                            className="h-8 rounded-lg border border-input bg-background px-2 text-xs"
-                          >
-                            <option value="">请选择</option>
-                            {projectOptions.map((p) => (
-                              <option key={p.id} value={p.id}>{p.projectName}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <span className="text-gray-600 text-xs">{record.projectName || "-"}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-right text-gray-700 text-xs font-medium">
-                        ¥{record.totalWage}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-3 py-2">
+            {detailRecords.map((record, idx) => {
+              const isEditing = detailBatch?.status === 0;
+              return (
+                <div key={record.id} className="rounded-xl border border-gray-100 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold">
+                        {record.workerName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">{record.workerName}</p>
+                        <p className="text-[10px] text-gray-400">{record.groupName || "未分组"}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-bold text-green-700">¥{record.totalWage.toFixed(2)}</p>
+                  </div>
 
-            <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">出勤</Label>
+                      {isEditing ? (
+                        <select
+                          value={record.attendanceType}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            newRecords[idx].attendanceType = Number(e.target.value);
+                            const wages = recalcWages(newRecords[idx]);
+                            newRecords[idx].dailyWage = wages.dailyWage;
+                            newRecords[idx].overtimeWage = wages.overtimeWage;
+                            newRecords[idx].totalWage = wages.totalWage;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="w-full h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                        >
+                          <option value={2}>全天</option>
+                          <option value={1}>半天</option>
+                        </select>
+                      ) : (
+                        <p className="text-xs text-gray-700">{record.attendanceTypeText}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">加班(小时)</Label>
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={record.overtimeHours}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            newRecords[idx].overtimeHours = Number(e.target.value);
+                            const wages = recalcWages(newRecords[idx]);
+                            newRecords[idx].dailyWage = wages.dailyWage;
+                            newRecords[idx].overtimeWage = wages.overtimeWage;
+                            newRecords[idx].totalWage = wages.totalWage;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="h-8 rounded-lg text-xs px-2"
+                        />
+                      ) : (
+                        <p className="text-xs text-gray-700">{record.overtimeHours}h</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">作业类型</Label>
+                      {isEditing ? (
+                        <select
+                          value={record.workTypeId || ""}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            newRecords[idx].workTypeId = e.target.value ? Number(e.target.value) : null;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="w-full h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">请选择</option>
+                          {workTypeOptions.map((wt) => (
+                            <option key={wt.id} value={wt.id}>{wt.typeName}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-xs text-gray-700">{record.workTypeName || "-"}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">项目</Label>
+                      {isEditing ? (
+                        <select
+                          value={record.projectId || ""}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            newRecords[idx].projectId = e.target.value ? Number(e.target.value) : null;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="w-full h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                        >
+                          <option value="">请选择</option>
+                          {projectOptions.map((p) => (
+                            <option key={p.id} value={p.id}>{p.projectName}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="text-xs text-gray-700">{record.projectName || "-"}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">日薪(元)</Label>
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={record.dailyWage}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            const dailyWage = Number(e.target.value) || 0;
+                            const overtimeWage = newRecords[idx].overtimeWage || 0;
+                            newRecords[idx].dailyWage = dailyWage;
+                            newRecords[idx].totalWage = Math.round((dailyWage + overtimeWage) * 100) / 100;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="h-8 rounded-lg text-xs px-2"
+                        />
+                      ) : (
+                        <p className="text-xs text-gray-700">¥{record.dailyWage}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-gray-400">加班工资(元)</Label>
+                      <p className="text-xs text-gray-700">¥{record.overtimeWage}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="flex items-center justify-between text-xs text-gray-500 px-1">
               <span>共 {detailRecords.length} 人</span>
               <span>
                 合计工资：¥{detailRecords.reduce((sum, r) => sum + (r.totalWage || 0), 0).toFixed(2)}
