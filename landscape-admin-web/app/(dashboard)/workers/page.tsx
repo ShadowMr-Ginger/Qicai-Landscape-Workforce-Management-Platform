@@ -737,14 +737,22 @@ export default function WorkersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>性别</Label>
-                <select value={editForm.gender} onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <select value={editForm.gender} onChange={(e) => {
+                  const gender = e.target.value;
+                  const { base, overtime } = computeDefaultSalary(gender, editForm.isSkilledWorker);
+                  setEditForm({ ...editForm, gender, baseDailySalary: base, overtimeHourlyRate: overtime });
+                }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="1">男</option>
                   <option value="2">女</option>
                 </select>
               </div>
               <div className="space-y-1.5">
                 <Label>是否技术工</Label>
-                <select value={editForm.isSkilledWorker} onChange={(e) => setEditForm({ ...editForm, isSkilledWorker: e.target.value })} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
+                <select value={editForm.isSkilledWorker} onChange={(e) => {
+                  const isSkilledWorker = e.target.value;
+                  const { base, overtime } = computeDefaultSalary(editForm.gender, isSkilledWorker);
+                  setEditForm({ ...editForm, isSkilledWorker, baseDailySalary: base, overtimeHourlyRate: overtime });
+                }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="1">是</option>
                   <option value="0">否</option>
                 </select>
