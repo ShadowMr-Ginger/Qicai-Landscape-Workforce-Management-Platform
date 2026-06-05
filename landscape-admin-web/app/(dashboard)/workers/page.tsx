@@ -664,7 +664,7 @@ export default function WorkersPage() {
                 <Label>性别 <span className="text-red-500">*</span></Label>
                 <select value={createForm.gender} onChange={(e) => {
                   const gender = e.target.value;
-                  const { base, overtime } = createForm.baseDailySalary === "" ? computeDefaultSalary(gender, createForm.isSkilledWorker) : { base: createForm.baseDailySalary, overtime: createForm.overtimeHourlyRate };
+                  const { base, overtime } = computeDefaultSalary(gender, createForm.isSkilledWorker);
                   setCreateForm({ ...createForm, gender, baseDailySalary: base, overtimeHourlyRate: overtime });
                 }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="1">男</option>
@@ -675,7 +675,7 @@ export default function WorkersPage() {
                 <Label>是否技术工</Label>
                 <select value={createForm.isSkilledWorker} onChange={(e) => {
                   const isSkilledWorker = e.target.value;
-                  const { base, overtime } = createForm.baseDailySalary === "" ? computeDefaultSalary(createForm.gender, isSkilledWorker) : { base: createForm.baseDailySalary, overtime: createForm.overtimeHourlyRate };
+                  const { base, overtime } = computeDefaultSalary(createForm.gender, isSkilledWorker);
                   setCreateForm({ ...createForm, isSkilledWorker, baseDailySalary: base, overtimeHourlyRate: overtime });
                 }} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   <option value="0">否</option>
