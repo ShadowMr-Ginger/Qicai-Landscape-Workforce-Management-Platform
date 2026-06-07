@@ -68,7 +68,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/20 dark:to-teal-950/30">
       {/* 装饰背景元素 */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-green-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
@@ -77,14 +77,14 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-200 mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-200 dark:shadow-green-900/30 mb-4">
             <Leaf className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">绿化工人管理系统</h1>
-          <p className="text-sm text-gray-500 mt-1">管理后台登录</p>
+          <h1 className="text-2xl font-bold text-foreground">绿化工人管理系统</h1>
+          <p className="text-sm text-muted-foreground mt-1">管理后台登录</p>
         </div>
 
-        <Card className="border-0 shadow-xl shadow-green-100/50 rounded-2xl">
+        <Card className="border-0 shadow-xl shadow-green-100/50 dark:shadow-green-900/20 rounded-2xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg">欢迎回来</CardTitle>
             <CardDescription>请输入管理员账号和密码</CardDescription>
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="请输入管理员账号"
-                  className="h-11 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500/20"
+                  className="h-11 rounded-xl border-border focus:border-green-500 focus:ring-green-500/20"
                   required
                 />
               </div>
@@ -113,13 +113,13 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="请输入密码"
-                    className="h-11 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500/20 pr-10"
+                    className="h-11 rounded-xl border-border focus:border-green-500 focus:ring-green-500/20 pr-10"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -127,13 +127,13 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-sm">
                   {error}
                 </div>
               )}
 
               {isDemo && (
-                <div className="p-3 rounded-lg bg-amber-50 text-amber-700 text-sm">
+                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-sm">
                   后端服务未启动，已进入演示模式
                 </div>
               )}
@@ -141,7 +141,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium shadow-lg shadow-green-200 transition-all"
+                className="w-full h-11 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium shadow-lg shadow-green-200 dark:shadow-green-900/30 transition-all"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -153,7 +153,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-gray-400 mt-8">
+        <p className="text-center text-xs text-muted-foreground/70 mt-8">
           绿化工人管理系统 © 2026 · 演示账号：admin / 123456
         </p>
       </div>

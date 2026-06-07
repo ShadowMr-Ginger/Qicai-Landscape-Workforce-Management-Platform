@@ -17,6 +17,8 @@ import com.green.module.driver.mapper.DriverMapper;
 import com.green.module.driver.service.DriverService;
 import com.green.module.driver.vo.DriverDetailVO;
 import com.green.module.driver.vo.DriverListVO;
+import com.green.security.JwtTokenProvider;
+import com.green.security.LoginUser;
 import com.green.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +45,13 @@ public class DriverServiceImpl implements DriverService {
     private final DriverMapper driverMapper;
     private final DriverAttendanceRecordMapper driverAttendanceRecordMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // ==================== 认证相关 ====================
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(DriverChangePasswordDTO dto) {
+    public String changePassword(DriverChangePasswordDTO dto) {
         Long driverId = SecurityUtils.getCurrentUserId();
         if (driverId == null) {
             throw new BusinessException(ResultCodeEnum.UNAUTHORIZED);
@@ -67,6 +70,18 @@ public class DriverServiceImpl implements DriverService {
         driver.setPasswordChanged(1);
         driverMapper.updateById(driver);
         log.info("司机修改密码成功: driverId={}", driverId);
+
+        // 重新生成 Token，更新 passwordChanged 标记
+        LoginUser loginUser = LoginUser.builder()
+                .userId(driver.getId())
+                .username(driver.getRealName())
+                .realName(driver.getRealName())
+                .password(driver.getPassword())
+                .role(com.green.common.enums.RoleEnum.DRIVER)
+                .passwordChanged(true)
+                .enabled(true)
+                .build();
+        return jwtTokenProvider.generateToken(loginUser);
     }
 
     @Override

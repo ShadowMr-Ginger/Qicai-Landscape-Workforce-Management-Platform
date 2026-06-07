@@ -65,14 +65,14 @@ export default function SalaryDefaultsPage() {
     <div className="space-y-4 max-w-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Coins className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-800">默认薪资配置</h2>
+          <Coins className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <h2 className="text-lg font-semibold text-foreground">默认薪资配置</h2>
         </div>
       </div>
 
       <Card className="border-0 shadow-sm rounded-xl">
         <CardContent className="p-6 space-y-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             设置新增工人时的默认薪资规则。选择性别和技术工状态后，系统会自动计算并填充基础日薪与加班时薪。
           </p>
 
@@ -123,7 +123,7 @@ export default function SalaryDefaultsPage() {
             </div>
           </div>
 
-          <div className="bg-green-50 rounded-xl p-4 text-sm text-green-800 space-y-1">
+          <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-4 text-sm text-green-800 space-y-1">
             <p className="font-medium">计算示例</p>
             <p>男工 + 非技术 = ¥{form.maleBase} / 天</p>
             <p>男工 + 技术工 = ¥{form.maleBase + form.skilledExtra} / 天</p>

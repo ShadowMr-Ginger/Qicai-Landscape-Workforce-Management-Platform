@@ -1,0 +1,76 @@
+<view class="login-page">
+  <!-- 顶部返回 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="nav-title">司机登录</text>
+    <view style="width: 64rpx;"></view>
+  </view>
+
+  <!-- Logo -->
+  <view class="login-header">
+    <view class="login-logo">
+      <text class="login-logo-icon">🚐</text>
+    </view>
+    <text class="login-title">欢迎回来</text>
+    <text class="login-subtitle">请登录您的司机账号</text>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form">
+    <view class="form-item">
+      <text class="form-label">姓名</text>
+      <input
+        class="input"
+        placeholder="请输入您的姓名"
+        placeholder-class="input-placeholder"
+        value="{{name}}"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">密码</text>
+      <input
+        class="input"
+        placeholder="请输入密码"
+        placeholder-class="input-placeholder"
+        password
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <button
+      class="btn btn-primary login-btn"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="onLogin"
+    >登录</button>
+
+    <!-- 分割线 -->
+    <view class="divider-with-text">
+      <view class="divider-line"></view>
+      <text class="divider-text">或</text>
+      <view class="divider-line"></view>
+    </view>
+
+    <!-- 微信登录 -->
+    <button
+      class="btn btn-outline wx-login-btn"
+      loading="{{wxLoading}}"
+      disabled="{{wxLoading}}"
+      bindtap="onWxLogin"
+    >
+      <text class="wx-icon">💬</text>
+      <text>微信一键登录</text>
+    </button>
+  </view>
+
+  <!-- 提示 -->
+  <view class="login-tips">
+    <text class="tips-text">首次登录默认密码为 123456</text>
+    <text class="tips-text">登录后需修改密码并绑定微信</text>
+  </view>
+</view>

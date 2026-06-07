@@ -115,8 +115,8 @@ export default function WorkTypesPage() {
     <div className="space-y-4 max-w-3xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Wrench className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-800">作业类型管理</h2>
+          <Wrench className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <h2 className="text-lg font-semibold text-foreground">作业类型管理</h2>
         </div>
         <Button
           variant="default"
@@ -133,35 +133,35 @@ export default function WorkTypesPage() {
         <CardContent className="p-0">
           <div className="divide-y divide-gray-50">
             {items.length === 0 ? (
-              <p className="text-center py-12 text-gray-400 text-sm">暂无作业类型</p>
+              <p className="text-center py-12 text-muted-foreground/70 text-sm">暂无作业类型</p>
             ) : (
               items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between px-5 py-4 hover:bg-green-50/20 transition-colors"
+                  className="flex items-center justify-between px-5 py-4 hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700 text-sm font-bold">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-700 dark:text-green-300 text-sm font-bold">
                       {item.typeName.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-800">{item.typeName}</p>
+                        <p className="text-sm font-semibold text-foreground">{item.typeName}</p>
                         {item.isSystem === 1 && (
-                          <Badge variant="outline" className="rounded-md text-[10px] border-gray-300 text-gray-500">
+                          <Badge variant="outline" className="rounded-md text-[10px] border-border text-muted-foreground">
                             <Shield className="w-3 h-3 mr-0.5" />
                             系统
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-gray-400">{item.description || "暂无描述"}</p>
+                      <p className="text-xs text-muted-foreground/70">{item.description || "暂无描述"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      className="w-8 h-8 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:bg-blue-950/30"
                       onClick={() => openEdit(item)}
                     >
                       <Pencil className="w-4 h-4" />
@@ -170,7 +170,7 @@ export default function WorkTypesPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
                         onClick={() => handleDelete(item)}
                       >
                         <Trash2 className="w-4 h-4" />

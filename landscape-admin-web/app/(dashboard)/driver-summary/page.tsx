@@ -13,15 +13,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CalendarView } from "@/components/attendance/calendar-view";
-import { getDriverList, getDriverCalendar, getDriverAttendanceDetail } from "@/lib/api";
+import { getDriverList, getDriverCalendar, getDriverAttendanceDetail, getDriverWageSummary } from "@/lib/api";
 
 interface DriverItem {
   id: number;
-  name: string;
+  realName: string;
+}
+
+interface WageStats {
+  totalUnsettled: number;
+  yearTotal: number;
+  yearSettled: number;
+  yearUnsettled: number;
+  historicalUnsettled: number;
 }
 
 export default function DriverSummaryPage() {
   const [drivers, setDrivers] = useState<DriverItem[]>([]);
+  const [wageStatsMap, setWageStatsMap] = useState<Record<number, WageStats>>({});
 
   // 日历弹窗
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -40,11 +49,29 @@ export default function DriverSummaryPage() {
     try {
       const res = await getDriverList({ pageNum: 1, pageSize: 1000 });
       if (res.code === 200 && res.data?.records) {
-        setDrivers(res.data.records);
+        const driverList = res.data.records;
+        setDrivers(driverList);
+        // 批量获取工资统计
+        fetchWageStats(driverList.map((d: DriverItem) => d.id));
       }
     } catch {
       toast.error("获取司机列表失败");
     }
+  };
+
+  const fetchWageStats = async (driverIds: number[]) => {
+    const statsMap: Record<number, WageStats> = {};
+    await Promise.all(
+      driverIds.map(async (id) => {
+        try {
+          const res = await getDriverWageSummary(id);
+          if (res.code === 200 && res.data) {
+            statsMap[id] = res.data;
+          }
+        } catch { /* ignore */ }
+      })
+    );
+    setWageStatsMap(statsMap);
   };
 
   useEffect(() => {
@@ -53,7 +80,7 @@ export default function DriverSummaryPage() {
 
   const openCalendar = async (driver: DriverItem) => {
     setCalendarDriverId(driver.id);
-    setCalendarDriverName(driver.name);
+    setCalendarDriverName(driver.realName);
     const now = new Date();
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
@@ -95,10 +122,40 @@ export default function DriverSummaryPage() {
     }
   };
 
+  const formatMoney = (v: number) => `¥${(v || 0).toFixed(2)}`;
+
+  const StatsGrid = ({ stats }: { stats?: WageStats }) => {
+    if (!stats) return null;
+    return (
+      <div className="grid grid-cols-5 gap-2 text-center mt-2">
+        <div className="bg-orange-50 dark:bg-orange-950/30 rounded-lg py-1.5">
+          <p className="text-[10px] text-orange-500">总共未结清</p>
+          <p className="text-xs font-semibold text-orange-700 dark:text-orange-300">{formatMoney(stats.totalUnsettled)}</p>
+        </div>
+        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg py-1.5">
+          <p className="text-[10px] text-blue-500">本年度需结清</p>
+          <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">{formatMoney(stats.yearTotal)}</p>
+        </div>
+        <div className="bg-green-50 dark:bg-green-950/30 rounded-lg py-1.5">
+          <p className="text-[10px] text-green-500">本年度已结清</p>
+          <p className="text-xs font-semibold text-green-700 dark:text-green-300">{formatMoney(stats.yearSettled)}</p>
+        </div>
+        <div className="bg-red-50 dark:bg-red-950/30 rounded-lg py-1.5">
+          <p className="text-[10px] text-red-500">本年度未结清</p>
+          <p className="text-xs font-semibold text-red-700 dark:text-red-300">{formatMoney(stats.yearUnsettled)}</p>
+        </div>
+        <div className="bg-muted/30 rounded-lg py-1.5">
+          <p className="text-[10px] text-muted-foreground">历来未结清</p>
+          <p className="text-xs font-semibold text-foreground/90">{formatMoney(stats.historicalUnsettled)}</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">司机考勤信息汇总</h2>
+        <h2 className="text-lg font-semibold text-foreground">司机考勤信息汇总</h2>
         <Link href="/attendance-records">
           <Button variant="outline" size="sm" className="rounded-lg">
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -107,27 +164,30 @@ export default function DriverSummaryPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {drivers.map((driver) => (
           <Card
             key={driver.id}
-            className="border-0 shadow-sm rounded-xl cursor-pointer hover:shadow-md hover:bg-green-50/20 transition-all"
+            className="border-0 shadow-sm rounded-xl cursor-pointer hover:shadow-md hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
             onClick={() => openCalendar(driver)}
           >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-sm font-bold">
-                  <UserCircle className="w-5 h-5" />
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 dark:text-orange-300 text-sm font-bold">
+                    <UserCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{driver.realName}</p>
+                    <p className="text-xs text-muted-foreground/70">点击查看出勤日历</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">{driver.name}</p>
-                  <p className="text-xs text-gray-400">点击查看出勤日历</p>
-                </div>
+                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/30 dark:bg-green-950/30">
+                  <CalendarDays className="w-4 h-4 mr-1" />
+                  日历
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" className="h-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50">
-                <CalendarDays className="w-4 h-4 mr-1" />
-                日历
-              </Button>
+              <StatsGrid stats={wageStatsMap[driver.id]} />
             </CardContent>
           </Card>
         ))}
@@ -160,29 +220,29 @@ export default function DriverSummaryPage() {
           {detail && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">考勤日期</p>
+                <div className="bg-muted/30 rounded-xl p-3">
+                  <p className="text-muted-foreground/70 text-xs">考勤日期</p>
                   <p className="font-medium">{detail.attendanceDate}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">出勤类型</p>
+                <div className="bg-muted/30 rounded-xl p-3">
+                  <p className="text-muted-foreground/70 text-xs">出勤类型</p>
                   <p className="font-medium">{detail.attendanceTypeText}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">加班时长</p>
+                <div className="bg-muted/30 rounded-xl p-3">
+                  <p className="text-muted-foreground/70 text-xs">加班时长</p>
                   <p className="font-medium">{detail.overtimeHours}h</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-gray-400 text-xs">总工资</p>
-                  <p className="font-medium text-green-700">¥{detail.totalWage}</p>
+                <div className="bg-muted/30 rounded-xl p-3">
+                  <p className="text-muted-foreground/70 text-xs">总工资</p>
+                  <p className="font-medium text-green-700 dark:text-green-300">¥{detail.totalWage}</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-3">
-                <p className="text-gray-400 text-xs">作业类型</p>
+              <div className="bg-muted/30 rounded-xl p-3">
+                <p className="text-muted-foreground/70 text-xs">作业类型</p>
                 <p className="font-medium">{detail.workTypeName || "-"}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-3">
-                <p className="text-gray-400 text-xs">备注</p>
+              <div className="bg-muted/30 rounded-xl p-3">
+                <p className="text-muted-foreground/70 text-xs">备注</p>
                 <p className="font-medium">{detail.remark || "-"}</p>
               </div>
             </div>

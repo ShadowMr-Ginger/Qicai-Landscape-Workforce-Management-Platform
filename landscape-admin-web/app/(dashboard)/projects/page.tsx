@@ -137,8 +137,8 @@ export default function ProjectsPage() {
     <div className="space-y-4 max-w-4xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-800">项目管理</h2>
+          <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <h2 className="text-lg font-semibold text-foreground">项目管理</h2>
         </div>
         <Button
           variant="default"
@@ -156,7 +156,7 @@ export default function ProjectsPage() {
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
               <Input
                 placeholder="搜索项目名称"
                 value={keyword}
@@ -177,25 +177,25 @@ export default function ProjectsPage() {
         <CardContent className="p-0">
           <div className="divide-y divide-gray-50">
             {projects.length === 0 ? (
-              <p className="text-center py-12 text-gray-400 text-sm">暂无项目</p>
+              <p className="text-center py-12 text-muted-foreground/70 text-sm">暂无项目</p>
             ) : (
               projects.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between px-5 py-4 hover:bg-green-50/20 transition-colors"
+                  className="flex items-center justify-between px-5 py-4 hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700 text-sm font-bold">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-700 dark:text-green-300 text-sm font-bold">
                       {item.projectName.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-800">{item.projectName}</p>
-                        <Badge variant="outline" className="rounded-md text-[10px] border-green-200 text-green-600 bg-green-50">
+                        <p className="text-sm font-semibold text-foreground">{item.projectName}</p>
+                        <Badge variant="outline" className="rounded-md text-[10px] border-green-200 dark:border-green-800/50 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30">
                           {item.status === 1 ? "进行中" : "已结束"}
                         </Badge>
                       </div>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-muted-foreground/70">
                         {item.projectAddress || "暂无地址"}
                         {item.startDate ? ` · ${item.startDate}` : ""}
                         {item.endDate ? ` ~ ${item.endDate}` : ""}
@@ -206,7 +206,7 @@ export default function ProjectsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      className="w-8 h-8 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:bg-blue-950/30"
                       onClick={() => openEdit(item)}
                     >
                       <Pencil className="w-4 h-4" />
@@ -214,7 +214,7 @@ export default function ProjectsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
                       onClick={() => handleDelete(item)}
                     >
                       <Trash2 className="w-4 h-4" />

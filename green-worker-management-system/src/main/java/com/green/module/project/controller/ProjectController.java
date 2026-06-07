@@ -4,6 +4,9 @@ import com.green.common.result.ApiResult;
 import com.green.common.result.ResultCodeEnum;
 import com.green.module.project.entity.ProjectEntity;
 import com.green.module.project.service.ProjectService;
+import com.green.module.system.service.SystemLogService;
+import com.green.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,7 @@ import java.util.Map;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final SystemLogService systemLogService;
 
     @GetMapping
     public ApiResult<?> list(
@@ -41,7 +45,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ApiResult<Long> create(@RequestBody Map<String, String> body) {
+    public ApiResult<Long> create(@RequestBody Map<String, String> body, HttpServletRequest request) {
         String projectName = body.get("projectName");
         if (!org.springframework.util.StringUtils.hasText(projectName)) {
             return ApiResult.error(ResultCodeEnum.BAD_REQUEST, "项目名称不能为空");
@@ -58,11 +62,13 @@ public class ProjectController {
             entity.setEndDate(java.time.LocalDate.parse(endDate));
         }
         Long id = projectService.create(entity);
+        systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "CREATE",
+                "项目管理", "新增项目: " + projectName, "SUCCESS", request);
         return ApiResult.success(id);
     }
 
     @PutMapping("/{id}")
-    public ApiResult<Void> update(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ApiResult<Void> update(@PathVariable Long id, @RequestBody Map<String, String> body, HttpServletRequest request) {
         String projectName = body.get("projectName");
         if (!org.springframework.util.StringUtils.hasText(projectName)) {
             return ApiResult.error(ResultCodeEnum.BAD_REQUEST, "项目名称不能为空");
@@ -80,12 +86,16 @@ public class ProjectController {
             entity.setEndDate(java.time.LocalDate.parse(endDate));
         }
         projectService.update(entity);
+        systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "UPDATE",
+                "项目管理", "修改项目: " + projectName + "(ID=" + id + ")", "SUCCESS", request);
         return ApiResult.success("修改成功");
     }
 
     @DeleteMapping("/{id}")
-    public ApiResult<Void> delete(@PathVariable Long id) {
+    public ApiResult<Void> delete(@PathVariable Long id, HttpServletRequest request) {
         projectService.delete(id);
+        systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "DELETE",
+                "项目管理", "删除项目(ID=" + id + ")", "SUCCESS", request);
         return ApiResult.success("删除成功");
     }
 }

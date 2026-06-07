@@ -38,7 +38,12 @@ public enum BatchStatusEnum {
     /**
      * 已撤回
      */
-    WITHDRAWN(2, "已撤回");
+    WITHDRAWN(2, "已撤回"),
+
+    /**
+     * 不通过
+     */
+    REJECTED(3, "不通过");
 
     private final Integer code;
     private final String description;

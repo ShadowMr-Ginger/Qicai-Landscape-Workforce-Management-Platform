@@ -1,0 +1,62 @@
+<view class="summary-page">
+  <view class="driver-list">
+    <view class="driver-card" wx:for="{{drivers}}" wx:key="id">
+      <view class="driver-info">
+        <view class="driver-avatar">
+          <text>{{item.realName[0]}}</text>
+        </view>
+        <view class="driver-meta">
+          <text class="driver-name">{{item.realName}}</text>
+          <text class="driver-status {{item.isActive ? 'active' : 'inactive'}}">{{item.isActive ? '在职' : '离职'}}</text>
+        </view>
+      </view>
+
+      <view class="summary-grid" wx:if="{{item.summary}}">
+        <view class="summary-cell">
+          <text class="summary-label">总共未结清</text>
+          <text class="summary-value orange">{{item.summary.totalUnsettled || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本年度需结清</text>
+          <text class="summary-value blue">{{item.summary.yearTotal || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本年度已结清</text>
+          <text class="summary-value green">{{item.summary.yearSettled || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本年度未结清</text>
+          <text class="summary-value red">{{item.summary.yearUnsettled || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">历来未结清</text>
+          <text class="summary-value gray">{{item.summary.historicalUnsettled || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本年度出勤天数</text>
+          <text class="summary-value purple">{{item.summary.yearAttendanceDays || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本年度加班时数</text>
+          <text class="summary-value teal">{{item.summary.yearOvertimeHours || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本月出勤天数</text>
+          <text class="summary-value pink">{{item.summary.monthAttendanceDays || 0}}</text>
+        </view>
+        <view class="summary-cell">
+          <text class="summary-label">本月加班时数</text>
+          <text class="summary-value brown">{{item.summary.monthOvertimeHours || 0}}</text>
+        </view>
+      </view>
+
+      <view class="summary-loading" wx:if="{{!item.summary}}">
+        <text>加载中...</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && drivers.length === 0}}">
+      <text>暂无司机数据</text>
+    </view>
+  </view>
+</view>

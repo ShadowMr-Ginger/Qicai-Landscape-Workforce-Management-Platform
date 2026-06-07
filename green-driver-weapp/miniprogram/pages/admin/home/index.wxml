@@ -1,0 +1,62 @@
+<view class="admin-home-page">
+  <view class="page-header">
+    <view class="header-top">
+      <view class="greeting">
+        <text class="greeting-title">欢迎回来，{{userInfo.name || '管理员'}}</text>
+        <text class="greeting-date">{{todayDate}}</text>
+      </view>
+      <view class="avatar">
+        <text>{{avatarText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="content">
+    <!-- 统计卡片 -->
+    <view class="stats-grid">
+      <view class="stat-card orange" bindtap="goBatchReview">
+        <text class="stat-icon">⏳</text>
+        <text class="stat-value">{{pendingCount}}</text>
+        <text class="stat-label">待审核批次</text>
+      </view>
+      <view class="stat-card blue" bindtap="goWorkerRecords">
+        <text class="stat-icon">👷</text>
+        <text class="stat-value">{{todayWorkerRecords}}</text>
+        <text class="stat-label">今日工人考勤</text>
+      </view>
+      <view class="stat-card purple" bindtap="goDriverRecords">
+        <text class="stat-icon">🚚</text>
+        <text class="stat-value">{{todayDriverRecords}}</text>
+        <text class="stat-label">今日司机考勤</text>
+      </view>
+      <view class="stat-card green" bindtap="goAttendanceRecords">
+        <text class="stat-icon">📊</text>
+        <text class="stat-value">{{totalWorkers + totalDrivers}}</text>
+        <text class="stat-label">人员总数</text>
+      </view>
+    </view>
+
+    <!-- 快捷入口 -->
+    <view class="section">
+      <text class="section-title">快捷入口</text>
+      <view class="menu-grid">
+        <view class="menu-card" bindtap="goBatchReview">
+          <text class="menu-icon">✅</text>
+          <text class="menu-name">考勤审核</text>
+        </view>
+        <view class="menu-card" bindtap="goAttendanceRecords">
+          <text class="menu-icon">📋</text>
+          <text class="menu-name">考勤记录</text>
+        </view>
+        <view class="menu-card" bindtap="goWorkerRecords">
+          <text class="menu-icon">👷</text>
+          <text class="menu-name">工人记录</text>
+        </view>
+        <view class="menu-card" bindtap="goDriverRecords">
+          <text class="menu-icon">🚚</text>
+          <text class="menu-name">司机记录</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

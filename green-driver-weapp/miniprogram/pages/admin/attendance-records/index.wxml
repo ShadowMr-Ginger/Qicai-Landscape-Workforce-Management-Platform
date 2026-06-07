@@ -1,0 +1,24 @@
+<view class="records-hub-page">
+  <view class="hub-grid">
+    <view class="hub-card" bindtap="goWorkerRecords">
+      <text class="hub-icon">👷</text>
+      <text class="hub-title">工人考勤记录总表</text>
+      <text class="hub-desc">查看所有工人的考勤明细</text>
+    </view>
+    <view class="hub-card" bindtap="goDriverRecords">
+      <text class="hub-icon">🚚</text>
+      <text class="hub-title">司机考勤记录总表</text>
+      <text class="hub-desc">查看所有司机的考勤明细</text>
+    </view>
+    <view class="hub-card" bindtap="goWorkerSummary">
+      <text class="hub-icon">📊</text>
+      <text class="hub-title">工人考勤信息汇总</text>
+      <text class="hub-desc">按工人汇总考勤与工资</text>
+    </view>
+    <view class="hub-card" bindtap="goDriverSummary">
+      <text class="hub-icon">📈</text>
+      <text class="hub-title">司机考勤信息汇总</text>
+      <text class="hub-desc">按司机汇总考勤与工资</text>
+    </view>
+  </view>
+</view>

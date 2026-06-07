@@ -1,0 +1,114 @@
+<view class="batch-list-page">
+  <!-- 选项卡 + 刷新 -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{activeTab === index ? 'tab-active' : ''}}"
+      wx:for="{{tabOptions}}"
+      wx:key="*this"
+      data-index="{{index}}"
+      bindtap="switchTab"
+    >
+      <text>{{item}}</text>
+      <view class="tab-line" wx:if="{{activeTab === index}}"></view>
+    </view>
+    <view class="refresh-btn" bindtap="onRefreshTap">
+      <text>🔄</text>
+    </view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="batch-list">
+    <view class="batch-card" wx:for="{{filteredBatches}}" wx:key="id" bindtap="openDetail" data-id="{{item.id}}">
+      <view class="batch-header">
+        <view class="batch-date">
+          <text class="date-text">{{item.batchDate}}</text>
+          <text class="badge {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</text>
+        </view>
+        <text class="batch-count">{{item.totalWorkers}}人</text>
+      </view>
+
+      <view class="batch-body">
+        <view class="batch-info-row">
+          <text class="info-label">提交时间</text>
+          <text class="info-value">{{item.submitTime}}</text>
+        </view>
+        <view class="batch-info-row" wx:if="{{item.remark}}">
+          <text class="info-label">备注</text>
+          <text class="info-value">{{item.remark}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="batch-actions" wx:if="{{activeTab === 0}}" catchtap="preventBubble">
+        <button
+          class="action-btn outline"
+          wx:if="{{item.status === 0}}"
+          bindtap="onWithdraw"
+          data-id="{{item.id}}"
+        >撤回</button>
+        <button
+          class="action-btn outline"
+          wx:if="{{item.status === 2}}"
+          bindtap="onEdit"
+          data-batch="{{item}}"
+        >编辑</button>
+        <button
+          class="action-btn danger"
+          wx:if="{{item.status === 2 || item.status === 3}}"
+          bindtap="onDelete"
+          data-id="{{item.id}}"
+        >删除</button>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{loading === false && filteredBatches.length === 0}}">
+      <text class="empty-state-text">{{activeTab === 0 ? '暂无草稿批次' : '暂无历史记录'}}</text>
+    </view>
+  </view>
+
+  <!-- 批次详情弹窗 -->
+  <view class="modal-mask" wx:if="{{showDetail}}" bindtap="closeDetail">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">考勤详情</text>
+        <text class="modal-close" bindtap="closeDetail">✕</text>
+      </view>
+
+      <view class="modal-body" wx:if="{{detailBatch}}">
+        <view class="detail-info">
+          <view class="detail-row">
+            <text class="detail-label">考勤日期</text>
+            <text class="detail-value">{{detailBatch.batchDate}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">状态</text>
+            <text class="detail-value">{{detailBatch.statusText || getStatusText(detailBatch.status)}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{detailBatch.remark}}">
+            <text class="detail-label">备注</text>
+            <text class="detail-value">{{detailBatch.remark}}</text>
+          </view>
+        </view>
+
+        <view class="detail-section-title">工人名单（{{detailWorkers.length || 0}}人）</view>
+        <view class="detail-worker-list">
+          <view class="detail-worker-item" wx:for="{{detailWorkers}}" wx:for-item="w" wx:for-index="widx" wx:key="widx">
+            <view class="worker-name-row">
+              <text class="worker-name">{{w.workerName || '未知工人'}}</text>
+              <view class="worker-tags">
+                <text class="worker-type">{{w.attendanceTypeText || getAttendanceTypeText(w.attendanceType)}}</text>
+                <text class="worker-work-type" wx:if="{{w.workTypeName}}">{{w.workTypeName}}</text>
+                <text class="worker-work-type" wx:elif="{{w.projectName}}">{{w.projectName}}</text>
+                <text class="worker-overtime" wx:if="{{w.overtimeHours > 0}}">加班{{w.overtimeHours}}h</text>
+              </view>
+            </view>
+            <view class="worker-info-row" wx:if="{{w.remark}}">
+              <text class="worker-info-remark">备注：{{w.remark}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

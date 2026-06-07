@@ -3,6 +3,7 @@ package com.green.module.auth.service;
 import com.green.common.result.ApiResult;
 import com.green.module.auth.dto.AdminLoginDTO;
 import com.green.module.auth.dto.DriverLoginDTO;
+import com.green.module.auth.dto.DriverWxLoginDTO;
 import com.green.module.auth.vo.CurrentUserVO;
 import com.green.module.auth.vo.DriverLoginVO;
 import com.green.module.auth.vo.LoginVO;
@@ -45,6 +46,26 @@ public interface AuthService {
      * @return 当前用户信息
      */
     CurrentUserVO getCurrentUser();
+
+    /**
+     * 司机微信登录
+     *
+     * <p>通过 wx.login 获取的 code 换取 OpenID，查找已绑定的司机账号并返回 Token。</p>
+     *
+     * @param dto 微信登录参数
+     * @return 登录成功结果
+     */
+    DriverLoginVO driverWxLogin(DriverWxLoginDTO dto);
+
+    /**
+     * 管理员微信登录
+     *
+     * <p>通过 wx.login 获取的 code 换取 OpenID，查找已绑定的管理员账号并返回 Token。</p>
+     *
+     * @param wxCode 微信登录code
+     * @return 登录成功结果
+     */
+    LoginVO adminWxLogin(String wxCode);
 
     /**
      * 退出登录

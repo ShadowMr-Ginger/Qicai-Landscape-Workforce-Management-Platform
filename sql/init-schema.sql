@@ -71,6 +71,7 @@ CREATE TABLE `admins` (
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否启用: 1-启用, 0-禁用',
     `last_login_time` DATETIME DEFAULT NULL COMMENT '最后登录时间',
     `last_login_ip` VARCHAR(50) DEFAULT NULL COMMENT '最后登录IP',
+    `wx_openid` VARCHAR(100) DEFAULT NULL COMMENT '微信OpenID',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
@@ -155,7 +156,7 @@ CREATE TABLE `attendance_batches` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `driver_id` BIGINT NOT NULL COMMENT '提交司机ID',
     `batch_date` DATE NOT NULL COMMENT '考勤日期',
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '批次状态: 0-待审核, 1-已通过, 2-已撤回',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '批次状态: 0-待审核, 1-已通过, 2-已撤回, 3-不通过',
     `submit_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '提交时间',
     `review_time` DATETIME DEFAULT NULL COMMENT '审核时间',
     `reviewer_id` BIGINT DEFAULT NULL COMMENT '审核人ID(管理员ID)',
@@ -179,7 +180,8 @@ CREATE TABLE `attendance_batches` (
 -- ============================================================
 CREATE TABLE `worker_attendance_records` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `batch_id` BIGINT NOT NULL COMMENT '所属考勤批次ID',
+    `batch_id` BIGINT DEFAULT NULL COMMENT '所属考勤批次ID（审核通过后解绑）',
+    `driver_id` BIGINT DEFAULT NULL COMMENT '审核司机ID',
     `worker_id` BIGINT NOT NULL COMMENT '工人ID',
     `project_id` BIGINT DEFAULT NULL COMMENT '分配的项目ID(审核时确定)',
     `attendance_date` DATE NOT NULL COMMENT '考勤日期',
@@ -304,7 +306,7 @@ ALTER TABLE `attendance_batches`
 
 -- 工人考勤记录表外键
 ALTER TABLE `worker_attendance_records`
-    ADD CONSTRAINT `fk_war_batch` FOREIGN KEY (`batch_id`) REFERENCES `attendance_batches` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT `fk_war_batch` FOREIGN KEY (`batch_id`) REFERENCES `attendance_batches` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_war_worker` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_war_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT `fk_war_work_type` FOREIGN KEY (`work_type_id`) REFERENCES `work_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;

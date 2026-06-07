@@ -329,7 +329,7 @@ export default function DriversPage() {
               返回
             </Button>
           )}
-          <h2 className="text-lg font-semibold text-gray-800">
+          <h2 className="text-lg font-semibold text-foreground">
             {showResigned ? "已离职司机" : "在职司机"}
           </h2>
           <Badge variant="secondary" className="rounded-md">{drivers.length} 人</Badge>
@@ -374,14 +374,14 @@ export default function DriversPage() {
         <CardContent className="p-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">姓名</Label>
+              <Label className="text-xs text-muted-foreground">姓名</Label>
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                 <Input placeholder="输入姓名搜索" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="pl-9 h-9 rounded-lg w-44" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">性别</Label>
+              <Label className="text-xs text-muted-foreground">性别</Label>
               <select value={gender} onChange={(e) => setGender(e.target.value)} className="h-9 rounded-lg border border-input bg-background px-3 text-sm w-28">
                 <option value="">全部</option>
                 <option value="1">男</option>
@@ -407,41 +407,41 @@ export default function DriversPage() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                <TableHead className="text-gray-600 font-medium">姓名</TableHead>
-                <TableHead className="text-gray-600 font-medium">性别</TableHead>
-                <TableHead className="text-gray-600 font-medium">联系方式</TableHead>
-                <TableHead className="text-gray-600 font-medium">日薪（元）</TableHead>
-                <TableHead className="text-gray-600 font-medium">加班时薪（元）</TableHead>
-                {managing && <TableHead className="text-gray-600 font-medium w-32">操作</TableHead>}
+              <TableRow className="bg-background/50 hover:bg-background/50">
+                <TableHead className="text-muted-foreground font-medium">姓名</TableHead>
+                <TableHead className="text-muted-foreground font-medium">性别</TableHead>
+                <TableHead className="text-muted-foreground font-medium">联系方式</TableHead>
+                <TableHead className="text-muted-foreground font-medium">日薪（元）</TableHead>
+                <TableHead className="text-muted-foreground font-medium">加班时薪（元）</TableHead>
+                {managing && <TableHead className="text-muted-foreground font-medium w-32">操作</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {drivers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={managing ? 6 : 5} className="text-center py-16 text-gray-400">
-                    <Car className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                  <TableCell colSpan={managing ? 6 : 5} className="text-center py-16 text-muted-foreground/70">
+                    <Car className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
                     暂无数据
                   </TableCell>
                 </TableRow>
               ) : (
                 drivers.map((driver) => (
-                  <TableRow key={driver.id} className="cursor-pointer hover:bg-green-50/30 transition-colors" onClick={() => openDetail(driver)}>
-                    <TableCell className="font-medium text-gray-800">{driver.realName}</TableCell>
-                    <TableCell className="text-gray-600">{driver.genderText}</TableCell>
-                    <TableCell className="text-gray-600">{driver.phone}</TableCell>
-                    <TableCell className="text-gray-800 font-medium">¥{driver.baseDailySalary}</TableCell>
-                    <TableCell className="text-gray-600">¥{driver.overtimeHourlyRate}</TableCell>
+                  <TableRow key={driver.id} className="cursor-pointer hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors" onClick={() => openDetail(driver)}>
+                    <TableCell className="font-medium text-foreground">{driver.realName}</TableCell>
+                    <TableCell className="text-muted-foreground">{driver.genderText}</TableCell>
+                    <TableCell className="text-muted-foreground">{driver.phone}</TableCell>
+                    <TableCell className="text-foreground font-medium">¥{driver.baseDailySalary}</TableCell>
+                    <TableCell className="text-muted-foreground">¥{driver.overtimeHourlyRate}</TableCell>
                     {managing && (
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:bg-blue-950/30"
                             onClick={(e) => { e.stopPropagation(); openEdit(driver); }}>
                             <Pencil className="w-4 h-4" />
                           </Button>
                           {!showResigned && (
                             <>
-                              <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                              <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 dark:bg-orange-950/30"
                                 onClick={(e) => { e.stopPropagation(); openResign(driver); }}>
                                 <UserX className="w-4 h-4" />
                               </Button>
@@ -452,7 +452,7 @@ export default function DriversPage() {
                             </>
                           )}
                           {showResigned && (
-                            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                            <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
                               onClick={(e) => { e.stopPropagation(); openDelete(driver); }}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -576,48 +576,48 @@ export default function DriversPage() {
             {driverDetail && (
               <>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center text-green-700 text-xl font-bold">
+                  <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-700 dark:text-green-300 text-xl font-bold">
                     {driverDetail.realName.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-gray-800">{driverDetail.realName}</p>
-                    <Badge className="mt-1 rounded-md bg-green-100 text-green-700 hover:bg-green-100">
+                    <p className="text-xl font-bold text-foreground">{driverDetail.realName}</p>
+                    <Badge className="mt-1 rounded-md bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 hover:bg-green-100 dark:bg-green-900/40">
                       {driverDetail.isActiveText}
                     </Badge>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">性别</p>
-                    <p className="font-medium text-gray-800">{driverDetail.genderText}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">性别</p>
+                    <p className="font-medium text-foreground">{driverDetail.genderText}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">密码状态</p>
-                    <p className="font-medium text-gray-800">{driverDetail.passwordChanged === 1 ? "已修改" : "未修改"}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">密码状态</p>
+                    <p className="font-medium text-foreground">{driverDetail.passwordChanged === 1 ? "已修改" : "未修改"}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">基础日薪</p>
-                    <p className="font-medium text-gray-800">¥{driverDetail.baseDailySalary}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">基础日薪</p>
+                    <p className="font-medium text-foreground">¥{driverDetail.baseDailySalary}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">加班时薪</p>
-                    <p className="font-medium text-gray-800">¥{driverDetail.overtimeHourlyRate}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">加班时薪</p>
+                    <p className="font-medium text-foreground">¥{driverDetail.overtimeHourlyRate}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">手机号</p>
-                    <p className="font-medium text-gray-800">{driverDetail.phone}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">手机号</p>
+                    <p className="font-medium text-foreground">{driverDetail.phone}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">身份证号</p>
-                    <p className="font-medium text-gray-800">{driverDetail.idCard || "-"}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">身份证号</p>
+                    <p className="font-medium text-foreground">{driverDetail.idCard || "-"}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">紧急联系人电话</p>
-                    <p className="font-medium text-gray-800">{driverDetail.emergencyContactPhone || "-"}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">紧急联系人电话</p>
+                    <p className="font-medium text-foreground">{driverDetail.emergencyContactPhone || "-"}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">微信 OpenID</p>
-                    <p className="font-medium text-gray-800 font-mono text-xs">{driverDetail.wxOpenid}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">微信 OpenID</p>
+                    <p className="font-medium text-foreground font-mono text-xs">{driverDetail.wxOpenid}</p>
                   </div>
                 </div>
               </>
@@ -633,7 +633,7 @@ export default function DriversPage() {
       <Dialog open={resignOpen} onOpenChange={setResignOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-orange-600">
+            <DialogTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
               <AlertTriangle className="w-5 h-5" />
               确认离职
             </DialogTitle>
@@ -675,11 +675,11 @@ export default function DriversPage() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
+            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="w-5 h-5" />
               危险操作：删除司机
             </DialogTitle>
-            <DialogDescription className="text-red-600/80">
+            <DialogDescription className="text-red-600 dark:text-red-400/80">
               该司机关联有 <strong>{deleteAttendanceCount}</strong> 条考勤记录，
               删除将同时删除这些记录，操作不可撤销！
             </DialogDescription>

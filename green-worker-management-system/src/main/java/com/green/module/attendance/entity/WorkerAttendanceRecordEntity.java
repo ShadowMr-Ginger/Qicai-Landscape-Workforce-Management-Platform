@@ -23,6 +23,9 @@ public class WorkerAttendanceRecordEntity extends BaseEntity {
     /** 所属考勤批次ID */
     private Long batchId;
 
+    /** 审核司机ID */
+    private Long driverId;
+
     /** 工人ID */
     private Long workerId;
 

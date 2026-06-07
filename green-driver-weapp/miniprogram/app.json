@@ -1,0 +1,74 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/driver/login/index",
+    "pages/driver/change-password/index",
+    "pages/driver/wechat-bind/index",
+    "pages/driver/home/index",
+    "pages/driver/batch-create/index",
+    "pages/driver/batch-list/index",
+    "pages/driver/workers/index",
+    "pages/driver/profile/index",
+    "pages/admin/login/index",
+    "pages/admin/wechat-bind/index",
+    "pages/admin/home/index",
+    "pages/admin/batch-review/index",
+    "pages/admin/batch-review-detail/index",
+    "pages/admin/attendance-records/index",
+    "pages/admin/worker-records/index",
+    "pages/admin/driver-records/index",
+    "pages/admin/worker-summary/index",
+    "pages/admin/driver-summary/index",
+    "pages/admin/profile/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "绿化管理系统",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#16a34a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/driver/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/driver/batch-list/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/driver/workers/index",
+        "text": "工人"
+      },
+      {
+        "pagePath": "pages/driver/profile/index",
+        "text": "我的"
+      },
+      {
+        "pagePath": "pages/admin/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/admin/batch-review/index",
+        "text": "审核"
+      },
+      {
+        "pagePath": "pages/admin/attendance-records/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/admin/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

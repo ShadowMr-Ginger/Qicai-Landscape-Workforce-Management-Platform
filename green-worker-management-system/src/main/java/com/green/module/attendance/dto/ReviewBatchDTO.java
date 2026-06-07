@@ -18,6 +18,9 @@ public class ReviewBatchDTO {
     /** 工人记录更新项 */
     private List<WorkerRecordUpdateItem> workerRecords;
 
+    /** 司机记录更新项 */
+    private DriverRecordUpdateItem driverRecord;
+
     @Data
     public static class WorkerRecordUpdateItem {
         @NotNull(message = "记录ID不能为空")
@@ -43,6 +46,21 @@ public class ReviewBatchDTO {
 
         /** 当日总工资 */
         private BigDecimal totalWage;
+
+        /** 备注 */
+        private String remark;
+    }
+
+    @Data
+    public static class DriverRecordUpdateItem {
+        @NotNull(message = "司机记录ID不能为空")
+        private Long recordId;
+
+        /** 加班时长 */
+        private BigDecimal overtimeHours;
+
+        /** 日薪 */
+        private BigDecimal dailyWage;
 
         /** 备注 */
         private String remark;

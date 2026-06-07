@@ -1,0 +1,38 @@
+<view class="profile-page">
+  <!-- 用户信息卡片 -->
+  <view class="profile-card">
+    <view class="profile-avatar">
+      <text class="avatar-text">{{avatarLetter}}</text>
+    </view>
+    <view class="profile-info">
+      <text class="profile-name">{{displayName}}</text>
+      <text class="profile-role">司机</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-card">
+      <view class="menu-item" bindtap="goChangePassword">
+        <view class="menu-icon-wrapper blue-bg">
+          <text class="menu-icon">🔒</text>
+        </view>
+        <text class="menu-title">修改密码</text>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-divider"></view>
+
+      <view class="menu-item" bindtap="goBindWechat">
+        <view class="menu-icon-wrapper green-bg">
+          <text class="menu-icon">💬</text>
+        </view>
+        <text class="menu-title">微信绑定</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <button class="btn btn-danger logout-btn" bindtap="onLogout">退出登录</button>
+</view>

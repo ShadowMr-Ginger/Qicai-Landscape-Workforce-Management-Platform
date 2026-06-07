@@ -55,6 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private static final String[] DRIVER_PASSWORD_CHANGE_WHITELIST = {
             "/api/driver/change-password",
+            "/api/driver/bind-wx",
             "/api/auth/current-user",
             "/api/auth/logout"
     };

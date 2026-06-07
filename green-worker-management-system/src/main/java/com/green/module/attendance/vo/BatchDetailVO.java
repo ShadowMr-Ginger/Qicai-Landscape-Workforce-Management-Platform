@@ -32,4 +32,7 @@ public class BatchDetailVO {
     private String reviewerName;
 
     private List<WorkerAttendanceRecordVO> workerRecords;
+
+    /** 司机考勤记录（与批次关联） */
+    private DriverAttendanceRecordVO driverRecord;
 }

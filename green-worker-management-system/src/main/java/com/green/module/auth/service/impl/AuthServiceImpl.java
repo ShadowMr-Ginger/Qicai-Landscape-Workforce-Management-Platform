@@ -1,16 +1,24 @@
 package com.green.module.auth.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.green.common.exception.BusinessException;
 import com.green.common.result.ResultCodeEnum;
 import com.green.module.auth.dto.AdminLoginDTO;
 import com.green.module.auth.dto.DriverLoginDTO;
+import com.green.module.auth.dto.DriverWxLoginDTO;
 import com.green.module.auth.service.AuthService;
 import com.green.module.auth.vo.CurrentUserVO;
 import com.green.module.auth.vo.DriverLoginVO;
 import com.green.module.auth.vo.LoginVO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.green.module.driver.entity.DriverEntity;
+import com.green.module.driver.mapper.DriverMapper;
+import com.green.module.system.entity.AdminEntity;
+import com.green.module.system.mapper.AdminMapper;
 import com.green.security.JwtTokenProvider;
 import com.green.security.LoginUser;
 import com.green.utils.SecurityUtils;
+import com.green.utils.WxApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final WxApiUtil wxApiUtil;
+    private final DriverMapper driverMapper;
+    private final AdminMapper adminMapper;
 
     @Override
     public LoginVO adminLogin(AdminLoginDTO dto) {
@@ -89,6 +100,94 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ResultCodeEnum.UNAUTHORIZED);
         }
         return convertToCurrentUserVO(loginUser);
+    }
+
+    @Override
+    public DriverLoginVO driverWxLogin(DriverWxLoginDTO dto) {
+        // 1. 调用微信接口换取 OpenID
+        JSONObject wxResult = wxApiUtil.code2Session(dto.getWxCode());
+        if (wxResult == null) {
+            throw new BusinessException(ResultCodeEnum.WX_BIND_FAILED, "微信授权失败，请重试");
+        }
+        String openid = wxResult.getStr("openid");
+        if (openid == null || openid.isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.WX_BIND_FAILED, "获取微信用户信息失败");
+        }
+
+        // 2. 根据 OpenID 查找司机
+        LambdaQueryWrapper<DriverEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DriverEntity::getWxOpenid, openid);
+        DriverEntity driver = driverMapper.selectOne(wrapper);
+        if (driver == null) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "该微信尚未绑定司机账号，请先使用账号密码登录并绑定微信");
+        }
+        if (driver.getIsActive() == 0) {
+            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "账号已停用");
+        }
+
+        // 3. 构建 LoginUser 并生成 Token
+        LoginUser loginUser = LoginUser.builder()
+                .userId(driver.getId())
+                .username(driver.getRealName())
+                .realName(driver.getRealName())
+                .password(driver.getPassword())
+                .role(com.green.common.enums.RoleEnum.DRIVER)
+                .passwordChanged(driver.getPasswordChanged() != null && driver.getPasswordChanged() == 1)
+                .enabled(true)
+                .build();
+
+        String token = jwtTokenProvider.generateToken(loginUser);
+
+        DriverLoginVO loginVO = new DriverLoginVO();
+        loginVO.setToken(token);
+        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+        loginVO.setFirstLogin(Boolean.FALSE.equals(loginUser.getPasswordChanged()));
+
+        log.info("司机微信登录成功: driverId={}, name={}", driver.getId(), driver.getRealName());
+        return loginVO;
+    }
+
+    @Override
+    public LoginVO adminWxLogin(String wxCode) {
+        // 1. 调用微信接口换取 OpenID
+        JSONObject wxResult = wxApiUtil.code2Session(wxCode);
+        if (wxResult == null) {
+            throw new BusinessException(ResultCodeEnum.WX_BIND_FAILED, "微信授权失败，请重试");
+        }
+        String openid = wxResult.getStr("openid");
+        if (openid == null || openid.isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.WX_BIND_FAILED, "获取微信用户信息失败");
+        }
+
+        // 2. 根据 OpenID 查找管理员
+        LambdaQueryWrapper<AdminEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AdminEntity::getWxOpenid, openid);
+        AdminEntity admin = adminMapper.selectOne(wrapper);
+        if (admin == null) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "该微信尚未绑定管理员账号，请先使用账号密码登录并绑定微信");
+        }
+        if (admin.getIsActive() == 0) {
+            throw new BusinessException(ResultCodeEnum.FORBIDDEN, "账号已停用");
+        }
+
+        // 3. 构建 LoginUser 并生成 Token
+        LoginUser loginUser = LoginUser.builder()
+                .userId(admin.getId())
+                .username(admin.getUsername())
+                .realName(admin.getRealName())
+                .password(admin.getPassword())
+                .role(com.green.common.enums.RoleEnum.ADMIN)
+                .enabled(true)
+                .build();
+
+        String token = jwtTokenProvider.generateToken(loginUser);
+
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(token);
+        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+
+        log.info("管理员微信登录成功: adminId={}, username={}", admin.getId(), admin.getUsername());
+        return loginVO;
     }
 
     @Override

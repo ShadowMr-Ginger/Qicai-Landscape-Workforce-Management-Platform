@@ -19,7 +19,7 @@ public interface DriverService {
 
     // ==================== 认证相关 ====================
 
-    void changePassword(DriverChangePasswordDTO dto);
+    String changePassword(DriverChangePasswordDTO dto);
 
     void resetPassword(AdminResetDriverPasswordDTO dto);
 

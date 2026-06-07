@@ -1,0 +1,19 @@
+<view class="profile-page">
+  <view class="profile-header">
+    <view class="profile-avatar">
+      <text>{{avatarText}}</text>
+    </view>
+    <view class="profile-info">
+      <text class="profile-name">{{displayName}}</text>
+      <text class="profile-role">管理员</text>
+    </view>
+  </view>
+
+  <view class="profile-menu">
+    <view class="menu-item" bindtap="logout">
+      <text class="menu-icon">🚪</text>
+      <text class="menu-text">退出登录</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+</view>

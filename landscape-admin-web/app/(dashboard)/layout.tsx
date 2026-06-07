@@ -37,7 +37,7 @@ export default function DashboardLayout({
   // 客户端挂载前显示占位，避免 SSR 阶段 token 为 null 导致闪烁/跳转
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
+      <div className="min-h-screen bg-background/50 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -48,7 +48,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-background/50">
       <Toaster position="top-right" richColors />
       <Sidebar />
       <div

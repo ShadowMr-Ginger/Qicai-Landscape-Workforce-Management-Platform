@@ -214,6 +214,16 @@ export async function approveAttendanceBatch(id: number) {
   return res.data;
 }
 
+export async function rejectAttendanceBatch(id: number) {
+  const res = await api.put(`/admin/attendance/batches/${id}/reject`);
+  return res.data;
+}
+
+export async function deleteAttendanceBatch(id: number) {
+  const res = await api.delete(`/admin/attendance/batches/${id}`);
+  return res.data;
+}
+
 export async function reviewAttendanceBatch(id: number, data: Record<string, unknown>) {
   const res = await api.put(`/admin/attendance/batches/${id}/review`, data);
   return res.data;
@@ -256,6 +266,16 @@ export async function getWorkerAttendanceDetail(id: number) {
   return res.data;
 }
 
+export async function updateWorkerAttendanceRecord(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/attendance/worker-records/${id}`, data);
+  return res.data;
+}
+
+export async function deleteWorkerAttendanceRecord(id: number) {
+  const res = await api.delete(`/admin/attendance/worker-records/${id}`);
+  return res.data;
+}
+
 export async function getWorkerCalendar(workerId: number, year: number, month: number) {
   const res = await api.get(`/admin/attendance/workers/${workerId}/calendar`, { params: { year, month } });
   return res.data;
@@ -268,6 +288,16 @@ export async function getDriverAttendanceRecords(params: Record<string, unknown>
 
 export async function getDriverAttendanceDetail(id: number) {
   const res = await api.get(`/admin/attendance/driver-records/${id}`);
+  return res.data;
+}
+
+export async function updateDriverAttendanceRecord(id: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/attendance/driver-records/${id}`, data);
+  return res.data;
+}
+
+export async function deleteDriverAttendanceRecord(id: number) {
+  const res = await api.delete(`/admin/attendance/driver-records/${id}`);
   return res.data;
 }
 
@@ -295,6 +325,55 @@ export async function updateWorkType(id: number, data: Record<string, unknown>) 
 
 export async function deleteWorkType(id: number) {
   const res = await api.delete(`/admin/work-types/${id}`);
+  return res.data;
+}
+
+export async function getSystemConfig(key: string) {
+  const res = await api.get(`/admin/system-configs/${key}`);
+  return res.data;
+}
+
+export async function updateSystemConfig(key: string, value: string) {
+  const res = await api.put(`/admin/system-configs/${key}`, value, {
+    headers: { 'Content-Type': 'text/plain' }
+  });
+  return res.data;
+}
+
+export async function getWorkerWageSummary(workerId: number) {
+  const res = await api.get(`/admin/attendance/workers/${workerId}/wage-summary`);
+  return res.data;
+}
+
+export async function getDriverWageSummary(driverId: number) {
+  const res = await api.get(`/admin/attendance/drivers/${driverId}/wage-summary`);
+  return res.data;
+}
+
+export async function previewWorkerSettle(workerId: number, dateFrom: string, dateTo: string) {
+  const res = await api.post(`/admin/attendance/workers/${workerId}/settle-preview`, null, { params: { dateFrom, dateTo } });
+  return res.data;
+}
+
+export async function settleWorkerRecords(workerId: number, data: { dateFrom: string; dateTo: string }) {
+  const res = await api.post(`/admin/attendance/workers/${workerId}/settle`, data);
+  return res.data;
+}
+
+export async function previewDriverSettle(driverId: number, dateFrom: string, dateTo: string) {
+  const res = await api.post(`/admin/attendance/drivers/${driverId}/settle-preview`, null, { params: { dateFrom, dateTo } });
+  return res.data;
+}
+
+export async function settleDriverRecords(driverId: number, data: { dateFrom: string; dateTo: string }) {
+  const res = await api.post(`/admin/attendance/drivers/${driverId}/settle`, data);
+  return res.data;
+}
+
+// ==================== 系统日志 ====================
+
+export async function getSystemLogs(params: { pageNum?: number; pageSize?: number; userType?: string; action?: string }) {
+  const res = await api.get('/admin/system-logs', { params });
   return res.data;
 }
 

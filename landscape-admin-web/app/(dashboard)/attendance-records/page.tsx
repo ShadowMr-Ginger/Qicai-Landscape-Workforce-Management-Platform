@@ -16,21 +16,21 @@ const entries = [
     desc: "按时间倒序查看所有工人的考勤明细",
     icon: ClipboardList,
     href: "/worker-records",
-    color: "bg-green-100 text-green-700",
+    color: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300",
   },
   {
     title: "工人考勤信息汇总",
     desc: "按组别浏览工人，查看个人出勤日历",
     icon: Users,
     href: "/worker-summary",
-    color: "bg-blue-100 text-blue-700",
+    color: "bg-blue-100 text-blue-700 dark:text-blue-300",
   },
   {
     title: "司机考勤记录总表",
     desc: "按时间倒序查看所有司机的考勤明细",
     icon: ClipboardList,
     href: "/driver-records",
-    color: "bg-orange-100 text-orange-700",
+    color: "bg-orange-100 text-orange-700 dark:text-orange-300",
   },
   {
     title: "司机考勤信息汇总",
@@ -46,7 +46,7 @@ export default function AttendanceRecordsPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800">考勤记录</h2>
+      <h2 className="text-lg font-semibold text-foreground">考勤记录</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {entries.map((item) => (
           <Card
@@ -59,8 +59,8 @@ export default function AttendanceRecordsPage() {
                 <item.icon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-800">{item.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{item.desc}</p>
+                <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
               </div>
             </CardContent>
           </Card>

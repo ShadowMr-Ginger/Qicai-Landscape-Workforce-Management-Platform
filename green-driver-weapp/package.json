@@ -1,0 +1,14 @@
+{
+  "name": "green-driver-weapp",
+  "version": "1.0.0",
+  "description": "绿化管理系统 - 司机微信小程序",
+  "main": "miniprogram/app.ts",
+  "scripts": {
+    "tsc": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,29 @@
+@import '../../../app.scss';
+
+.page-white {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 48rpx;
+}
+
+.page-header {
+  margin-bottom: 48rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12rpx;
+}
+
+.page-subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: #f97316;
+}
+
+.form-container {
+  padding: 0 24rpx;
+}

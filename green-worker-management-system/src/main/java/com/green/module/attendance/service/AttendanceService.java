@@ -5,9 +5,12 @@ import com.green.module.attendance.dto.BatchQuery;
 import com.green.module.attendance.dto.CreateBatchDTO;
 import com.green.module.attendance.dto.DriverRecordQuery;
 import com.green.module.attendance.dto.ReviewBatchDTO;
+import com.green.module.attendance.dto.UpdateDriverRecordDTO;
+import com.green.module.attendance.dto.UpdateWorkerRecordDTO;
 import com.green.module.attendance.dto.WorkerRecordQuery;
 import com.green.module.attendance.vo.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -24,15 +27,25 @@ public interface AttendanceService {
 
     Long createBatchByAdmin(CreateBatchDTO dto);
 
+    void updateBatch(Long id, CreateBatchDTO dto);
+
     void approveBatch(Long id);
 
     void reviewBatch(ReviewBatchDTO dto);
+
+    void rejectBatch(Long id);
+
+    void deleteBatch(Long id);
 
     // ==================== 工人考勤记录 ====================
 
     IPage<WorkerAttendanceRecordVO> listWorkerRecords(WorkerRecordQuery query);
 
     WorkerAttendanceRecordVO workerRecordDetail(Long id);
+
+    void updateWorkerRecord(Long id, UpdateWorkerRecordDTO dto);
+
+    void deleteWorkerRecord(Long id);
 
     Map<String, Object> getWorkerCalendar(Long workerId, Integer year, Integer month);
 
@@ -42,5 +55,21 @@ public interface AttendanceService {
 
     DriverAttendanceRecordVO driverRecordDetail(Long id);
 
+    void updateDriverRecord(Long id, UpdateDriverRecordDTO dto);
+
+    void deleteDriverRecord(Long id);
+
     Map<String, Object> getDriverCalendar(Long driverId, Integer year, Integer month);
+
+    WageSummaryVO getWorkerWageSummary(Long workerId);
+
+    WageSummaryVO getDriverWageSummary(Long driverId);
+
+    SettlePreviewVO previewWorkerSettle(Long workerId, LocalDate dateFrom, LocalDate dateTo);
+
+    void settleWorkerRecords(Long workerId, LocalDate dateFrom, LocalDate dateTo);
+
+    SettlePreviewVO previewDriverSettle(Long driverId, LocalDate dateFrom, LocalDate dateTo);
+
+    void settleDriverRecords(Long driverId, LocalDate dateFrom, LocalDate dateTo);
 }

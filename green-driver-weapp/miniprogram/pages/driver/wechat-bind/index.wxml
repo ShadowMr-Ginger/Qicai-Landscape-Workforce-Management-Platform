@@ -1,0 +1,22 @@
+<view class="bind-page">
+  <view class="bind-content">
+    <view class="bind-icon-wrapper">
+      <text class="bind-icon">💬</text>
+    </view>
+    <text class="bind-title">绑定微信</text>
+    <text class="bind-desc">绑定微信后，下次可使用微信一键登录，更加便捷安全</text>
+
+    <button
+      class="btn btn-primary"
+      style="margin-top: 64rpx;"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="onBindWx"
+    >授权绑定微信</button>
+
+    <button
+      class="skip-btn"
+      bindtap="onSkip"
+    >稍后再说</button>
+  </view>
+</view>

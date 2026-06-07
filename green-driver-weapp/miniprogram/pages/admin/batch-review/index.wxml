@@ -1,0 +1,61 @@
+<view class="batch-review-page">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item">
+      <picker bindchange="onStatusChange" value="{{statusFilter === '0' ? 1 : statusFilter === '1' ? 2 : statusFilter === '2' ? 3 : statusFilter === '3' ? 4 : 0}}" range="{{['全部','待审核','已通过','已撤回','不通过']}}">
+        <view class="filter-picker">
+          <text>{{statusFilter === '' ? '全部' : statusFilter === '0' ? '待审核' : statusFilter === '1' ? '已通过' : statusFilter === '2' ? '已撤回' : statusFilter === '3' ? '不通过' : '全部'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    <view class="filter-item">
+      <picker mode="date" bindchange="onDateFromChange" value="{{dateFrom}}">
+        <view class="filter-picker">
+          <text>{{dateFrom || '开始日期'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    <view class="filter-item">
+      <picker mode="date" bindchange="onDateToChange" value="{{dateTo}}">
+        <view class="filter-picker">
+          <text>{{dateTo || '结束日期'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    <text class="filter-reset" bindtap="resetFilter">重置</text>
+  </view>
+
+  <!-- 列表 -->
+  <view class="batch-list">
+    <view class="batch-card {{item._cardClass}}" wx:for="{{batches}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="batch-header">
+        <view class="batch-driver">
+          <text class="driver-name">{{item.driverName || '-'}}</text>
+          <text class="status-mark {{item._statusClass}}">{{item._statusText}}</text>
+        </view>
+        <text class="batch-count">{{item.totalWorkers}}人</text>
+      </view>
+      <view class="batch-body">
+        <view class="batch-row">
+          <text class="batch-label">考勤日期</text>
+          <text class="batch-value">{{item.batchDate}}</text>
+        </view>
+        <view class="batch-row">
+          <text class="batch-label">提交时间</text>
+          <text class="batch-value">{{item.submitTime}}</text>
+        </view>
+        <view class="batch-row" wx:if="{{item.remark}}">
+          <text class="batch-label">备注</text>
+          <text class="batch-value">{{item.remark}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && batches.length === 0}}">
+      <text>暂无考勤批次</text>
+    </view>
+  </view>
+</view>

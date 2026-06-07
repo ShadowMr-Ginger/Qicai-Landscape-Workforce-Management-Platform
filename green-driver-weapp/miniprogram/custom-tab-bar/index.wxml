@@ -1,0 +1,12 @@
+<cover-view class="tab-bar">
+  <cover-view
+    class="tab-item {{selected === index ? 'tab-active' : ''}}"
+    wx:for="{{isAdmin ? adminList : driverList}}"
+    wx:key="index"
+    data-index="{{index}}"
+    bindtap="switchTab"
+  >
+    <cover-view class="tab-icon">{{item.icon}}</cover-view>
+    <cover-view class="tab-text">{{item.text}}</cover-view>
+  </cover-view>
+</cover-view>

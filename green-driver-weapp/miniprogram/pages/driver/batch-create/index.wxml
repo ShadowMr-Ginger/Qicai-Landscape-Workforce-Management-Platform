@@ -1,0 +1,176 @@
+<view class="batch-create-page">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">上报考勤</text>
+    <text class="page-subtitle">{{todayDate}}</text>
+  </view>
+
+  <!-- 批次设置 -->
+  <view class="card">
+    <view class="section-title">批次设置</view>
+
+    <view class="form-row">
+      <text class="form-label">出勤类型</text>
+      <picker bindchange="onAttendanceTypeChange" value="{{attendanceType === 2 ? 1 : 0}}" range="{{['半天', '全天']}}">
+        <view class="picker-value">
+          <text>{{attendanceType === 2 ? '全天' : '半天'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">加班时长</text>
+      <picker bindchange="onOvertimeChange" value="{{overtimeHours * 2}}" range="{{['0小时', '0.5小时', '1小时', '1.5小时', '2小时', '2.5小时', '3小时', '3.5小时', '4小时', '4.5小时', '5小时']}}">
+        <view class="picker-value">
+          <text>{{overtimeHours}}小时</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">作业类型</text>
+      <picker bindchange="onWorkTypeChange" value="{{workTypeIndex}}" range="{{workTypeOptions}}" range-key="typeName">
+        <view class="picker-value">
+          <text>{{selectedWorkTypeName || '请选择'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">备注</text>
+      <input
+        class="inline-input"
+        placeholder="选填"
+        placeholder-class="input-placeholder"
+        value="{{remark}}"
+        bindinput="onRemarkInput"
+      />
+    </view>
+  </view>
+
+  <!-- 工人选择 -->
+  <view class="card">
+    <view class="section-header">
+      <text class="section-title">选择工人</text>
+      <text class="section-count">已选 {{selectedWorkers.length}} 人</text>
+    </view>
+
+    <!-- 搜索输入框 -->
+    <view class="search-inline">
+      <input
+        class="search-inline-input"
+        placeholder="输入姓名或手机号搜索添加工人..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="doSearch"
+      />
+      <text class="search-inline-btn" bindtap="doSearch">搜索</text>
+    </view>
+
+    <!-- 搜索结果 -->
+    <view class="search-results-inline" wx:if="{{searchResults.length > 0}}">
+      <view class="search-item" wx:for="{{searchResults}}" wx:key="id" bindtap="addFromSearch" data-worker="{{item}}">
+        <text class="search-item-name">{{item.name}}</text>
+        <text class="search-item-phone">{{item.phone || ''}}</text>
+        <text class="search-item-add">+ 添加</text>
+      </view>
+    </view>
+    <view class="search-empty-inline" wx:if="{{searchKeyword && searchResults.length === 0}}">
+      <text>未找到匹配工人</text>
+    </view>
+
+    <!-- 常用工人 -->
+    <view class="favorite-section" wx:if="{{favoriteWorkers.length > 0}}">
+      <text class="sub-section-title">常用工人</text>
+      <view class="worker-tags">
+        <view
+          class="worker-tag"
+          wx:for="{{favoriteWorkers}}"
+          wx:key="id"
+          wx:if="{{!selectedWorkerIdMap[item.id]}}"
+          bindtap="addFromFavorite"
+          data-worker="{{item}}"
+        >
+          <text>{{item.name}}</text>
+          <text class="tag-plus">+</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 已选工人列表 -->
+    <view class="selected-list" wx:if="{{selectedWorkers.length > 0}}">
+      <text class="sub-section-title">已选工人</text>
+      <view class="selected-item" wx:for="{{selectedWorkers}}" wx:key="workerId">
+        <view class="selected-info" bindtap="openWorkerEdit" data-index="{{index}}">
+          <text class="selected-name">{{item.workerName}}</text>
+          <view class="selected-meta">
+            <text class="meta-tag">{{item.attendanceType === 2 ? '全天' : '半天'}}</text>
+            <text class="meta-tag" wx:if="{{item.overtimeHours > 0}}">+{{item.overtimeHours}}h</text>
+            <text class="meta-tag remark" wx:if="{{item.remark}}">{{item.remark}}</text>
+          </view>
+        </view>
+        <text class="remove-btn" bindtap="removeWorker" data-index="{{index}}">✕</text>
+      </view>
+    </view>
+
+    <view class="empty-hint" wx:if="{{selectedWorkers.length === 0}}">
+      <text>请点击上方搜索或从常用工人中添加</text>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <button
+    class="btn btn-primary submit-btn"
+    loading="{{submitting}}"
+    disabled="{{submitting || selectedWorkers.length === 0}}"
+    bindtap="onSubmit"
+  >提交考勤批次</button>
+
+  <!-- 单个工人编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showWorkerPicker}}" bindtap="closeWorkerEdit">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">编辑工人考勤</text>
+        <text class="modal-close" bindtap="closeWorkerEdit">✕</text>
+      </view>
+
+      <view class="modal-body">
+        <view class="form-row">
+          <text class="form-label">出勤类型</text>
+          <picker bindchange="onEditAttendanceChange" value="{{editAttendanceType === 2 ? 1 : 0}}" range="{{['半天', '全天']}}">
+            <view class="picker-value">
+              <text>{{editAttendanceType === 2 ? '全天' : '半天'}}</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="form-row">
+          <text class="form-label">加班时长</text>
+          <picker bindchange="onEditOvertimeChange" value="{{editOvertimeHours * 2}}" range="{{['0小时', '0.5小时', '1小时', '1.5小时', '2小时', '2.5小时', '3小时', '3.5小时', '4小时', '4.5小时', '5小时']}}">
+            <view class="picker-value">
+              <text>{{editOvertimeHours}}小时</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="form-row">
+          <text class="form-label">备注</text>
+          <input
+            class="inline-input"
+            placeholder="选填"
+            value="{{editRemark}}"
+            bindinput="onEditRemarkInput"
+          />
+        </view>
+      </view>
+
+      <button class="btn btn-primary" bindtap="saveWorkerEdit">保存</button>
+    </view>
+  </view>
+</view>

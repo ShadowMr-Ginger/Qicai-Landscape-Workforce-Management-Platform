@@ -1,0 +1,41 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 9999;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  padding: 10rpx 0;
+}
+
+.tab-icon {
+  font-size: 44rpx;
+  line-height: 1.2;
+  margin-bottom: 6rpx;
+}
+
+.tab-text {
+  font-size: 28rpx;
+  line-height: 1.2;
+  color: #999999;
+}
+
+.tab-active .tab-text {
+  color: #16a34a;
+  font-weight: 600;
+}

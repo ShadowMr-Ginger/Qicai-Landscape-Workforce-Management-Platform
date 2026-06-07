@@ -1,5 +1,6 @@
 package com.green.module.system.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.green.common.base.BaseEntity;
 import lombok.Data;
@@ -81,4 +82,12 @@ public class AdminEntity extends BaseEntity {
      * 最后登录 IP
      */
     private String lastLoginIp;
+
+    /**
+     * 微信 OpenID
+     * <p>用于微信一键登录</p>
+     * <p>注意：数据库添加 wx_openid 字段后，需移除此 @TableField(exist = false)</p>
+     */
+    @TableField(exist = false)
+    private String wxOpenid;
 }

@@ -107,7 +107,8 @@ export default function GroupsPage() {
     try {
       const res = await getGroupWorkers(group.id);
       if (res.code === 200 && res.data) {
-        setGroupWorkers(res.data);
+        const sorted = [...res.data].sort((a, b) => b.isEmployed - a.isEmployed);
+        setGroupWorkers(sorted);
       }
     } catch {
       setGroupWorkers([]);
@@ -230,7 +231,7 @@ export default function GroupsPage() {
       {/* 顶部操作栏 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-800">组别管理</h2>
+          <h2 className="text-lg font-semibold text-foreground">组别管理</h2>
           <Badge variant="secondary" className="rounded-md">
             {groups.length} 个组别
           </Badge>
@@ -276,30 +277,30 @@ export default function GroupsPage() {
         {groups.map((group) => (
           <Card
             key={group.id}
-            className="border-0 shadow-sm rounded-xl cursor-pointer hover:shadow-md hover:bg-green-50/20 transition-all"
+            className="border-0 shadow-sm rounded-xl cursor-pointer hover:shadow-md hover:bg-green-50 dark:hover:bg-green-950/20 transition-all"
             onClick={() => openDetail(group)}
           >
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-gray-800">{group.groupName}</h3>
+                    <h3 className="text-base font-semibold text-foreground">{group.groupName}</h3>
                     {group.isSystem === 1 && (
-                      <Badge variant="outline" className="text-[10px] rounded-md border-gray-300 text-gray-500">
+                      <Badge variant="outline" className="text-[10px] rounded-md border-border text-muted-foreground">
                         系统
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1 truncate">
+                  <p className="text-xs text-muted-foreground/70 mt-1 truncate">
                     {group.description || "暂无描述"}
                   </p>
                   <div className="flex items-center gap-3 mt-3">
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="w-4 h-4 text-green-500" />
                       <span>{group.workerCount} 人</span>
                     </div>
                     {group.resignedWorkerCount > 0 && (
-                      <div className="flex items-center gap-1 text-sm text-orange-600">
+                      <div className="flex items-center gap-1 text-sm text-orange-600 dark:text-orange-400">
                         <UserX className="w-4 h-4" />
                         <span>{group.resignedWorkerCount} 已离职</span>
                       </div>
@@ -311,7 +312,7 @@ export default function GroupsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      className="w-7 h-7 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:bg-blue-950/30"
                       onClick={(e) => { e.stopPropagation(); openEdit(group); }}
                       title="编辑组别"
                     >
@@ -320,7 +321,7 @@ export default function GroupsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-7 h-7 rounded-lg text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                      className="w-7 h-7 rounded-lg text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 dark:bg-orange-950/30"
                       onClick={(e) => { e.stopPropagation(); openResign(group); }}
                       title="组别离职"
                     >
@@ -329,7 +330,7 @@ export default function GroupsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
+                      className="w-7 h-7 rounded-lg text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/30 dark:bg-green-950/30"
                       onClick={(e) => { e.stopPropagation(); openRestore(group); }}
                       title="组别恢复"
                     >
@@ -339,7 +340,7 @@ export default function GroupsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="w-7 h-7 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
                         onClick={(e) => { e.stopPropagation(); openDelete(group); }}
                         title="组别删除"
                       >
@@ -359,7 +360,7 @@ export default function GroupsPage() {
         <DrawerContent className="rounded-t-2xl max-h-[85vh]">
           <DrawerHeader>
             <DrawerTitle className="text-lg flex items-center gap-2">
-              <FolderOpen className="w-5 h-5 text-green-600" />
+              <FolderOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
               {selectedGroup?.groupName}
               <Badge variant="secondary" className="rounded-md text-xs">
                 {groupWorkers.length} 人
@@ -368,8 +369,8 @@ export default function GroupsPage() {
           </DrawerHeader>
           <div className="px-4 pb-2 space-y-2 max-w-lg mx-auto w-full overflow-y-auto">
             {groupWorkers.length === 0 ? (
-              <div className="text-center py-8 text-gray-400 text-sm">
-                <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <div className="text-center py-8 text-muted-foreground/70 text-sm">
+                <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
                 该组暂无工人
               </div>
             ) : (
@@ -378,32 +379,32 @@ export default function GroupsPage() {
                   key={worker.id}
                   className={cn(
                     "flex items-center justify-between p-3 rounded-xl text-sm",
-                    worker.isEmployed === 0 ? "bg-gray-50" : "bg-green-50/30"
+                    worker.isEmployed === 0 ? "bg-muted/30" : "bg-green-50/30"
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-                      worker.isEmployed === 0 ? "bg-gray-200 text-gray-500" : "bg-green-100 text-green-700"
+                      worker.isEmployed === 0 ? "bg-muted text-muted-foreground" : "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 dark:bg-green-900/40 dark:text-green-300"
                     )}>
                       {worker.name.charAt(0)}
                     </div>
                     <div>
                       <p className={cn(
                         "font-medium",
-                        worker.isEmployed === 0 ? "text-gray-400 line-through" : "text-gray-800"
+                        worker.isEmployed === 0 ? "text-muted-foreground/70 line-through" : "text-foreground"
                       )}>
                         {worker.name}
                         {worker.isEmployed === 0 && (
                           <span className="text-orange-500 text-xs ml-1">（已离职）</span>
                         )}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-muted-foreground/70">
                         {worker.genderText} · {worker.phone || "无手机号"}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right text-xs text-gray-500">
+                  <div className="text-right text-xs text-muted-foreground">
                     <p>日薪 ¥{worker.baseDailySalary}</p>
                     <p>加班 ¥{worker.overtimeHourlyRate}/h</p>
                   </div>
@@ -488,7 +489,7 @@ export default function GroupsPage() {
       <Dialog open={resignOpen} onOpenChange={setResignOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-orange-600">
+            <DialogTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
               <AlertTriangle className="w-5 h-5" />
               确认组别离职
             </DialogTitle>
@@ -507,7 +508,7 @@ export default function GroupsPage() {
       <Dialog open={restoreOpen} onOpenChange={setRestoreOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-green-600">
+            <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <UserCheck className="w-5 h-5" />
               确认组别恢复
             </DialogTitle>
@@ -526,7 +527,7 @@ export default function GroupsPage() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="rounded-2xl max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
+            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <ArrowRightLeft className="w-5 h-5" />
               删除组别并迁移工人
             </DialogTitle>
@@ -552,21 +553,21 @@ export default function GroupsPage() {
                     </option>
                   ))}
               </select>
-              <p className="text-xs text-gray-400">默认迁移到"未分配"组</p>
+              <p className="text-xs text-muted-foreground/70">默认迁移到"未分配"组</p>
             </div>
 
             <div className="space-y-1.5">
               <Label>该组工人列表（{deleteWorkers.length} 人）</Label>
-              <div className="max-h-48 overflow-y-auto space-y-1 rounded-xl border border-gray-100 p-2">
+              <div className="max-h-48 overflow-y-auto space-y-1 rounded-xl border border-border p-2">
                 {deleteWorkers.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-2">该组暂无工人</p>
+                  <p className="text-sm text-muted-foreground/70 text-center py-2">该组暂无工人</p>
                 ) : (
                   deleteWorkers.map((w) => (
                     <div
                       key={w.id}
                       className={cn(
                         "flex items-center justify-between px-2 py-1.5 rounded-lg text-sm",
-                        w.isEmployed === 0 ? "bg-gray-50 text-gray-400" : "bg-green-50/30 text-gray-700"
+                        w.isEmployed === 0 ? "bg-muted/30 text-muted-foreground/70" : "bg-green-50/30 text-foreground/90"
                       )}
                     >
                       <span className="flex items-center gap-1">
@@ -575,7 +576,7 @@ export default function GroupsPage() {
                           <span className="text-orange-500 text-xs">（已离职）</span>
                         )}
                       </span>
-                      <span className="text-xs text-gray-400">{w.phone || "无手机号"}</span>
+                      <span className="text-xs text-muted-foreground/70">{w.phone || "无手机号"}</span>
                     </div>
                   ))
                 )}

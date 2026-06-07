@@ -26,6 +26,13 @@ public class DriverAttendanceRecordVO {
     private BigDecimal dailyWage;
     private BigDecimal overtimeWage;
     private BigDecimal totalWage;
+
+    /** 司机日薪基数（用于前端重算） */
+    private BigDecimal baseDailySalary;
+
+    /** 司机加班时薪（用于前端重算） */
+    private BigDecimal overtimeHourlyRate;
+
     private String remark;
     private Integer isSettled;
     private String isSettledText;

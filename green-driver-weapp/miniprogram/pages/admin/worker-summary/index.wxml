@@ -1,0 +1,72 @@
+<view class="summary-page">
+  <view class="group-list">
+    <view class="group-card" wx:for="{{groups}}" wx:for-index="gidx" wx:key="name">
+      <view class="group-header" bindtap="toggleGroup" data-index="{{gidx}}">
+        <text class="group-name">{{item.name}}</text>
+        <text class="group-count">{{item.workers.length}}人</text>
+        <text class="group-arrow">{{item.expanded ? '▼' : '▶'}}</text>
+      </view>
+
+      <view class="group-body" wx:if="{{item.expanded}}">
+        <view class="worker-item" wx:for="{{item.workers}}" wx:for-item="w" wx:for-index="widx" wx:key="id">
+          <view class="worker-info">
+            <view class="worker-avatar">
+              <text>{{w.name[0]}}</text>
+            </view>
+            <view class="worker-meta">
+              <text class="worker-name">{{w.name}}</text>
+              <text class="worker-status {{w.isEmployed ? 'employed' : 'resigned'}}">{{w.isEmployed ? '在职' : '离职'}}</text>
+            </view>
+          </view>
+
+          <view class="summary-grid" wx:if="{{w.summary}}">
+            <view class="summary-cell">
+              <text class="summary-label">总共未结清</text>
+              <text class="summary-value orange">{{w.summary.totalUnsettled || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本年度需结清</text>
+              <text class="summary-value blue">{{w.summary.yearTotal || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本年度已结清</text>
+              <text class="summary-value green">{{w.summary.yearSettled || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本年度未结清</text>
+              <text class="summary-value red">{{w.summary.yearUnsettled || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">历来未结清</text>
+              <text class="summary-value gray">{{w.summary.historicalUnsettled || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本年度出勤天数</text>
+              <text class="summary-value purple">{{w.summary.yearAttendanceDays || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本年度加班时数</text>
+              <text class="summary-value teal">{{w.summary.yearOvertimeHours || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本月出勤天数</text>
+              <text class="summary-value pink">{{w.summary.monthAttendanceDays || 0}}</text>
+            </view>
+            <view class="summary-cell">
+              <text class="summary-label">本月加班时数</text>
+              <text class="summary-value brown">{{w.summary.monthOvertimeHours || 0}}</text>
+            </view>
+          </view>
+
+          <view class="summary-loading" wx:if="{{!w.summary}}">
+            <text>加载中...</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && groups.length === 0}}">
+      <text>暂无工人数据</text>
+    </view>
+  </view>
+</view>

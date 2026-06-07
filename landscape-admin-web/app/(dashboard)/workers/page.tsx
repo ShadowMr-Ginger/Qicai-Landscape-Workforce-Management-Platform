@@ -406,7 +406,7 @@ export default function WorkersPage() {
               返回
             </Button>
           )}
-          <h2 className="text-lg font-semibold text-gray-800">
+          <h2 className="text-lg font-semibold text-foreground">
             {showResigned ? "已离职工人" : "在职工人"}
           </h2>
           <Badge variant="secondary" className="rounded-md">
@@ -474,9 +474,9 @@ export default function WorkersPage() {
         <CardContent className="p-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">姓名</Label>
+              <Label className="text-xs text-muted-foreground">姓名</Label>
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                 <Input
                   placeholder="输入姓名搜索"
                   value={keyword}
@@ -486,7 +486,7 @@ export default function WorkersPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">性别</Label>
+              <Label className="text-xs text-muted-foreground">性别</Label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
@@ -498,7 +498,7 @@ export default function WorkersPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">是否技术工</Label>
+              <Label className="text-xs text-muted-foreground">是否技术工</Label>
               <select
                 value={isSkilled}
                 onChange={(e) => setIsSkilled(e.target.value)}
@@ -510,7 +510,7 @@ export default function WorkersPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-gray-500">组别</Label>
+              <Label className="text-xs text-muted-foreground">组别</Label>
               <select
                 value={groupId}
                 onChange={(e) => setGroupId(e.target.value)}
@@ -550,22 +550,22 @@ export default function WorkersPage() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                <TableHead className="text-gray-600 font-medium">姓名</TableHead>
-                <TableHead className="text-gray-600 font-medium">性别</TableHead>
-                <TableHead className="text-gray-600 font-medium">技术工</TableHead>
-                <TableHead className="text-gray-600 font-medium">联系方式</TableHead>
-                <TableHead className="text-gray-600 font-medium">组别</TableHead>
-                <TableHead className="text-gray-600 font-medium">日薪（元）</TableHead>
-                <TableHead className="text-gray-600 font-medium">加班时薪（元）</TableHead>
-                {managing && <TableHead className="text-gray-600 font-medium w-32">操作</TableHead>}
+              <TableRow className="bg-background/50 hover:bg-background/50">
+                <TableHead className="text-muted-foreground font-medium">姓名</TableHead>
+                <TableHead className="text-muted-foreground font-medium">性别</TableHead>
+                <TableHead className="text-muted-foreground font-medium">技术工</TableHead>
+                <TableHead className="text-muted-foreground font-medium">联系方式</TableHead>
+                <TableHead className="text-muted-foreground font-medium">组别</TableHead>
+                <TableHead className="text-muted-foreground font-medium">日薪（元）</TableHead>
+                <TableHead className="text-muted-foreground font-medium">加班时薪（元）</TableHead>
+                {managing && <TableHead className="text-muted-foreground font-medium w-32">操作</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {workers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={managing ? 8 : 7} className="text-center py-16 text-gray-400">
-                    <Users className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                  <TableCell colSpan={managing ? 8 : 7} className="text-center py-16 text-muted-foreground/70">
+                    <Users className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
                     暂无数据
                   </TableCell>
                 </TableRow>
@@ -573,36 +573,36 @@ export default function WorkersPage() {
                 workers.map((worker) => (
                   <TableRow
                     key={worker.id}
-                    className="cursor-pointer hover:bg-green-50/30 transition-colors"
+                    className="cursor-pointer hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors"
                     onClick={() => openDetail(worker)}
                   >
-                    <TableCell className="font-medium text-gray-800">{worker.name}</TableCell>
-                    <TableCell className="text-gray-600">{worker.genderText}</TableCell>
+                    <TableCell className="font-medium text-foreground">{worker.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{worker.genderText}</TableCell>
                     <TableCell>
                       <Badge
                         variant={worker.isSkilledWorkerText === "是" ? "default" : "secondary"}
                         className={`rounded-md text-xs ${
                           worker.isSkilledWorkerText === "是"
-                            ? "bg-green-100 text-green-700 hover:bg-green-100"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-100"
+                            ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 hover:bg-green-100 dark:bg-green-900/40"
+                            : "bg-muted text-muted-foreground hover:bg-muted"
                         }`}
                       >
                         {worker.isSkilledWorkerText}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-600">{worker.phone}</TableCell>
-                    <TableCell className="text-gray-600">{worker.groupName || "-"}</TableCell>
-                    <TableCell className="text-gray-800 font-medium">
+                    <TableCell className="text-muted-foreground">{worker.phone}</TableCell>
+                    <TableCell className="text-muted-foreground">{worker.groupName || "-"}</TableCell>
+                    <TableCell className="text-foreground font-medium">
                       ¥{worker.baseDailySalary}
                     </TableCell>
-                    <TableCell className="text-gray-600">¥{worker.overtimeHourlyRate}</TableCell>
+                    <TableCell className="text-muted-foreground">¥{worker.overtimeHourlyRate}</TableCell>
                     {managing && (
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="w-8 h-8 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:bg-blue-950/30"
                             onClick={(e) => {
                               e.stopPropagation();
                               openEdit(worker);
@@ -614,7 +614,7 @@ export default function WorkersPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="w-8 h-8 rounded-lg text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                              className="w-8 h-8 rounded-lg text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 dark:bg-orange-950/30"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 openResign(worker);
@@ -627,7 +627,7 @@ export default function WorkersPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                              className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 openDelete(worker);
@@ -807,48 +807,48 @@ export default function WorkersPage() {
             {workerDetail && (
               <>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center text-green-700 text-xl font-bold">
+                  <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-700 dark:text-green-300 text-xl font-bold">
                     {workerDetail.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-gray-800">{workerDetail.name}</p>
-                    <Badge className="mt-1 rounded-md bg-green-100 text-green-700 hover:bg-green-100">
+                    <p className="text-xl font-bold text-foreground">{workerDetail.name}</p>
+                    <Badge className="mt-1 rounded-md bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 hover:bg-green-100 dark:bg-green-900/40">
                       {workerDetail.isEmployedText}
                     </Badge>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">性别</p>
-                    <p className="font-medium text-gray-800">{workerDetail.genderText}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">性别</p>
+                    <p className="font-medium text-foreground">{workerDetail.genderText}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">是否技术工</p>
-                    <p className="font-medium text-gray-800">{workerDetail.isSkilledWorkerText}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">是否技术工</p>
+                    <p className="font-medium text-foreground">{workerDetail.isSkilledWorkerText}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">所属组别</p>
-                    <p className="font-medium text-gray-800">{workerDetail.groupName || "-"}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">所属组别</p>
+                    <p className="font-medium text-foreground">{workerDetail.groupName || "-"}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">基础日薪</p>
-                    <p className="font-medium text-gray-800">¥{workerDetail.baseDailySalary}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">基础日薪</p>
+                    <p className="font-medium text-foreground">¥{workerDetail.baseDailySalary}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3">
-                    <p className="text-gray-400 text-xs mb-1">加班时薪</p>
-                    <p className="font-medium text-gray-800">¥{workerDetail.overtimeHourlyRate}</p>
+                  <div className="bg-muted/30 rounded-xl p-3">
+                    <p className="text-muted-foreground/70 text-xs mb-1">加班时薪</p>
+                    <p className="font-medium text-foreground">¥{workerDetail.overtimeHourlyRate}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">手机号</p>
-                    <p className="font-medium text-gray-800">{workerDetail.phone}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">手机号</p>
+                    <p className="font-medium text-foreground">{workerDetail.phone}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">身份证号</p>
-                    <p className="font-medium text-gray-800">{workerDetail.idCard}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">身份证号</p>
+                    <p className="font-medium text-foreground">{workerDetail.idCard}</p>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-3 col-span-2">
-                    <p className="text-gray-400 text-xs mb-1">紧急联系人</p>
-                    <p className="font-medium text-gray-800">{workerDetail.emergencyContactPhone || "-"}</p>
+                  <div className="bg-muted/30 rounded-xl p-3 col-span-2">
+                    <p className="text-muted-foreground/70 text-xs mb-1">紧急联系人</p>
+                    <p className="font-medium text-foreground">{workerDetail.emergencyContactPhone || "-"}</p>
                   </div>
                 </div>
               </>
@@ -864,7 +864,7 @@ export default function WorkersPage() {
       <Dialog open={resignOpen} onOpenChange={setResignOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-orange-600">
+            <DialogTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
               <AlertTriangle className="w-5 h-5" />
               确认离职
             </DialogTitle>
@@ -885,11 +885,11 @@ export default function WorkersPage() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
+            <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="w-5 h-5" />
               危险操作：删除工人
             </DialogTitle>
-            <DialogDescription className="text-red-600/80">
+            <DialogDescription className="text-red-600 dark:text-red-400/80">
               该工人关联有 <strong>{deleteAttendanceCount}</strong> 条考勤记录，
               删除工人将同时删除这些考勤记录，操作不可撤销！
             </DialogDescription>

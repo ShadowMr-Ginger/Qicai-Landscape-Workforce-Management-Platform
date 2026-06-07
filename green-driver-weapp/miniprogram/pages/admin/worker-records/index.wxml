@@ -1,0 +1,56 @@
+<view class="records-page">
+  <view class="filter-bar">
+    <view class="search-inline">
+      <input class="search-input" placeholder="工人姓名" value="{{workerName}}" bindinput="onNameInput" confirm-type="search" bindconfirm="doSearch" />
+      <text class="search-btn" bindtap="doSearch">搜索</text>
+    </view>
+    <view class="date-filters">
+      <picker mode="date" bindchange="onDateFromChange" value="{{dateFrom}}">
+        <view class="date-picker">{{dateFrom || '开始日期'}} ▼</view>
+      </picker>
+      <picker mode="date" bindchange="onDateToChange" value="{{dateTo}}">
+        <view class="date-picker">{{dateTo || '结束日期'}} ▼</view>
+      </picker>
+      <text class="reset-btn" bindtap="resetFilter">重置</text>
+    </view>
+  </view>
+
+  <view class="record-list">
+    <view class="record-card" wx:for="{{records}}" wx:key="id">
+      <view class="record-header">
+        <text class="record-name">{{item.workerName}}</text>
+        <text class="record-status {{item.isSettled ? 'settled' : 'unsettled'}}">{{item.isSettledText || (item.isSettled ? '已结清' : '未结清')}}</text>
+      </view>
+      <view class="record-body">
+        <view class="record-row">
+          <text class="record-label">考勤日期</text>
+          <text class="record-value">{{item.attendanceDate}}</text>
+        </view>
+        <view class="record-row">
+          <text class="record-label">出勤类型</text>
+          <text class="record-value">{{item.attendanceTypeText || (item.attendanceType === 1 ? '半天' : '全天')}}</text>
+        </view>
+        <view class="record-row" wx:if="{{item.overtimeHours > 0}}">
+          <text class="record-label">加班</text>
+          <text class="record-value">{{item.overtimeHours}}小时</text>
+        </view>
+        <view class="record-row">
+          <text class="record-label">当日工资</text>
+          <text class="record-value">{{item.totalWage}}元</text>
+        </view>
+        <view class="record-row">
+          <text class="record-label">审核司机</text>
+          <text class="record-value">{{item.driverName || '-'}}</text>
+        </view>
+        <view class="record-row" wx:if="{{item.remark}}">
+          <text class="record-label">备注</text>
+          <text class="record-value">{{item.remark}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
+      <text>暂无记录</text>
+    </view>
+  </view>
+</view>

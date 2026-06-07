@@ -1,0 +1,19 @@
+{
+  "name": "green-driver-weapp",
+  "version": "1.0.0",
+  "description": "绿化管理系统 - 司机微信小程序",
+  "main": "app.ts",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:scss": "sass --style=expanded --no-source-map app.scss app.wxss && for f in $(find pages -name '*.scss'); do out=\"${f%.scss}.wxss\"; sass --style=expanded --no-source-map \"$f\" \"$out\"; done",
+    "build": "npm run build:ts && npm run build:scss",
+    "watch:ts": "tsc --watch",
+    "watch:scss": "sass --watch --style=expanded --no-source-map app.scss:app.wxss pages:pages",
+    "watch": "npm run watch:ts & npm run watch:scss"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.0",
+    "sass": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}

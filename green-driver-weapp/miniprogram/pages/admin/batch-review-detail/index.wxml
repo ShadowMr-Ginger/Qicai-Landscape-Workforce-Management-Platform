@@ -1,0 +1,205 @@
+<view class="detail-page">
+  <view class="detail-card" wx:if="{{batch}}">
+    <view class="detail-header">
+      <text class="detail-title">考勤详情</text>
+      <text class="badge {{batch.status === 0 ? 'badge-orange' : batch.status === 1 ? 'badge-green' : batch.status === 2 ? 'badge-blue' : 'badge-red'}}">{{getStatusText(batch.status)}}</text>
+    </view>
+
+    <view class="detail-info">
+      <view class="info-row">
+        <text class="info-label">审核司机</text>
+        <text class="info-value">{{batch.driverName || '-'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">考勤日期</text>
+        <text class="info-value">{{batch.batchDate}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">提交时间</text>
+        <text class="info-value">{{batch.submitTime}}</text>
+      </view>
+    </view>
+
+    <!-- 司机考勤 -->
+    <view class="driver-section" wx:if="{{driverRecord}}">
+      <text class="section-title">司机考勤</text>
+      <view class="driver-item">
+        <view class="driver-name-row">
+          <text class="driver-name">{{driverRecord.driverName || '司机'}}</text>
+          <text class="driver-type">{{driverRecord.attendanceTypeText || (driverRecord.attendanceType === 1 ? '半天' : '全天')}}</text>
+        </view>
+        <view class="driver-meta">
+          <text>工资{{driverRecord.totalWage}}元</text>
+        </view>
+        <view class="driver-edit-row" wx:if="{{batch.status === 0}}">
+          <text class="edit-label">加班(小时)</text>
+          <input
+            class="edit-input"
+            type="digit"
+            value="{{driverRecord.overtimeHours}}"
+            bindinput="onDriverOvertimeChange"
+            placeholder="0"
+          />
+        </view>
+        <view class="driver-edit-row" wx:if="{{batch.status === 0}}">
+          <text class="edit-label">日薪(元)</text>
+          <input
+            class="edit-input"
+            type="digit"
+            value="{{driverRecord.dailyWage}}"
+            bindinput="onDriverDailyWageChange"
+            placeholder="0"
+          />
+        </view>
+        <view class="driver-meta" wx:else>
+          <text wx:if="{{driverRecord.overtimeHours > 0}}">加班{{driverRecord.overtimeHours}}h</text>
+          <text>日薪{{driverRecord.dailyWage}}元</text>
+        </view>
+        <view class="driver-edit-row" wx:if="{{batch.status === 0}}">
+          <text class="edit-label">备注</text>
+          <input
+            class="edit-input"
+            type="text"
+            value="{{driverRecord.remark || ''}}"
+            bindinput="onDriverRemarkChange"
+            placeholder="选填"
+          />
+        </view>
+        <view class="driver-meta" wx:if="{{driverRecord.remark && batch.status !== 0}}">
+          <text class="remark">备注：{{driverRecord.remark}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="worker-section">
+      <text class="section-title">工人名单（{{workers.length}}人）</text>
+      <view class="worker-list">
+        <view
+          class="worker-item {{batch.status === 0 ? 'worker-item-editable' : ''}}"
+          wx:for="{{workers}}"
+          wx:for-item="w"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="openWorkerEdit"
+        >
+          <view class="worker-name-row">
+            <text class="worker-name">{{w.workerName || '未知工人'}}</text>
+            <text class="worker-type">{{w.attendanceTypeText || (w.attendanceType === 1 ? '半天' : '全天')}}</text>
+          </view>
+          <view class="worker-meta">
+            <text wx:if="{{w.workTypeName}}">{{w.workTypeName}}</text>
+            <text wx:if="{{w.overtimeHours > 0}}">加班{{w.overtimeHours}}h</text>
+            <text>工资{{w.totalWage}}元</text>
+          </view>
+          <view class="worker-meta" wx:if="{{w.remark}}">
+            <text class="remark">备注：{{w.remark}}</text>
+          </view>
+          <view class="worker-edit-hint" wx:if="{{batch.status === 0}}">
+            <text>点击修改</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-bar" wx:if="{{batch.status === 0}}">
+      <button class="btn-reject" bindtap="onReject" loading="{{submitting}}">不予通过</button>
+      <button class="btn-approve" bindtap="onApprove" loading="{{submitting}}">审核通过</button>
+    </view>
+  </view>
+
+  <!-- 编辑工人弹窗 -->
+  <view class="edit-mask {{editPanelOpen ? 'edit-mask-show' : ''}}" wx:if="{{editPanelOpen}}" bindtap="closeWorkerEdit">
+    <view class="edit-panel" catchtap="preventClose">
+      <view class="edit-panel-header">
+        <text class="edit-panel-title">编辑工人考勤</text>
+        <text class="edit-panel-close" bindtap="closeWorkerEdit">关闭</text>
+      </view>
+
+      <view class="edit-panel-body" wx:if="{{editingWorker}}">
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">工人</text>
+          <text class="edit-panel-value">{{editingWorker.workerName}}</text>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">出勤类型</text>
+          <picker mode="selector" range="{{attendanceTypeOptions}}" value="{{editingWorker.attendanceType === 1 ? 1 : 0}}" bindchange="onWorkerAttendanceTypeChange">
+            <view class="edit-panel-picker">
+              <text>{{editingWorker.attendanceType === 1 ? '半天' : '全天'}}</text>
+              <text class="edit-panel-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">工地项目</text>
+          <picker mode="selector" range="{{projectOptions}}" range-key="projectName" value="{{editingWorker.projectIndex}}" bindchange="onWorkerProjectChange">
+            <view class="edit-panel-picker">
+              <text>{{editingWorker.projectName || '请选择'}}</text>
+              <text class="edit-panel-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">作业类型</text>
+          <picker mode="selector" range="{{workTypeOptions}}" range-key="typeName" value="{{editingWorker.workTypeIndex}}" bindchange="onWorkerWorkTypeChange">
+            <view class="edit-panel-picker">
+              <text>{{editingWorker.workTypeName || '请选择'}}</text>
+              <text class="edit-panel-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">加班(小时)</text>
+          <input
+            class="edit-panel-input"
+            type="digit"
+            value="{{editingWorker.overtimeHours}}"
+            bindinput="onWorkerOvertimeChange"
+            placeholder="0"
+          />
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">日薪(元)</text>
+          <input
+            class="edit-panel-input"
+            type="digit"
+            value="{{editingWorker.dailyWage}}"
+            bindinput="onWorkerDailyWageChange"
+            placeholder="0"
+          />
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">加班工资(元)</text>
+          <text class="edit-panel-value">{{editingWorker.overtimeWage}}</text>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">总工资(元)</text>
+          <text class="edit-panel-value edit-panel-total">{{editingWorker.totalWage}}</text>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">备注</text>
+          <input
+            class="edit-panel-input"
+            type="text"
+            value="{{editingWorker.remark || ''}}"
+            bindinput="onWorkerRemarkChange"
+            placeholder="选填"
+          />
+        </view>
+      </view>
+
+      <view class="edit-panel-footer">
+        <button class="btn-edit-cancel" bindtap="closeWorkerEdit">取消</button>
+        <button class="btn-edit-save" bindtap="saveWorkerEdit">保存</button>
+      </view>
+    </view>
+  </view>
+</view>
