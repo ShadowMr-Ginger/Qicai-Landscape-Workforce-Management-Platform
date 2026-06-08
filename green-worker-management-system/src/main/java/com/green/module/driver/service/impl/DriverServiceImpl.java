@@ -15,6 +15,7 @@ import com.green.module.driver.dto.UpdateDriverDTO;
 import com.green.module.driver.entity.DriverEntity;
 import com.green.module.driver.mapper.DriverMapper;
 import com.green.module.driver.service.DriverService;
+import com.green.module.anomaly.service.AnomalyRecordService;
 import com.green.module.driver.vo.DriverDetailVO;
 import com.green.module.driver.vo.DriverListVO;
 import com.green.security.JwtTokenProvider;
@@ -46,6 +47,7 @@ public class DriverServiceImpl implements DriverService {
     private final DriverAttendanceRecordMapper driverAttendanceRecordMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AnomalyRecordService anomalyRecordService;
 
     // ==================== 认证相关 ====================
 
@@ -117,6 +119,7 @@ public class DriverServiceImpl implements DriverService {
         entity.setIsActive(1);
         driverMapper.insert(entity);
         log.info("新增司机成功: driverId={}, name={}", entity.getId(), entity.getRealName());
+        anomalyRecordService.checkDriverNameDuplicate(entity.getId(), entity.getRealName());
         return entity.getId();
     }
 
@@ -162,6 +165,7 @@ public class DriverServiceImpl implements DriverService {
         BeanUtils.copyProperties(dto, entity);
         driverMapper.updateById(entity);
         log.info("修改司机信息成功: driverId={}", id);
+        anomalyRecordService.checkDriverNameDuplicate(entity.getId(), entity.getRealName());
     }
 
     @Override

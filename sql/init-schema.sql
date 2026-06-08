@@ -282,6 +282,35 @@ CREATE TABLE `operation_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
 
 -- ============================================================
+-- 13. 异常记录表 (anomaly_records)
+-- 说明: 存储系统检测到的各类异常，供管理员人工复核处理
+-- ============================================================
+CREATE TABLE `anomaly_records` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `type` TINYINT NOT NULL COMMENT '异常类型: 1-重名, 2-重复考勤, 3-超长加班',
+    `sub_type` TINYINT DEFAULT NULL COMMENT '子类型: 1-工人, 2-司机',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态: 0-未处理, 1-已处理',
+    `title` VARCHAR(200) NOT NULL COMMENT '异常标题',
+    `description` VARCHAR(500) DEFAULT NULL COMMENT '异常描述',
+    `related_id` BIGINT DEFAULT NULL COMMENT '主要关联ID',
+    `related_id2` BIGINT DEFAULT NULL COMMENT '次要关联ID',
+    `related_date` DATE DEFAULT NULL COMMENT '关联日期',
+    `link_url` VARCHAR(255) DEFAULT NULL COMMENT '导航链接',
+    `resolved_time` DATETIME DEFAULT NULL COMMENT '处理时间',
+    `resolved_by` BIGINT DEFAULT NULL COMMENT '处理人ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除标志',
+    `version` INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    PRIMARY KEY (`id`),
+    KEY `idx_type_status` (`type`, `status`),
+    KEY `idx_related` (`related_id`, `related_date`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='异常记录表';
+
+-- ============================================================
 -- 外键约束（在表创建后添加，避免依赖问题）
 -- ============================================================
 

@@ -15,11 +15,13 @@ import {
   Settings,
   CalendarIcon,
   Pencil,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   getSystemConfig,
@@ -30,6 +32,7 @@ import {
   getWorkerList,
   getDriverList,
   getSystemLogs,
+  getUnresolvedAnomalyCount,
 } from "@/lib/api";
 
 function getToday(): string {
@@ -102,6 +105,7 @@ export default function DashboardPage() {
   const [driverAttToday, setDriverAttToday] = useState(0);
   const [workerTotal, setWorkerTotal] = useState(0);
   const [driverTotal, setDriverTotal] = useState(0);
+  const [unresolvedAnomalies, setUnresolvedAnomalies] = useState(0);
   const [recentLogs, setRecentLogs] = useState<LogItem[]>([]);
 
   useEffect(() => {
@@ -118,13 +122,15 @@ export default function DashboardPage() {
       getDriverAttendanceRecords({ dateFrom: today, dateTo: today, pageNum: 1, pageSize: 1 }),
       getWorkerList({ isEmployed: 1, pageNum: 1, pageSize: 1 }),
       getDriverList({ isActive: 1, pageNum: 1, pageSize: 1 }),
+      getUnresolvedAnomalyCount(),
       getSystemLogs({ pageNum: 1, pageSize: 5 }),
-    ]).then(([batchRes, workerAttRes, driverAttRes, workerRes, driverRes, logRes]) => {
+    ]).then(([batchRes, workerAttRes, driverAttRes, workerRes, driverRes, anomalyRes, logRes]) => {
       setPendingBatches(batchRes.data?.total ?? 0);
       setWorkerAttToday(workerAttRes.data?.total ?? 0);
       setDriverAttToday(driverAttRes.data?.total ?? 0);
       setWorkerTotal(workerRes.data?.total ?? 0);
       setDriverTotal(driverRes.data?.total ?? 0);
+      setUnresolvedAnomalies(anomalyRes.data?.count ?? 0);
       setRecentLogs(logRes.data?.records || []);
     }).catch(() => { /* ignore */ });
   }, []);
@@ -187,7 +193,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 统计卡片 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {/* 1. 待审核批次 */}
         <Card
           className="border-0 shadow-sm rounded-2xl hover:shadow-md transition-shadow cursor-pointer"
@@ -269,6 +275,35 @@ export default function DashboardPage() {
               </div>
               <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
                 <UserCircle className="w-5 h-5 text-emerald-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 5. 未处理异常 */}
+        <Card
+          className={cn(
+            "border-0 shadow-sm rounded-2xl hover:shadow-md transition-shadow cursor-pointer",
+            unresolvedAnomalies > 0 && "ring-1 ring-red-200 dark:ring-red-900/50"
+          )}
+          onClick={() => router.push("/anomalies")}
+        >
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">未处理异常</p>
+                <p className={cn("text-3xl font-bold", unresolvedAnomalies > 0 ? "text-red-600 dark:text-red-400" : "text-foreground")}>
+                  {unresolvedAnomalies}
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                  {unresolvedAnomalies > 0 ? "需要人工复核" : "暂无异常"}
+                </p>
+              </div>
+              <div className={cn(
+                "w-11 h-11 rounded-xl flex items-center justify-center",
+                unresolvedAnomalies > 0 ? "bg-red-50 dark:bg-red-950/30" : "bg-gray-50 dark:bg-gray-950/30"
+              )}>
+                <AlertTriangle className={cn("w-5 h-5", unresolvedAnomalies > 0 ? "text-red-600 dark:text-red-400" : "text-gray-500")} />
               </div>
             </div>
           </CardContent>

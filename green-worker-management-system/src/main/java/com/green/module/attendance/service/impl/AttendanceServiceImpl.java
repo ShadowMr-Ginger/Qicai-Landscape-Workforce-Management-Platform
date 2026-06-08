@@ -21,6 +21,7 @@ import com.green.module.attendance.mapper.WorkerAttendanceRecordMapper;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
 import com.green.module.attendance.mapper.WorkTypeMapper;
 import com.green.module.attendance.service.AttendanceService;
+import com.green.module.anomaly.service.AnomalyRecordService;
 import com.green.module.attendance.vo.*;
 import com.green.module.driver.entity.DriverEntity;
 import com.green.module.driver.mapper.DriverMapper;
@@ -66,6 +67,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final AdminMapper adminMapper;
     private final WorkTypeMapper workTypeMapper;
     private final com.green.module.system.service.SystemConfigService systemConfigService;
+    private final AnomalyRecordService anomalyRecordService;
 
     // ==================== 考勤批次 ====================
 
@@ -305,6 +307,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         // 生成/更新司机考勤记录
         upsertDriverAttendanceRecord(batch);
 
+        // 异常检测
+        anomalyRecordService.checkAttendanceDuplicateAfterBatchReview(id);
+        anomalyRecordService.checkOvertimeAfterBatchReview(id);
+
         log.info("考勤批次审核通过: batchId={}", id);
     }
 
@@ -415,6 +421,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         // 生成/更新司机考勤记录
         upsertDriverAttendanceRecord(batch);
+
+        // 异常检测
+        anomalyRecordService.checkAttendanceDuplicateAfterBatchReview(batchId);
+        anomalyRecordService.checkOvertimeAfterBatchReview(batchId);
 
         log.info("考勤批次审核通过(含修改): batchId={}", batchId);
     }

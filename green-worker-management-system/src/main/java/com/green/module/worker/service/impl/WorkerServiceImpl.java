@@ -15,6 +15,7 @@ import com.green.module.worker.dto.UpdateWorkerDTO;
 import com.green.module.worker.dto.WorkerQuery;
 import com.green.module.worker.entity.WorkerEntity;
 import com.green.module.worker.mapper.WorkerMapper;
+import com.green.module.anomaly.service.AnomalyRecordService;
 import com.green.module.worker.service.WorkerService;
 import com.green.module.worker.vo.WorkerDetailVO;
 import com.green.module.worker.vo.WorkerListVO;
@@ -43,6 +44,7 @@ public class WorkerServiceImpl implements WorkerService {
     private final GroupMapper groupMapper;
     private final ProjectMapper projectMapper;
     private final WorkerAttendanceRecordMapper workerAttendanceRecordMapper;
+    private final AnomalyRecordService anomalyRecordService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,6 +65,7 @@ public class WorkerServiceImpl implements WorkerService {
         entity.setCreatedByType(1);
         workerMapper.insert(entity);
         log.info("新增工人成功: workerId={}, name={}", entity.getId(), entity.getName());
+        anomalyRecordService.checkWorkerNameDuplicate(entity.getId(), entity.getName());
         return entity.getId();
     }
 
@@ -123,6 +126,7 @@ public class WorkerServiceImpl implements WorkerService {
         BeanUtils.copyProperties(dto, entity);
         workerMapper.updateById(entity);
         log.info("修改工人信息成功: workerId={}", id);
+        anomalyRecordService.checkWorkerNameDuplicate(entity.getId(), entity.getName());
     }
 
     @Override

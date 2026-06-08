@@ -19,6 +19,7 @@ import {
   List,
   FolderTree,
   FileText,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,7 @@ const navItems: NavItem[] = [
   },
   { title: "工资结算", href: "/wages", icon: Wallet },
   { title: "项目管理", href: "/projects", icon: Building2 },
+  { title: "异常记录", href: "/anomalies", icon: AlertTriangle },
   { title: "系统日志", href: "/system-logs", icon: FileText },
   { title: "系统设置", href: "/settings", icon: Settings },
 ];

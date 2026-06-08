@@ -377,4 +377,36 @@ export async function getSystemLogs(params: { pageNum?: number; pageSize?: numbe
   return res.data;
 }
 
+// ==================== 异常记录 ====================
+
+export async function getAnomalyList(params: { pageNum?: number; pageSize?: number; type?: number; subType?: number; status?: number; keyword?: string }) {
+  const res = await api.get('/admin/anomalies', { params });
+  return res.data;
+}
+
+export async function getAnomalyDetail(id: number) {
+  const res = await api.get(`/admin/anomalies/${id}`);
+  return res.data;
+}
+
+export async function resolveAnomaly(id: number) {
+  const res = await api.put(`/admin/anomalies/${id}/resolve`);
+  return res.data;
+}
+
+export async function deleteAnomaly(id: number) {
+  const res = await api.delete(`/admin/anomalies/${id}`);
+  return res.data;
+}
+
+export async function getUnresolvedAnomalyCount() {
+  const res = await api.get('/admin/anomalies/stats/unresolved');
+  return res.data;
+}
+
+export async function runGlobalAnomalyCheck() {
+  const res = await api.post('/admin/anomalies/global-check');
+  return res.data;
+}
+
 export default api;
