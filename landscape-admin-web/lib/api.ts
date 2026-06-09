@@ -256,6 +256,26 @@ export async function deleteProject(id: number) {
   return res.data;
 }
 
+export async function closeProject(id: number) {
+  const res = await api.post(`/admin/projects/${id}/close`);
+  return res.data;
+}
+
+export async function reopenProject(id: number) {
+  const res = await api.post(`/admin/projects/${id}/reopen`);
+  return res.data;
+}
+
+export async function getProjectCalendar(id: number, year: number, month: number) {
+  const res = await api.get(`/admin/projects/${id}/calendar`, { params: { year, month } });
+  return res.data;
+}
+
+export async function getTodayStats() {
+  const res = await api.get('/admin/projects/today-stats');
+  return res.data;
+}
+
 export async function getWorkerAttendanceRecords(params: Record<string, unknown>) {
   const res = await api.get('/admin/attendance/worker-records', { params });
   return res.data;

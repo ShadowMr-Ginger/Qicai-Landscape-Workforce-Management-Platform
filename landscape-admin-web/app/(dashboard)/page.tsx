@@ -33,6 +33,7 @@ import {
   getDriverList,
   getSystemLogs,
   getUnresolvedAnomalyCount,
+  getTodayStats,
 } from "@/lib/api";
 
 function getToday(): string {
@@ -107,6 +108,10 @@ export default function DashboardPage() {
   const [driverTotal, setDriverTotal] = useState(0);
   const [unresolvedAnomalies, setUnresolvedAnomalies] = useState(0);
   const [recentLogs, setRecentLogs] = useState<LogItem[]>([]);
+  const [todayRevenue, setTodayRevenue] = useState(0);
+  const [todayPayableWage, setTodayPayableWage] = useState(0);
+  const [todayNetProfit, setTodayNetProfit] = useState(0);
+  const [todayProfit, setTodayProfit] = useState(0);
 
   useEffect(() => {
     getSystemConfig("start_work_date").then((res) => {
@@ -124,7 +129,8 @@ export default function DashboardPage() {
       getDriverList({ isActive: 1, pageNum: 1, pageSize: 1 }),
       getUnresolvedAnomalyCount(),
       getSystemLogs({ pageNum: 1, pageSize: 5 }),
-    ]).then(([batchRes, workerAttRes, driverAttRes, workerRes, driverRes, anomalyRes, logRes]) => {
+      getTodayStats(),
+    ]).then(([batchRes, workerAttRes, driverAttRes, workerRes, driverRes, anomalyRes, logRes, statsRes]) => {
       setPendingBatches(batchRes.data?.total ?? 0);
       setWorkerAttToday(workerAttRes.data?.total ?? 0);
       setDriverAttToday(driverAttRes.data?.total ?? 0);
@@ -132,6 +138,12 @@ export default function DashboardPage() {
       setDriverTotal(driverRes.data?.total ?? 0);
       setUnresolvedAnomalies(anomalyRes.data?.count ?? 0);
       setRecentLogs(logRes.data?.records || []);
+      if (statsRes.code === 200 && statsRes.data) {
+        setTodayRevenue(statsRes.data.todayRevenue ?? 0);
+        setTodayPayableWage(statsRes.data.todayPayableWage ?? 0);
+        setTodayNetProfit(statsRes.data.todayNetProfit ?? 0);
+        setTodayProfit(statsRes.data.todayProfit ?? 0);
+      }
     }).catch(() => { /* ignore */ });
   }, []);
 
@@ -190,6 +202,66 @@ export default function DashboardPage() {
             </Button>
           </Link>
         </div>
+      </div>
+
+      {/* 财务概览 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-0 shadow-sm rounded-2xl hover:shadow-md transition-shadow bg-gradient-to-br from-green-50 to-white dark:from-green-950/20 dark:to-card">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-green-600 dark:text-green-400 mb-1 font-medium">今日营业额</p>
+                <p className="text-3xl font-bold text-foreground">¥{todayRevenue.toFixed(2)}</p>
+                <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1 font-medium">
+                  毛利润 ¥{todayProfit.toFixed(2)}
+                </p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm rounded-2xl hover:shadow-md transition-shadow bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-amber-600 dark:text-amber-400 mb-1 font-medium">今日待付工资</p>
+                <p className="text-3xl font-bold text-foreground">¥{todayPayableWage.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">工人 + 司机</p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={cn(
+          "border-0 shadow-sm rounded-2xl hover:shadow-md transition-shadow bg-gradient-to-br",
+          todayNetProfit >= 0
+            ? "from-blue-50 to-white dark:from-blue-950/20 dark:to-card"
+            : "from-red-50 to-white dark:from-red-950/20 dark:to-card"
+        )}>
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className={cn("text-sm mb-1 font-medium", todayNetProfit >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400")}>
+                  今日净利润
+                </p>
+                <p className="text-3xl font-bold text-foreground">¥{todayNetProfit.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">利润 - 待付工资</p>
+              </div>
+              <div className={cn(
+                "w-11 h-11 rounded-xl flex items-center justify-center",
+                todayNetProfit >= 0 ? "bg-blue-100 dark:bg-blue-900/40" : "bg-red-100 dark:bg-red-900/40"
+              )}>
+                <TrendingUp className={cn("w-5 h-5", todayNetProfit >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400")} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 统计卡片 */}

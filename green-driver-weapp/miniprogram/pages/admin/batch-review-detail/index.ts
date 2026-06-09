@@ -16,6 +16,8 @@ Page({
     attendanceTypeOptions: ['全天', '半天'],
     projectOptions: [] as any[],
     workTypeOptions: [] as any[],
+    // 批量设置项目
+    batchProjectIndex: -1,
   },
 
   onLoad(options: any) {
@@ -94,7 +96,11 @@ Page({
     if (this.data.batch?.status !== 0) return
     const index = e.currentTarget.dataset.index
     const worker = this.data.workers[index]
-    const projectIndex = this.data.projectOptions.findIndex((p: any) => p.id === worker.projectId)
+    let projectIndex = this.data.projectOptions.findIndex((p: any) => p.id === worker.projectId)
+    // 如果工人没有分配项目，默认选中系统默认项目
+    if (projectIndex < 0) {
+      projectIndex = this.data.projectOptions.findIndex((p: any) => p.isSystem === 1 || p.projectName === '默认')
+    }
     const workTypeIndex = this.data.workTypeOptions.findIndex((wt: any) => wt.id === worker.workTypeId)
     this.setData({
       editPanelOpen: true,
@@ -155,7 +161,7 @@ Page({
     })
   },
 
-  // 工地项目选择变化
+  // 工地项目选择变化（单工人编辑）
   onWorkerProjectChange(e: any) {
     const idx = parseInt(e.detail.value)
     const project = this.data.projectOptions[idx]
@@ -169,6 +175,28 @@ Page({
         },
       })
     }
+  },
+
+  // 批量设置项目选择变化
+  onBatchProjectChange(e: any) {
+    this.setData({ batchProjectIndex: parseInt(e.detail.value) })
+  },
+
+  // 应用批量项目设置
+  applyBatchProject() {
+    const idx = this.data.batchProjectIndex
+    if (idx < 0 || idx >= this.data.projectOptions.length) {
+      wx.showToast({ title: '请先选择项目', icon: 'none' })
+      return
+    }
+    const project = this.data.projectOptions[idx]
+    const workers = this.data.workers.map((w: any) => ({
+      ...w,
+      projectId: project.id,
+      projectName: project.projectName,
+    }))
+    this.setData({ workers, batchProjectIndex: -1 })
+    wx.showToast({ title: `已批量设置为${project.projectName}`, icon: 'success' })
   },
 
   // 作业类型选择变化

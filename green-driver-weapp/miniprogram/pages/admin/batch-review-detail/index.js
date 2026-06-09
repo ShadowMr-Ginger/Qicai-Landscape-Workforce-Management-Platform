@@ -24,6 +24,10 @@ Page({
         editingWorkerIndex: -1,
         editingWorker: null,
         attendanceTypeOptions: ['全天', '半天'],
+        projectOptions: [],
+        workTypeOptions: [],
+        // 批量设置项目
+        batchProjectIndex: -1,
     },
     onLoad(options) {
         const id = parseInt(options.id);
@@ -36,10 +40,16 @@ Page({
             try {
                 const detail = yield (0, api_1.getAdminBatchDetail)(id);
                 const driverRecord = detail.driverRecord || this.buildDefaultDriverRecord(detail);
+                const [projectOptions, workTypeOptions] = yield Promise.all([
+                    (0, api_1.getAdminProjects)().catch(() => []),
+                    (0, api_1.getAdminWorkTypes)().catch(() => []),
+                ]);
                 this.setData({
                     batch: detail,
                     workers: detail.workerRecords || [],
                     driverRecord,
+                    projectOptions: projectOptions || [],
+                    workTypeOptions: workTypeOptions || [],
                 });
             }
             catch (err) {
@@ -68,11 +78,19 @@ Page({
     onDriverOvertimeChange(e) {
         const record = Object.assign(Object.assign({}, this.data.driverRecord), { overtimeHours: parseFloat(e.detail.value) || 0 });
         const rate = record.overtimeHourlyRate || 0;
-        const dailyWage = record.baseDailySalary || record.dailyWage || 0;
+        const dailyWage = record.dailyWage || 0;
         const overtimeWage = Math.round(rate * record.overtimeHours * 100) / 100;
         const totalWage = Math.round((dailyWage + overtimeWage) * 100) / 100;
         this.setData({
             driverRecord: Object.assign(Object.assign({}, record), { dailyWage, overtimeWage, totalWage }),
+        });
+    },
+    onDriverDailyWageChange(e) {
+        const dailyWage = parseFloat(e.detail.value) || 0;
+        const overtimeWage = this.data.driverRecord.overtimeWage || 0;
+        const totalWage = Math.round((dailyWage + overtimeWage) * 100) / 100;
+        this.setData({
+            driverRecord: Object.assign(Object.assign({}, this.data.driverRecord), { dailyWage, totalWage }),
         });
     },
     onDriverRemarkChange(e) {
@@ -87,10 +105,16 @@ Page({
             return;
         const index = e.currentTarget.dataset.index;
         const worker = this.data.workers[index];
+        let projectIndex = this.data.projectOptions.findIndex((p) => p.id === worker.projectId);
+        // 如果工人没有分配项目，默认选中系统默认项目
+        if (projectIndex < 0) {
+            projectIndex = this.data.projectOptions.findIndex((p) => p.isSystem === 1 || p.projectName === '默认');
+        }
+        const workTypeIndex = this.data.workTypeOptions.findIndex((wt) => wt.id === worker.workTypeId);
         this.setData({
             editPanelOpen: true,
             editingWorkerIndex: index,
-            editingWorker: Object.assign({}, worker),
+            editingWorker: Object.assign(Object.assign({}, worker), { projectIndex: projectIndex >= 0 ? projectIndex : 0, workTypeIndex: workTypeIndex >= 0 ? workTypeIndex : 0 }),
         });
     },
     // 阻止事件冒泡（无需额外逻辑）
@@ -134,6 +158,42 @@ Page({
         this.setData({
             editingWorker: Object.assign(Object.assign({}, this.data.editingWorker), { remark: e.detail.value }),
         });
+    },
+    // 工地项目选择变化（单工人编辑）
+    onWorkerProjectChange(e) {
+        const idx = parseInt(e.detail.value);
+        const project = this.data.projectOptions[idx];
+        if (project) {
+            this.setData({
+                editingWorker: Object.assign(Object.assign({}, this.data.editingWorker), { projectId: project.id, projectName: project.projectName, projectIndex: idx }),
+            });
+        }
+    },
+    // 批量设置项目选择变化
+    onBatchProjectChange(e) {
+        this.setData({ batchProjectIndex: parseInt(e.detail.value) });
+    },
+    // 应用批量项目设置
+    applyBatchProject() {
+        const idx = this.data.batchProjectIndex;
+        if (idx < 0 || idx >= this.data.projectOptions.length) {
+            wx.showToast({ title: '请先选择项目', icon: 'none' });
+            return;
+        }
+        const project = this.data.projectOptions[idx];
+        const workers = this.data.workers.map((w) => (Object.assign(Object.assign({}, w), { projectId: project.id, projectName: project.projectName })));
+        this.setData({ workers, batchProjectIndex: -1 });
+        wx.showToast({ title: `已批量设置为${project.projectName}`, icon: 'success' });
+    },
+    // 作业类型选择变化
+    onWorkerWorkTypeChange(e) {
+        const idx = parseInt(e.detail.value);
+        const wt = this.data.workTypeOptions[idx];
+        if (wt) {
+            this.setData({
+                editingWorker: Object.assign(Object.assign({}, this.data.editingWorker), { workTypeId: wt.id, workTypeName: wt.typeName, workTypeIndex: idx }),
+            });
+        }
     },
     // 重算工人工资
     recalcWorkerWages(worker) {
@@ -193,6 +253,7 @@ Page({
                                 payload.driverRecord = {
                                     recordId: driverRecord.id,
                                     overtimeHours: driverRecord.overtimeHours,
+                                    dailyWage: driverRecord.dailyWage,
                                     remark: driverRecord.remark,
                                 };
                             }

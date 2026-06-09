@@ -73,6 +73,19 @@
 
     <view class="worker-section">
       <text class="section-title">工人名单（{{workers.length}}人）</text>
+
+      <!-- 批量设置项目 -->
+      <view class="batch-project-bar" wx:if="{{batch.status === 0 && projectOptions.length > 0}}">
+        <text class="batch-project-label">批量设置项目</text>
+        <picker mode="selector" range="{{projectOptions}}" range-key="projectName" value="{{batchProjectIndex >= 0 ? batchProjectIndex : 0}}" bindchange="onBatchProjectChange">
+          <view class="batch-project-picker">
+            <text>{{batchProjectIndex >= 0 ? projectOptions[batchProjectIndex].projectName : '请选择项目'}}</text>
+            <text class="batch-project-arrow">›</text>
+          </view>
+        </picker>
+        <view class="batch-project-btn" bindtap="applyBatchProject">应用</view>
+      </view>
+
       <view class="worker-list">
         <view
           class="worker-item {{batch.status === 0 ? 'worker-item-editable' : ''}}"
@@ -87,6 +100,7 @@
             <text class="worker-type">{{w.attendanceTypeText || (w.attendanceType === 1 ? '半天' : '全天')}}</text>
           </view>
           <view class="worker-meta">
+            <text wx:if="{{w.projectName}}" class="project-tag">{{w.projectName}}</text>
             <text wx:if="{{w.workTypeName}}">{{w.workTypeName}}</text>
             <text wx:if="{{w.overtimeHours > 0}}">加班{{w.overtimeHours}}h</text>
             <text>工资{{w.totalWage}}元</text>

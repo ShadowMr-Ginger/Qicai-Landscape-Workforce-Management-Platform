@@ -156,6 +156,58 @@
   margin-top: 24rpx;
 }
 
+.batch-project-bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background: #f0fdf4;
+  border: 1rpx solid #86efac;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.batch-project-label {
+  font-size: 24rpx;
+  color: #166534;
+  flex-shrink: 0;
+}
+
+.batch-project-picker {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  font-size: 26rpx;
+  color: #1f2937;
+}
+
+.batch-project-arrow {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+.batch-project-btn {
+  flex-shrink: 0;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 12rpx 24rpx;
+  border-radius: 12rpx;
+}
+
+.worker-meta .project-tag {
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+}
+
 .worker-list {
   display: flex;
   flex-direction: column;

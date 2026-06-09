@@ -151,7 +151,8 @@ export default function BatchesPage() {
   const [detailBatch, setDetailBatch] = useState<any>(null);
   const [detailRecords, setDetailRecords] = useState<BatchWorkerRecord[]>([]);
   const [detailDriverRecord, setDetailDriverRecord] = useState<BatchDriverRecord | null>(null);
-  const [projectOptions, setProjectOptions] = useState<{ id: number; projectName: string }[]>([]);
+  const [projectOptions, setProjectOptions] = useState<{ id: number; projectName: string; isSystem?: number }[]>([]);
+  const [defaultProjectId, setDefaultProjectId] = useState<number | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [manageMode, setManageMode] = useState(false);
   const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
@@ -229,6 +230,10 @@ export default function BatchesPage() {
       const res = await getAllProjects();
       if (res.code === 200 && res.data) {
         setProjectOptions(res.data);
+        const defaultProject = res.data.find((p: any) => p.isSystem === 1 || p.projectName === '默认');
+        if (defaultProject) {
+          setDefaultProjectId(defaultProject.id);
+        }
       }
     } catch { /* ignore */ }
   };
@@ -290,7 +295,27 @@ export default function BatchesPage() {
       const res = await getAttendanceBatchDetail(batch.id);
       if (res.code === 200 && res.data) {
         setDetailBatch(res.data);
-        setDetailRecords(res.data.workerRecords || []);
+        // 先加载项目列表以获取默认项目
+        let defaultPid: number | null = null;
+        let defaultPName = '';
+        try {
+          const projectRes = await getAllProjects();
+          if (projectRes.code === 200 && projectRes.data) {
+            setProjectOptions(projectRes.data);
+            const defaultProject = projectRes.data.find((p: any) => p.isSystem === 1 || p.projectName === '默认');
+            if (defaultProject) {
+              defaultPid = defaultProject.id;
+              defaultPName = defaultProject.projectName;
+              setDefaultProjectId(defaultProject.id);
+            }
+          }
+        } catch { /* ignore */ }
+        const records = (res.data.workerRecords || []).map((r: any) => ({
+          ...r,
+          projectId: r.projectId ?? defaultPid,
+          projectName: r.projectName ?? defaultPName,
+        }));
+        setDetailRecords(records);
         const rawDriver = res.data.driverRecord;
         if (rawDriver) {
           setDetailDriverRecord({
@@ -312,7 +337,6 @@ export default function BatchesPage() {
           setDetailDriverRecord(null);
         }
         await fetchWorkTypes();
-        await fetchProjects();
         setDetailOpen(true);
       }
     } catch (err: any) {
