@@ -19,7 +19,7 @@ jobs:
             -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'REMOTE_EOF'
           cd /d C:\Users\ginger\qicai
-          git -c http.sslBackend=openssl pull origin main
+          git -c http.proxy= -c https.proxy= -c http.sslBackend=openssl pull origin main
           cd green-worker-management-system
           mvn clean package -DskipTests
           powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
