@@ -228,7 +228,8 @@ public class DriverServiceImpl implements DriverService {
                 .eq(DriverEntity::getIsActive, 1)
                 .ne(currentId != null, DriverEntity::getId, currentId);
         if (driverMapper.selectCount(wrapper) > 0) {
-            throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS, "司机姓名已存在：" + realName);
+            throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS,
+                    "已存在同名司机，如需添加，请修改司机名字或删除同名司机");
         }
     }
 

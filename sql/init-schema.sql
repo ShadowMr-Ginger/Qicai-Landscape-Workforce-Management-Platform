@@ -147,10 +147,10 @@ CREATE TABLE `workers` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name` (`name`),
     KEY `idx_group_id` (`group_id`),
     KEY `idx_is_employed` (`is_employed`),
     KEY `idx_default_project_id` (`default_project_id`),
-    KEY `idx_name` (`name`),
     KEY `idx_phone` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工人表';
 

@@ -49,15 +49,18 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(CreateWorkerDTO dto) {
+        // 工人姓名唯一：避免同名覆盖
+        checkNameUnique(null, dto.getName());
+
         WorkerEntity entity = new WorkerEntity();
         entity.setName(dto.getName());
         entity.setGender(dto.getGender());
         entity.setGroupId(dto.getGroupId());
-        entity.setPhone(dto.getPhone());
-        entity.setIdCard(dto.getIdCard());
+        entity.setPhone(blankToNull(dto.getPhone()));
+        entity.setIdCard(blankToNull(dto.getIdCard()));
         entity.setBaseDailySalary(dto.getBaseDailySalary());
         entity.setOvertimeHourlyRate(dto.getOvertimeHourlyRate());
-        entity.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+        entity.setEmergencyContactPhone(blankToNull(dto.getEmergencyContactPhone()));
         entity.setIsSkilledWorker(dto.getIsSkilledWorker());
         entity.setDefaultProjectId(dto.getDefaultProjectId());
         // 新增工人一定是在职的
@@ -65,7 +68,6 @@ public class WorkerServiceImpl implements WorkerService {
         entity.setCreatedByType(1);
         workerMapper.insert(entity);
         log.info("新增工人成功: workerId={}, name={}", entity.getId(), entity.getName());
-        anomalyRecordService.checkWorkerNameDuplicate(entity.getId(), entity.getName());
         return entity.getId();
     }
 
@@ -122,11 +124,17 @@ public class WorkerServiceImpl implements WorkerService {
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "工人不存在");
         }
+        // 工人姓名唯一：如果修改了姓名，需要校验
+        if (!dto.getName().equals(entity.getName())) {
+            checkNameUnique(id, dto.getName());
+        }
 
         BeanUtils.copyProperties(dto, entity);
+        entity.setPhone(blankToNull(entity.getPhone()));
+        entity.setIdCard(blankToNull(entity.getIdCard()));
+        entity.setEmergencyContactPhone(blankToNull(entity.getEmergencyContactPhone()));
         workerMapper.updateById(entity);
         log.info("修改工人信息成功: workerId={}", id);
-        anomalyRecordService.checkWorkerNameDuplicate(entity.getId(), entity.getName());
     }
 
     @Override
@@ -153,24 +161,40 @@ public class WorkerServiceImpl implements WorkerService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "工人不存在");
         }
 
-        // 1. 查询关联的考勤记录数量
-        LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> countWrapper = new LambdaQueryWrapper<>();
-        countWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
-        Long attendanceCount = workerAttendanceRecordMapper.selectCount(countWrapper);
-
-        // 2. 删除关联的考勤记录
+        // 直接删除关联考勤记录（逻辑删除），返回实际删除数，避免 selectCount 统计异常
+        LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
+        long attendanceCount = workerAttendanceRecordMapper.delete(deleteWrapper);
         if (attendanceCount > 0) {
-            LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
-            deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
-            workerAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除工人关联考勤记录: workerId={}, count={}", id, attendanceCount);
         }
 
-        // 3. 删除工人
+        // 删除工人
         workerMapper.deleteById(id);
         log.info("删除工人成功: workerId={}", id);
 
-        return attendanceCount.intValue();
+        return (int) attendanceCount;
+    }
+
+    /**
+     * 将空白字符串转为 null
+     */
+    private String blankToNull(String value) {
+        return StringUtils.hasText(value) ? value : null;
+    }
+
+    /**
+     * 校验工人姓名唯一性
+     */
+    private void checkNameUnique(Long currentId, String name) {
+        LambdaQueryWrapper<WorkerEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(WorkerEntity::getName, name)
+                .eq(WorkerEntity::getIsEmployed, 1)
+                .ne(currentId != null, WorkerEntity::getId, currentId);
+        if (workerMapper.selectCount(wrapper) > 0) {
+            throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS,
+                    "已存在同名工人，如需添加，请修改工人名字或删除同名工人");
+        }
     }
 
     /**
