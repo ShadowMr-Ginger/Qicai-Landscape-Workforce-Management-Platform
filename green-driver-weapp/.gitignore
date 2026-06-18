@@ -1,0 +1,11 @@
+# 微信开发者工具私有配置（含个人本地设置，不上传）
+miniprogram/project.private.config.json
+
+# 依赖与构建产物
+node_modules/
+miniprogram_npm/
+
+# 日志与临时文件
+*.log
+.DS_Store
+Thumbs.db
