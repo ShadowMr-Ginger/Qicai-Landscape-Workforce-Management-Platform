@@ -16,8 +16,13 @@ CREATE TABLE `groups` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `group_name` VARCHAR(50) NOT NULL COMMENT '组别名称',
     `description` VARCHAR(200) DEFAULT NULL COMMENT '组别描述',
+    `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统组: 0-否, 1-是',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    `version` INT NOT NULL DEFAULT 1 COMMENT '版本号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_group_name` (`group_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组别表';
@@ -32,7 +37,13 @@ CREATE TABLE `work_types` (
     `description` VARCHAR(200) DEFAULT NULL COMMENT '工作类型描述',
     `is_active` TINYINT NOT NULL DEFAULT 1 COMMENT '是否启用: 1-启用, 0-禁用',
     `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序序号',
+    `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统类型: 0-否, 1-是',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    `version` INT NOT NULL DEFAULT 1 COMMENT '版本号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_type_name` (`type_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工作类型表';
@@ -88,6 +99,8 @@ CREATE TABLE `drivers` (
     `real_name` VARCHAR(50) NOT NULL COMMENT '姓名',
     `gender` TINYINT NOT NULL DEFAULT 1 COMMENT '性别: 1-男, 2-女',
     `phone` VARCHAR(20) NOT NULL COMMENT '手机号',
+    `id_card` VARCHAR(18) DEFAULT NULL COMMENT '身份证号',
+    `emergency_contact_phone` VARCHAR(20) DEFAULT NULL COMMENT '紧急联系人电话',
     `base_daily_salary` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '基础日薪(元)',
     `overtime_hourly_rate` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '加班时薪(元/小时)',
     `wx_openid` VARCHAR(100) DEFAULT NULL COMMENT '微信OpenID',
@@ -174,13 +187,13 @@ CREATE TABLE `attendance_batches` (
 
 -- ============================================================
 -- 9. 工人考勤记录表 (worker_attendance_records)
--- 说明: 工人的每日考勤记录，直接归属批次
--- 核心约束: 一个工人每天只有一条考勤记录
+-- 说明: 工人的每日考勤记录，审核通过后由批次明细写入
+-- 核心约束: 允许一个工人同一天存在多条考勤记录，用于异常检测
 -- 工资冗余字段: 审核时计算并写入，避免重复计算
 -- ============================================================
 CREATE TABLE `worker_attendance_records` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `batch_id` BIGINT DEFAULT NULL COMMENT '所属考勤批次ID（审核通过后解绑）',
+    `batch_id` BIGINT DEFAULT NULL COMMENT '来源考勤批次ID（用于追溯）',
     `driver_id` BIGINT DEFAULT NULL COMMENT '审核司机ID',
     `worker_id` BIGINT NOT NULL COMMENT '工人ID',
     `project_id` BIGINT DEFAULT NULL COMMENT '分配的项目ID(审核时确定)',
@@ -198,7 +211,6 @@ CREATE TABLE `worker_attendance_records` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_worker_date` (`worker_id`, `attendance_date`) COMMENT '核心约束：一个工人每天只有一条考勤记录',
     KEY `idx_batch_id` (`batch_id`),
     KEY `idx_worker_id` (`worker_id`),
     KEY `idx_project_id` (`project_id`),
@@ -210,7 +222,7 @@ CREATE TABLE `worker_attendance_records` (
 
 -- ============================================================
 -- 10. 司机考勤记录表 (driver_attendance_records)
--- 说明: 司机的每日考勤记录，每天固定全勤
+-- 说明: 司机的每日考勤记录，审核通过后由批次明细写入
 -- 工资冗余字段: 系统生成时计算并写入
 -- ============================================================
 CREATE TABLE `driver_attendance_records` (
@@ -231,12 +243,56 @@ CREATE TABLE `driver_attendance_records` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_driver_date` (`driver_id`, `attendance_date`) COMMENT '核心约束：一个司机每天只有一条考勤记录',
     KEY `idx_attendance_date` (`attendance_date`),
     KEY `idx_work_type_id` (`work_type_id`),
     KEY `idx_is_settled` (`is_settled`),
     KEY `idx_source_batch_id` (`source_batch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='司机考勤记录表';
+
+-- ============================================================
+-- 10.1 考勤批次工人明细临时表 (attendance_batch_worker_items)
+-- 说明: 保存待审核/已撤回批次中的工人考勤明细，审核通过后写入 worker_attendance_records
+-- ============================================================
+CREATE TABLE `attendance_batch_worker_items` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `batch_id` BIGINT NOT NULL COMMENT '所属考勤批次ID',
+    `worker_id` BIGINT NOT NULL COMMENT '工人ID',
+    `project_id` BIGINT DEFAULT NULL COMMENT '分配的项目ID',
+    `attendance_type` TINYINT NOT NULL DEFAULT 2 COMMENT '出勤类型: 1-半天, 2-全天',
+    `overtime_hours` DECIMAL(3,1) NOT NULL DEFAULT 0.0 COMMENT '加班时长(小时，0.5小时粒度)',
+    `work_type_id` BIGINT DEFAULT NULL COMMENT '工作类型ID',
+    `daily_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日基础工资(元)',
+    `overtime_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日加班工资(元)',
+    `total_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日总工资(元)',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_batch_id` (`batch_id`),
+    KEY `idx_worker_id` (`worker_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考勤批次工人明细临时表';
+
+-- ============================================================
+-- 10.2 考勤批次司机明细临时表 (attendance_batch_driver_items)
+-- 说明: 保存待审核/已撤回批次中的司机考勤明细，审核通过后写入 driver_attendance_records
+-- ============================================================
+CREATE TABLE `attendance_batch_driver_items` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `batch_id` BIGINT NOT NULL COMMENT '所属考勤批次ID',
+    `driver_id` BIGINT NOT NULL COMMENT '司机ID',
+    `attendance_date` DATE NOT NULL COMMENT '考勤日期',
+    `attendance_type` TINYINT NOT NULL DEFAULT 2 COMMENT '出勤类型: 固定2-全天',
+    `overtime_hours` DECIMAL(3,1) NOT NULL DEFAULT 0.0 COMMENT '加班时长(小时，0.5小时粒度)',
+    `daily_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日基础工资(元)',
+    `overtime_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日加班工资(元)',
+    `total_wage` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '当日总工资(元)',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_batch_id` (`batch_id`),
+    KEY `idx_driver_id` (`driver_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考勤批次司机明细临时表';
 
 -- ============================================================
 -- 11. 系统配置表 (system_configs)
@@ -282,7 +338,34 @@ CREATE TABLE `operation_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
 
 -- ============================================================
--- 13. 异常记录表 (anomaly_records)
+-- 13. 系统日志表 (system_logs)
+-- 说明: 记录管理员/司机的关键操作，用于审计和故障排查
+-- ============================================================
+CREATE TABLE `system_logs` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_type` VARCHAR(20) NOT NULL COMMENT '用户类型: ADMIN-管理员, DRIVER-司机',
+    `user_id` BIGINT DEFAULT NULL COMMENT '用户ID',
+    `user_name` VARCHAR(50) DEFAULT NULL COMMENT '用户姓名',
+    `action` VARCHAR(50) NOT NULL COMMENT '操作类型',
+    `target_type` VARCHAR(50) DEFAULT NULL COMMENT '操作对象类型',
+    `target_id` BIGINT DEFAULT NULL COMMENT '操作对象ID',
+    `detail` VARCHAR(1000) DEFAULT NULL COMMENT '详细内容',
+    `ip_address` VARCHAR(50) DEFAULT NULL COMMENT 'IP地址',
+    `result` VARCHAR(20) NOT NULL COMMENT '操作结果: SUCCESS-成功, FAIL-失败',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    `version` INT NOT NULL DEFAULT 1 COMMENT '版本号',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_type` (`user_type`),
+    KEY `idx_action` (`action`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统日志表';
+
+-- ============================================================
+-- 14. 异常记录表 (anomaly_records)
 -- 说明: 存储系统检测到的各类异常，供管理员人工复核处理
 -- ============================================================
 CREATE TABLE `anomaly_records` (
@@ -353,7 +436,7 @@ ALTER TABLE `driver_attendance_records`
 -- 1. 插入默认超级管理员 (密码: 123456，使用 BCrypt 加密后的示例值)
 -- 注意: 生产环境请重新生成密码
 INSERT INTO `admins` (`username`, `password`, `real_name`, `phone`, `role_type`, `is_active`) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKtWAn7P', '超级管理员', '13800138000', 1, 1);
+('admin', '$2b$10$9VU6HH87JmmG6Mh6ZcgvR.anONPjdDiyEFE.6mA4sHpRMgRkmRB3.', '超级管理员', '13800138000', 1, 1);
 
 -- 2. 插入默认工作类型
 INSERT INTO `work_types` (`type_name`, `description`, `sort_order`, `is_active`) VALUES
@@ -390,12 +473,12 @@ INSERT INTO `system_configs` (`config_key`, `config_value`, `description`) VALUE
 /*
 【核心索引说明】
 
-1. UK: worker_attendance_records.uk_worker_date (worker_id + attendance_date)
-   - 业务强约束：一个工人每天只能有一条考勤记录
-   - 从根本上杜绝重复考勤数据
+1. UK: worker_attendance_records 已移除 worker_id + attendance_date 唯一约束
+   - 业务允许一个工人同一天存在多条考勤记录
+   - 重复考勤由异常检测功能识别并提醒
 
-2. UK: driver_attendance_records.uk_driver_date (driver_id + attendance_date)
-   - 业务强约束：一个司机每天只能有一条考勤记录
+2. UK: driver_attendance_records 已移除 driver_id + attendance_date 唯一约束
+   - 业务允许一个司机同一天存在多条考勤记录
 
 3. UK: attendance_batches 无日期+司机唯一索引
    - 业务允许一个司机同一天提交多个批次（前一个被撤回后可重新提交）

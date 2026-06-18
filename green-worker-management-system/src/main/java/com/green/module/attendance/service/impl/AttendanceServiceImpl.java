@@ -14,9 +14,13 @@ import com.green.module.attendance.dto.UpdateDriverRecordDTO;
 import com.green.module.attendance.dto.UpdateWorkerRecordDTO;
 import com.green.module.attendance.dto.WorkerRecordQuery;
 import com.green.module.attendance.entity.AttendanceBatchEntity;
+import com.green.module.attendance.entity.AttendanceBatchWorkerItemEntity;
+import com.green.module.attendance.entity.AttendanceBatchDriverItemEntity;
 import com.green.module.attendance.entity.WorkerAttendanceRecordEntity;
 import com.green.module.attendance.entity.DriverAttendanceRecordEntity;
 import com.green.module.attendance.mapper.AttendanceBatchMapper;
+import com.green.module.attendance.mapper.AttendanceBatchWorkerItemMapper;
+import com.green.module.attendance.mapper.AttendanceBatchDriverItemMapper;
 import com.green.module.attendance.mapper.WorkerAttendanceRecordMapper;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
 import com.green.module.attendance.mapper.WorkTypeMapper;
@@ -60,6 +64,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceBatchMapper batchMapper;
     private final WorkerAttendanceRecordMapper workerRecordMapper;
     private final DriverAttendanceRecordMapper driverRecordMapper;
+    private final AttendanceBatchWorkerItemMapper workerItemMapper;
+    private final AttendanceBatchDriverItemMapper driverItemMapper;
     private final WorkerMapper workerMapper;
     private final DriverMapper driverMapper;
     private final GroupMapper groupMapper;
@@ -147,18 +153,33 @@ public class AttendanceServiceImpl implements AttendanceService {
             vo.setReviewerName(admin != null ? admin.getRealName() : "-");
         }
 
-        // 查询批次下的工人考勤记录
-        LambdaQueryWrapper<WorkerAttendanceRecordEntity> wWrapper = new LambdaQueryWrapper<>();
-        wWrapper.eq(WorkerAttendanceRecordEntity::getBatchId, id);
-        List<WorkerAttendanceRecordEntity> records = workerRecordMapper.selectList(wWrapper);
-        vo.setWorkerRecords(records.stream().map(this::convertWorkerRecord).collect(Collectors.toList()));
+        // 查询批次下的工人考勤明细（来自临时明细表）
+        LambdaQueryWrapper<AttendanceBatchWorkerItemEntity> wWrapper = new LambdaQueryWrapper<>();
+        wWrapper.eq(AttendanceBatchWorkerItemEntity::getBatchId, id);
+        List<AttendanceBatchWorkerItemEntity> items = workerItemMapper.selectList(wWrapper);
+        vo.setWorkerRecords(items.stream().map(item -> convertWorkerItem(item, batch, driver))
+                .collect(Collectors.toList()));
 
-        // 查询批次下的司机考勤记录
-        LambdaQueryWrapper<DriverAttendanceRecordEntity> dWrapper = new LambdaQueryWrapper<>();
-        dWrapper.eq(DriverAttendanceRecordEntity::getSourceBatchId, id);
-        DriverAttendanceRecordEntity driverRecord = driverRecordMapper.selectOne(dWrapper);
-        if (driverRecord == null) {
-            // 如果还没生成司机记录，构造一条默认的返回给前端展示
+        // 查询批次下的司机考勤明细（来自临时明细表）
+        LambdaQueryWrapper<AttendanceBatchDriverItemEntity> dWrapper = new LambdaQueryWrapper<>();
+        dWrapper.eq(AttendanceBatchDriverItemEntity::getBatchId, id);
+        AttendanceBatchDriverItemEntity driverItem = driverItemMapper.selectOne(dWrapper);
+        DriverAttendanceRecordEntity driverRecord;
+        if (driverItem != null) {
+            driverRecord = new DriverAttendanceRecordEntity();
+            driverRecord.setId(driverItem.getId());
+            driverRecord.setDriverId(driverItem.getDriverId());
+            driverRecord.setAttendanceDate(driverItem.getAttendanceDate());
+            driverRecord.setAttendanceType(driverItem.getAttendanceType());
+            driverRecord.setOvertimeHours(driverItem.getOvertimeHours());
+            driverRecord.setDailyWage(driverItem.getDailyWage());
+            driverRecord.setOvertimeWage(driverItem.getOvertimeWage());
+            driverRecord.setTotalWage(driverItem.getTotalWage());
+            driverRecord.setRemark(driverItem.getRemark());
+            driverRecord.setIsSettled(0);
+            driverRecord.setSourceBatchId(batch.getId());
+        } else {
+            // 如果还没生成司机明细，构造一条默认的返回给前端展示
             driverRecord = buildDefaultDriverRecord(batch, driver);
         }
         vo.setDriverRecord(convertDriverRecord(driverRecord));
@@ -184,7 +205,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         batch.setRemark(dto.getRemark());
         batchMapper.insert(batch);
 
-        // 创建工人考勤记录
+        // 创建工人考勤明细（保存到临时明细表，审核通过后再写入总表）
         for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
             WorkerEntity worker = workerMapper.selectById(item.getWorkerId());
             if (worker == null) continue;
@@ -194,12 +215,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             BigDecimal overtimeWage = calculateOvertimeWage(worker, dto.getOvertimeHours());
             BigDecimal totalWage = dailyWage.add(overtimeWage);
 
-            WorkerAttendanceRecordEntity record = new WorkerAttendanceRecordEntity();
+            AttendanceBatchWorkerItemEntity record = new AttendanceBatchWorkerItemEntity();
             record.setBatchId(batch.getId());
-            record.setDriverId(batch.getDriverId());
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
-            record.setAttendanceDate(dto.getBatchDate());
             record.setAttendanceType(dto.getAttendanceType());
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
@@ -207,12 +226,11 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setOvertimeWage(overtimeWage);
             record.setTotalWage(totalWage);
             record.setRemark(item.getRemark());
-            record.setIsSettled(0);
-            workerRecordMapper.insert(record);
+            workerItemMapper.insert(record);
         }
 
-        // 创建司机考勤记录（与批次关联）
-        createDriverRecordForBatch(batch, driver, dto.getOvertimeHours(), dto.getRemark());
+        // 创建司机考勤明细（保存到临时明细表）
+        createDriverItemForBatch(batch, driver, dto.getOvertimeHours(), dto.getRemark());
 
         log.info("管理员创建考勤批次: batchId={}, 工人总数={}", batch.getId(), dto.getWorkers().size());
         return batch.getId();
@@ -237,17 +255,17 @@ public class AttendanceServiceImpl implements AttendanceService {
         batch.setRemark(dto.getRemark());
         batchMapper.updateById(batch);
 
-        // 删除旧的工人记录
-        LambdaQueryWrapper<WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
-        deleteWrapper.eq(WorkerAttendanceRecordEntity::getBatchId, id);
-        workerRecordMapper.delete(deleteWrapper);
+        // 删除旧的工人明细
+        LambdaQueryWrapper<AttendanceBatchWorkerItemEntity> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(AttendanceBatchWorkerItemEntity::getBatchId, id);
+        workerItemMapper.delete(deleteWrapper);
 
-        // 删除旧的司机记录
-        LambdaQueryWrapper<DriverAttendanceRecordEntity> driverDeleteWrapper = new LambdaQueryWrapper<>();
-        driverDeleteWrapper.eq(DriverAttendanceRecordEntity::getSourceBatchId, id);
-        driverRecordMapper.delete(driverDeleteWrapper);
+        // 删除旧的司机明细
+        LambdaQueryWrapper<AttendanceBatchDriverItemEntity> driverDeleteWrapper = new LambdaQueryWrapper<>();
+        driverDeleteWrapper.eq(AttendanceBatchDriverItemEntity::getBatchId, id);
+        driverItemMapper.delete(driverDeleteWrapper);
 
-        // 重新创建工人考勤记录
+        // 重新创建工人考勤明细
         for (CreateBatchDTO.WorkerAttendanceItem item : dto.getWorkers()) {
             WorkerEntity worker = workerMapper.selectById(item.getWorkerId());
             if (worker == null) continue;
@@ -256,12 +274,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             BigDecimal overtimeWage = calculateOvertimeWage(worker, dto.getOvertimeHours());
             BigDecimal totalWage = dailyWage.add(overtimeWage);
 
-            WorkerAttendanceRecordEntity record = new WorkerAttendanceRecordEntity();
+            AttendanceBatchWorkerItemEntity record = new AttendanceBatchWorkerItemEntity();
             record.setBatchId(batch.getId());
-            record.setDriverId(batch.getDriverId());
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
-            record.setAttendanceDate(dto.getBatchDate());
             record.setAttendanceType(dto.getAttendanceType());
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
@@ -269,14 +285,13 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setOvertimeWage(overtimeWage);
             record.setTotalWage(totalWage);
             record.setRemark(item.getRemark());
-            record.setIsSettled(0);
-            workerRecordMapper.insert(record);
+            workerItemMapper.insert(record);
         }
 
-        // 重新创建司机考勤记录
+        // 重新创建司机考勤明细
         DriverEntity driver = driverMapper.selectById(batch.getDriverId());
         if (driver != null) {
-            createDriverRecordForBatch(batch, driver, dto.getOvertimeHours(), dto.getRemark());
+            createDriverItemForBatch(batch, driver, dto.getOvertimeHours(), dto.getRemark());
         }
 
         log.info("更新考勤批次: batchId={}, 工人总数={}", batch.getId(), dto.getWorkers().size());
@@ -297,15 +312,11 @@ public class AttendanceServiceImpl implements AttendanceService {
         batch.setReviewerId(SecurityUtils.getCurrentUserId());
         batchMapper.updateById(batch);
 
-        // 审核通过后，工人考勤记录与批次解绑
-        LambdaQueryWrapper<WorkerAttendanceRecordEntity> decoupleWrapper = new LambdaQueryWrapper<>();
-        decoupleWrapper.eq(WorkerAttendanceRecordEntity::getBatchId, id);
-        WorkerAttendanceRecordEntity decoupleRecord = new WorkerAttendanceRecordEntity();
-        decoupleRecord.setBatchId(null);
-        workerRecordMapper.update(decoupleRecord, decoupleWrapper);
+        // 审核通过后，将工人明细写入正式考勤记录表
+        insertWorkerRecordsFromItems(batch);
 
-        // 生成/更新司机考勤记录
-        upsertDriverAttendanceRecord(batch);
+        // 将司机明细写入正式司机考勤记录表
+        insertDriverRecordFromItem(batch);
 
         // 异常检测
         anomalyRecordService.checkAttendanceDuplicateAfterBatchReview(id);
@@ -326,10 +337,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new BusinessException(ResultCodeEnum.BATCH_STATUS_ERROR, "当前批次不处于待审核状态");
         }
 
-        // 批量更新工人考勤记录
+        // 批量更新工人考勤明细（临时表）
         if (dto.getWorkerRecords() != null && !dto.getWorkerRecords().isEmpty()) {
             for (ReviewBatchDTO.WorkerRecordUpdateItem item : dto.getWorkerRecords()) {
-                WorkerAttendanceRecordEntity record = workerRecordMapper.selectById(item.getRecordId());
+                AttendanceBatchWorkerItemEntity record = workerItemMapper.selectById(item.getRecordId());
                 if (record == null || !record.getBatchId().equals(batchId)) {
                     continue;
                 }
@@ -374,15 +385,15 @@ public class AttendanceServiceImpl implements AttendanceService {
                     record.setTotalWage(dailyWage.add(overtimeWage));
                 }
 
-                workerRecordMapper.updateById(record);
+                workerItemMapper.updateById(record);
             }
         }
 
-        // 更新司机考勤记录
+        // 更新司机考勤明细（临时表）
         if (dto.getDriverRecord() != null) {
             ReviewBatchDTO.DriverRecordUpdateItem driverItem = dto.getDriverRecord();
-            DriverAttendanceRecordEntity driverRec = driverRecordMapper.selectById(driverItem.getRecordId());
-            if (driverRec != null && batchId.equals(driverRec.getSourceBatchId())) {
+            AttendanceBatchDriverItemEntity driverRec = driverItemMapper.selectById(driverItem.getRecordId());
+            if (driverRec != null && batchId.equals(driverRec.getBatchId())) {
                 if (driverItem.getOvertimeHours() != null) {
                     driverRec.setOvertimeHours(driverItem.getOvertimeHours());
                 }
@@ -402,7 +413,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     driverRec.setOvertimeWage(overtimeWage);
                     driverRec.setTotalWage(dailyWage.add(overtimeWage));
                 }
-                driverRecordMapper.updateById(driverRec);
+                driverItemMapper.updateById(driverRec);
             }
         }
 
@@ -412,15 +423,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         batch.setReviewerId(SecurityUtils.getCurrentUserId());
         batchMapper.updateById(batch);
 
-        // 审核通过后，工人考勤记录与批次解绑
-        LambdaQueryWrapper<WorkerAttendanceRecordEntity> decoupleWrapper = new LambdaQueryWrapper<>();
-        decoupleWrapper.eq(WorkerAttendanceRecordEntity::getBatchId, batchId);
-        WorkerAttendanceRecordEntity decoupleRecord = new WorkerAttendanceRecordEntity();
-        decoupleRecord.setBatchId(null);
-        workerRecordMapper.update(decoupleRecord, decoupleWrapper);
-
-        // 生成/更新司机考勤记录
-        upsertDriverAttendanceRecord(batch);
+        // 将明细写入正式考勤记录表
+        insertWorkerRecordsFromItems(batch);
+        insertDriverRecordFromItem(batch);
 
         // 异常检测
         anomalyRecordService.checkAttendanceDuplicateAfterBatchReview(batchId);
@@ -453,7 +458,15 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (batch == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "批次不存在");
         }
-        // 外键已改为 ON DELETE SET NULL，删除批次不会影响工人考勤记录
+        // 删除关联的工人/司机明细临时记录
+        LambdaQueryWrapper<AttendanceBatchWorkerItemEntity> workerItemDelete = new LambdaQueryWrapper<>();
+        workerItemDelete.eq(AttendanceBatchWorkerItemEntity::getBatchId, id);
+        workerItemMapper.delete(workerItemDelete);
+
+        LambdaQueryWrapper<AttendanceBatchDriverItemEntity> driverItemDelete = new LambdaQueryWrapper<>();
+        driverItemDelete.eq(AttendanceBatchDriverItemEntity::getBatchId, id);
+        driverItemMapper.delete(driverItemDelete);
+
         batchMapper.deleteById(id);
         log.info("考勤批次删除成功: batchId={}", id);
     }
@@ -855,6 +868,30 @@ public class AttendanceServiceImpl implements AttendanceService {
         return vo;
     }
 
+    /**
+     * 将批次工人明细临时实体转换为展示 VO
+     */
+    private WorkerAttendanceRecordVO convertWorkerItem(AttendanceBatchWorkerItemEntity item,
+                                                        AttendanceBatchEntity batch,
+                                                        DriverEntity driver) {
+        WorkerAttendanceRecordEntity rec = new WorkerAttendanceRecordEntity();
+        rec.setId(item.getId());
+        rec.setBatchId(batch.getId());
+        rec.setDriverId(batch.getDriverId());
+        rec.setWorkerId(item.getWorkerId());
+        rec.setProjectId(item.getProjectId());
+        rec.setAttendanceDate(batch.getBatchDate());
+        rec.setAttendanceType(item.getAttendanceType());
+        rec.setOvertimeHours(item.getOvertimeHours());
+        rec.setWorkTypeId(item.getWorkTypeId());
+        rec.setDailyWage(item.getDailyWage());
+        rec.setOvertimeWage(item.getOvertimeWage());
+        rec.setTotalWage(item.getTotalWage());
+        rec.setRemark(item.getRemark());
+        rec.setIsSettled(0);
+        return convertWorkerRecord(rec);
+    }
+
     private DriverAttendanceRecordVO convertDriverRecord(DriverAttendanceRecordEntity rec) {
         DriverAttendanceRecordVO vo = new DriverAttendanceRecordVO();
         vo.setId(rec.getId());
@@ -986,73 +1023,70 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     /**
-     * 根据批次生成或更新司机考勤记录
-     * <p>已有记录时，保留加班时长和备注（审核时可修改），仅刷新日薪和 sourceBatchId；
-     * 不存在时，以批次初始数据新建。</p>
+     * 将批次工人明细写入正式工人考勤记录表
      */
-    private void upsertDriverAttendanceRecord(AttendanceBatchEntity batch) {
-        if (batch == null || batch.getDriverId() == null || batch.getBatchDate() == null) {
+    private void insertWorkerRecordsFromItems(AttendanceBatchEntity batch) {
+        if (batch == null || batch.getId() == null) {
             return;
         }
-        DriverEntity driver = driverMapper.selectById(batch.getDriverId());
-        if (driver == null) {
-            log.warn("批次对应司机不存在，跳过司机考勤记录生成: batchId={}", batch.getId());
-            return;
-        }
-
-        BigDecimal dailyWage = driver.getBaseDailySalary() != null ? driver.getBaseDailySalary() : BigDecimal.ZERO;
-
-        // 查找是否已存在同日期司机记录
-        LambdaQueryWrapper<DriverAttendanceRecordEntity> dWrapper = new LambdaQueryWrapper<>();
-        dWrapper.eq(DriverAttendanceRecordEntity::getDriverId, batch.getDriverId())
-                .eq(DriverAttendanceRecordEntity::getAttendanceDate, batch.getBatchDate());
-        DriverAttendanceRecordEntity existing = driverRecordMapper.selectOne(dWrapper);
-
-        if (existing != null) {
-            // 已有记录：保留加班时长、备注等可编辑字段，仅刷新日薪和批次关联
-            BigDecimal overtimeHours = existing.getOvertimeHours() != null ? existing.getOvertimeHours() : BigDecimal.ZERO;
-            BigDecimal overtimeWage = calculateDriverOvertimeWage(driver, overtimeHours);
-            existing.setSourceBatchId(batch.getId());
-            existing.setAttendanceType(2); // 全天
-            existing.setWorkTypeId(null);  // 司机不需要作业类型
-            existing.setDailyWage(dailyWage);
-            existing.setOvertimeWage(overtimeWage);
-            existing.setTotalWage(dailyWage.add(overtimeWage));
-            // 不覆盖 existing.remark 和 existing.overtimeHours
-            driverRecordMapper.updateById(existing);
-            log.info("更新司机考勤记录: recordId={}, batchId={}", existing.getId(), batch.getId());
-        } else {
-            // 兼容历史批次：不存在司机记录时新建，加班时长优先取该批次工人记录
-            LambdaQueryWrapper<WorkerAttendanceRecordEntity> wWrapper = new LambdaQueryWrapper<>();
-            wWrapper.eq(WorkerAttendanceRecordEntity::getBatchId, batch.getId());
-            wWrapper.last("LIMIT 1");
-            WorkerAttendanceRecordEntity sampleWorkerRecord = workerRecordMapper.selectOne(wWrapper);
-            BigDecimal overtimeHours = sampleWorkerRecord != null && sampleWorkerRecord.getOvertimeHours() != null
-                    ? sampleWorkerRecord.getOvertimeHours() : BigDecimal.ZERO;
-            BigDecimal overtimeWage = calculateDriverOvertimeWage(driver, overtimeHours);
-
-            DriverAttendanceRecordEntity record = new DriverAttendanceRecordEntity();
+        LambdaQueryWrapper<AttendanceBatchWorkerItemEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AttendanceBatchWorkerItemEntity::getBatchId, batch.getId());
+        List<AttendanceBatchWorkerItemEntity> items = workerItemMapper.selectList(wrapper);
+        for (AttendanceBatchWorkerItemEntity item : items) {
+            WorkerAttendanceRecordEntity record = new WorkerAttendanceRecordEntity();
+            record.setBatchId(batch.getId());
             record.setDriverId(batch.getDriverId());
+            record.setWorkerId(item.getWorkerId());
+            record.setProjectId(item.getProjectId());
             record.setAttendanceDate(batch.getBatchDate());
-            record.setAttendanceType(2); // 全天
-            record.setOvertimeHours(overtimeHours);
-            record.setWorkTypeId(null);
-            record.setDailyWage(dailyWage);
-            record.setOvertimeWage(overtimeWage);
-            record.setTotalWage(dailyWage.add(overtimeWage));
-            record.setRemark(batch.getRemark());
+            record.setAttendanceType(item.getAttendanceType());
+            record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
+            record.setWorkTypeId(item.getWorkTypeId());
+            record.setDailyWage(item.getDailyWage());
+            record.setOvertimeWage(item.getOvertimeWage());
+            record.setTotalWage(item.getTotalWage());
+            record.setRemark(item.getRemark());
             record.setIsSettled(0);
-            record.setSourceBatchId(batch.getId());
-            driverRecordMapper.insert(record);
-            log.info("创建司机考勤记录: driverId={}, batchId={}", batch.getDriverId(), batch.getId());
+            workerRecordMapper.insert(record);
         }
+        log.info("批次工人明细写入正式表: batchId={}, records={}", batch.getId(), items.size());
     }
 
     /**
-     * 创建与批次关联的司机考勤记录（在提交批次时调用）
+     * 将批次司机明细写入正式司机考勤记录表
      */
-    private void createDriverRecordForBatch(AttendanceBatchEntity batch, DriverEntity driver,
-                                            BigDecimal overtimeHours, String remark) {
+    private void insertDriverRecordFromItem(AttendanceBatchEntity batch) {
+        if (batch == null || batch.getId() == null) {
+            return;
+        }
+        LambdaQueryWrapper<AttendanceBatchDriverItemEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AttendanceBatchDriverItemEntity::getBatchId, batch.getId());
+        AttendanceBatchDriverItemEntity item = driverItemMapper.selectOne(wrapper);
+        if (item == null) {
+            log.warn("批次无司机明细，跳过写入正式表: batchId={}", batch.getId());
+            return;
+        }
+        DriverAttendanceRecordEntity record = new DriverAttendanceRecordEntity();
+        record.setDriverId(item.getDriverId());
+        record.setAttendanceDate(item.getAttendanceDate());
+        record.setAttendanceType(item.getAttendanceType());
+        record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
+        record.setWorkTypeId(null);
+        record.setDailyWage(item.getDailyWage());
+        record.setOvertimeWage(item.getOvertimeWage());
+        record.setTotalWage(item.getTotalWage());
+        record.setRemark(item.getRemark());
+        record.setIsSettled(0);
+        record.setSourceBatchId(batch.getId());
+        driverRecordMapper.insert(record);
+        log.info("批次司机明细写入正式表: batchId={}, driverId={}", batch.getId(), item.getDriverId());
+    }
+
+    /**
+     * 创建与批次关联的司机考勤明细（保存到临时明细表）
+     */
+    private void createDriverItemForBatch(AttendanceBatchEntity batch, DriverEntity driver,
+                                          BigDecimal overtimeHours, String remark) {
         if (batch == null || driver == null) {
             return;
         }
@@ -1062,39 +1096,18 @@ public class AttendanceServiceImpl implements AttendanceService {
         BigDecimal overtimeWage = calculateDriverOvertimeWage(driver, otHours);
         BigDecimal totalWage = dailyWage.add(overtimeWage);
 
-        // 同一司机同一天可能已有记录（例如先有一个已通过批次），则覆盖关联到当前批次
-        LambdaQueryWrapper<DriverAttendanceRecordEntity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(DriverAttendanceRecordEntity::getDriverId, batch.getDriverId())
-                .eq(DriverAttendanceRecordEntity::getAttendanceDate, batch.getBatchDate());
-        DriverAttendanceRecordEntity existing = driverRecordMapper.selectOne(wrapper);
-
-        if (existing != null) {
-            existing.setSourceBatchId(batch.getId());
-            existing.setAttendanceType(2);
-            existing.setOvertimeHours(otHours);
-            existing.setWorkTypeId(null);
-            existing.setDailyWage(dailyWage);
-            existing.setOvertimeWage(overtimeWage);
-            existing.setTotalWage(totalWage);
-            existing.setRemark(remark);
-            driverRecordMapper.updateById(existing);
-            log.info("更新司机考勤记录(提交批次): recordId={}, batchId={}", existing.getId(), batch.getId());
-        } else {
-            DriverAttendanceRecordEntity record = new DriverAttendanceRecordEntity();
-            record.setDriverId(batch.getDriverId());
-            record.setAttendanceDate(batch.getBatchDate());
-            record.setAttendanceType(2);
-            record.setOvertimeHours(otHours);
-            record.setWorkTypeId(null);
-            record.setDailyWage(dailyWage);
-            record.setOvertimeWage(overtimeWage);
-            record.setTotalWage(totalWage);
-            record.setRemark(remark);
-            record.setIsSettled(0);
-            record.setSourceBatchId(batch.getId());
-            driverRecordMapper.insert(record);
-            log.info("创建司机考勤记录(提交批次): driverId={}, batchId={}", batch.getDriverId(), batch.getId());
-        }
+        AttendanceBatchDriverItemEntity record = new AttendanceBatchDriverItemEntity();
+        record.setBatchId(batch.getId());
+        record.setDriverId(batch.getDriverId());
+        record.setAttendanceDate(batch.getBatchDate());
+        record.setAttendanceType(2); // 全天
+        record.setOvertimeHours(otHours);
+        record.setDailyWage(dailyWage);
+        record.setOvertimeWage(overtimeWage);
+        record.setTotalWage(totalWage);
+        record.setRemark(remark);
+        driverItemMapper.insert(record);
+        log.info("创建司机考勤明细: driverId={}, batchId={}", batch.getDriverId(), batch.getId());
     }
 
     /**
