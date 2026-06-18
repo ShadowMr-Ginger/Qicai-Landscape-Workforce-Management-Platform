@@ -7,7 +7,7 @@ USE landscape_workforce;
 ALTER TABLE `projects` 
   ADD COLUMN `male_daily_revenue` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '男工一日营业额',
   ADD COLUMN `female_daily_revenue` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '女工一日营业额',
-  ADD COLUMN `gross_margin` DECIMAL(5,4) NOT NULL DEFAULT 0 COMMENT '毛利率(0-1)',
+  ADD COLUMN `gross_margin_rate` DECIMAL(5,4) NOT NULL DEFAULT 0 COMMENT '毛利率(0-1)',
   ADD COLUMN `total_revenue` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '项目总营业额',
   ADD COLUMN `profit` DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '利润',
   ADD COLUMN `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统项目: 0-否, 1-是',
