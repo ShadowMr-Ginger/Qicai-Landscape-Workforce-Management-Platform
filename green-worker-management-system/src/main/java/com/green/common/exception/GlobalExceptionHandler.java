@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -141,6 +142,39 @@ public class GlobalExceptionHandler {
                                                         HttpServletRequest request) {
         log.warn("[权限不足] URI={} | Message={}", request.getRequestURI(), e.getMessage());
         return ApiResult.error(ResultCodeEnum.FORBIDDEN);
+    }
+
+    // ==================== 数据库约束异常 ====================
+
+    /**
+     * 处理数据库唯一约束冲突
+     * <p>即使业务层校验遗漏，数据库层也能返回友好提示</p>
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResult<Void> handleDataIntegrityViolationException(DataIntegrityViolationException e,
+                                                                  HttpServletRequest request) {
+        String rootMsg = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
+        log.warn("[数据库约束冲突] URI={} | Message={}", request.getRequestURI(), rootMsg);
+
+        String message = "数据冲突，请检查是否有重复记录";
+        if (rootMsg != null) {
+            String lower = rootMsg.toLowerCase();
+            if (lower.contains("uk_real_name") || lower.contains("drivers.uk_real_name")) {
+                message = "已存在同名司机，如需添加，请修改司机名字或删除同名司机";
+            } else if (lower.contains("uk_name") || lower.contains("workers.uk_name")) {
+                message = "已存在同名工人，如需添加，请修改工人名字或删除同名工人";
+            } else if (lower.contains("uk_phone")) {
+                message = "手机号已存在";
+            } else if (lower.contains("uk_username")) {
+                message = "用户名已存在";
+            } else if (lower.contains("uk_wx_openid")) {
+                message = "该微信已绑定其他账号";
+            } else if (lower.contains("duplicate")) {
+                message = "数据重复，请检查后再提交";
+            }
+        }
+        return ApiResult.error(ResultCodeEnum.DATA_ALREADY_EXISTS, message);
     }
 
     // ==================== 系统异常 ====================
