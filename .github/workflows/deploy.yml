@@ -13,7 +13,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create deploy package
-        run: tar -czf deploy.tar.gz --exclude='.git' --exclude='target' --exclude='node_modules' --exclude='.next' .
+        run: |
+          ls -la
+          tar -czf deploy.tar.gz --exclude='.git' --exclude='target' --exclude='node_modules' --exclude='.next' .
+          ls -lh deploy.tar.gz
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
