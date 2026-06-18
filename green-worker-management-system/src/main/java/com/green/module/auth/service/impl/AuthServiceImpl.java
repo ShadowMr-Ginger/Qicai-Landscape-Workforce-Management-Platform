@@ -21,9 +21,6 @@ import com.green.utils.SecurityUtils;
 import com.green.utils.WxApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +46,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final WxApiUtil wxApiUtil;
     private final DriverMapper driverMapper;
@@ -58,14 +54,36 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginVO adminLogin(AdminLoginDTO dto) {
-        // 1. 执行 Spring Security 认证流程
-        Authentication authentication = authenticate(dto.getUsername(), dto.getPassword());
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        // 1. 直接查询管理员表（管理员登录与司机登录完全分离，避免同名冲突）
+        AdminEntity admin = adminMapper.selectOne(
+                new LambdaQueryWrapper<AdminEntity>()
+                        .eq(AdminEntity::getUsername, dto.getUsername())
+                        .eq(AdminEntity::getIsActive, 1)
+        );
 
-        // 2. 生成 JWT Token
+        if (admin == null) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "账号或密码错误");
+        }
+
+        // 2. 校验密码
+        if (!passwordEncoder.matches(dto.getPassword(), admin.getPassword())) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "账号或密码错误");
+        }
+
+        // 3. 构建 LoginUser
+        LoginUser loginUser = LoginUser.builder()
+                .userId(admin.getId())
+                .username(admin.getUsername())
+                .realName(admin.getRealName())
+                .role(com.green.common.enums.RoleEnum.ADMIN)
+                .password(admin.getPassword())
+                .enabled(admin.getIsActive() == 1)
+                .build();
+
+        // 4. 生成 JWT Token
         String token = jwtTokenProvider.generateToken(loginUser);
 
-        // 3. 组装返回结果
+        // 5. 组装返回结果
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
         loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
@@ -221,19 +239,6 @@ public class AuthServiceImpl implements AuthService {
         log.info("用户退出登录: userId={}, userType={}",
                 SecurityUtils.getCurrentUserId(),
                 SecurityUtils.isAdmin() ? "ADMIN" : "DRIVER");
-    }
-
-    /**
-     * 封装认证逻辑
-     *
-     * @param username 用户名
-     * @param password 密码
-     * @return 认证成功的 Authentication 对象
-     */
-    private Authentication authenticate(String username, String password) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
-        return authenticationManager.authenticate(authenticationToken);
     }
 
     /**
