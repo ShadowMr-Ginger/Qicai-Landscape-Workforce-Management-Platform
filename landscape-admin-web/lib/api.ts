@@ -60,7 +60,7 @@ api.interceptors.response.use(
 /**
  * 管理员登录
  */
-export async function adminLogin(username: string, password: string): Promise<ApiResult<{ token: string; userInfo: { userId: number; userType: string; name: string } }>> {
+export async function adminLogin(username: string, password: string): Promise<ApiResult<{ token: string; userInfo: { userId: number; userType: string; name: string; roleName?: string } }>> {
   const res = await api.post('/auth/admin/login', { username, password });
   return res.data;
 }
