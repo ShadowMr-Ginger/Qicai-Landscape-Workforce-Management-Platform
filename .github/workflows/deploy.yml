@@ -18,29 +18,10 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script_stop: true
           script: |
-            powershell -Command @"
-            $ErrorActionPreference = 'Stop'
-
-            Write-Host '=== 1. 拉取最新代码 ==='
-            Set-Location -Path 'C:\Users\ginger\qicai'
-            & git -c http.sslBackend=openssl pull origin main
-            if ($LASTEXITCODE -ne 0) { throw "git pull failed with exit code $LASTEXITCODE" }
-
-            Write-Host '=== 2. 编译后端 ==='
-            Set-Location -Path 'C:\Users\ginger\qicai\green-worker-management-system'
-            & mvn clean package -DskipTests
-            if ($LASTEXITCODE -ne 0) { throw "mvn build failed with exit code $LASTEXITCODE" }
-
-            Write-Host '=== 3. 停止占用 8082 端口的进程 ==='
-            $connections = Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' }
-            foreach ($conn in $connections) {
-                Write-Host "Stopping PID: $($conn.OwningProcess)"
-                Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue
-            }
-            Start-Sleep -Seconds 2
-
-            Write-Host '=== 4. 启动后端（prod 环境）==='
-            & wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
-
-            Write-Host '=== 部署完成 ==='
-            "@
+            cd /d C:\Users\ginger\qicai
+            git -c http.sslBackend=openssl pull origin main
+            cd green-worker-management-system
+            mvn clean package -DskipTests
+            powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+            timeout /t 2 /nobreak >nul
+            wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
