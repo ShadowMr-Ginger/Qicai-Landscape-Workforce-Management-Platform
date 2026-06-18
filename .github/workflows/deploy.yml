@@ -9,19 +9,20 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
       - name: Deploy backend to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          script_stop: true
-          script: |
-            cd /d C:\Users\ginger\qicai
-            git -c http.sslBackend=openssl pull origin main
-            cd green-worker-management-system
-            mvn clean package -DskipTests
-            powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
-            timeout /t 2 /nobreak >nul
-            wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh \
+            -o StrictHostKeyChecking=no \
+            -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'REMOTE_EOF'
+          cd /d C:\Users\ginger\qicai
+          git -c http.sslBackend=openssl pull origin main
+          cd green-worker-management-system
+          mvn clean package -DskipTests
+          powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+          timeout /t 2 /nobreak >nul
+          wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+          REMOTE_EOF
