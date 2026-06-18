@@ -119,10 +119,11 @@ CREATE TABLE `drivers` (
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_real_name` (`real_name`),
     UNIQUE KEY `uk_wx_openid` (`wx_openid`),
     KEY `idx_is_active` (`is_active`),
     KEY `idx_phone` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='司机';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='司机表';
 
 -- ============================================================
 -- 6. 工人表 (workers)

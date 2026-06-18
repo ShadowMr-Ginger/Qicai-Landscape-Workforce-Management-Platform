@@ -104,10 +104,13 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(CreateDriverDTO dto) {
+        // 司机姓名唯一：登录用姓名，不能同名
+        checkRealNameUnique(null, dto.getRealName());
+
         DriverEntity entity = new DriverEntity();
         entity.setRealName(dto.getRealName());
         entity.setGender(dto.getGender());
-        // 空字符串转 null，避免唯一索引 uk_phone 在多个空手机号时冲突
+        // 空字符串转 null，避免多个空手机号时冲突
         entity.setPhone(blankToNull(dto.getPhone()));
         entity.setIdCard(blankToNull(dto.getIdCard()));
         entity.setEmergencyContactPhone(blankToNull(dto.getEmergencyContactPhone()));
@@ -120,7 +123,6 @@ public class DriverServiceImpl implements DriverService {
         entity.setIsActive(1);
         driverMapper.insert(entity);
         log.info("新增司机成功: driverId={}, name={}", entity.getId(), entity.getRealName());
-        anomalyRecordService.checkDriverNameDuplicate(entity.getId(), entity.getRealName());
         return entity.getId();
     }
 
@@ -163,14 +165,17 @@ public class DriverServiceImpl implements DriverService {
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
+        // 司机姓名唯一：如果修改了姓名，需要校验
+        if (!dto.getRealName().equals(entity.getRealName())) {
+            checkRealNameUnique(id, dto.getRealName());
+        }
         BeanUtils.copyProperties(dto, entity);
-        // 空字符串转 null，避免唯一索引 uk_phone 冲突
+        // 空字符串转 null
         entity.setPhone(blankToNull(entity.getPhone()));
         entity.setIdCard(blankToNull(entity.getIdCard()));
         entity.setEmergencyContactPhone(blankToNull(entity.getEmergencyContactPhone()));
         driverMapper.updateById(entity);
         log.info("修改司机信息成功: driverId={}", id);
-        anomalyRecordService.checkDriverNameDuplicate(entity.getId(), entity.getRealName());
     }
 
     @Override
@@ -195,18 +200,16 @@ public class DriverServiceImpl implements DriverService {
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
-        LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> countWrapper = new LambdaQueryWrapper<>();
-        countWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
-        Long attendanceCount = driverAttendanceRecordMapper.selectCount(countWrapper);
+        // 直接删除关联考勤记录（逻辑删除），返回实际删除数，避免 selectCount 统计异常
+        LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
+        long attendanceCount = driverAttendanceRecordMapper.delete(deleteWrapper);
         if (attendanceCount > 0) {
-            LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
-            deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
-            driverAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除司机关联考勤记录: driverId={}, count={}", id, attendanceCount);
         }
         driverMapper.deleteById(id);
         log.info("删除司机成功: driverId={}", id);
-        return attendanceCount.intValue();
+        return (int) attendanceCount;
     }
 
     /**
@@ -214,6 +217,19 @@ public class DriverServiceImpl implements DriverService {
      */
     private String blankToNull(String value) {
         return StringUtils.hasText(value) ? value : null;
+    }
+
+    /**
+     * 校验司机姓名唯一性
+     */
+    private void checkRealNameUnique(Long currentId, String realName) {
+        LambdaQueryWrapper<DriverEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DriverEntity::getRealName, realName)
+                .eq(DriverEntity::getIsActive, 1)
+                .ne(currentId != null, DriverEntity::getId, currentId);
+        if (driverMapper.selectCount(wrapper) > 0) {
+            throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS, "司机姓名已存在：" + realName);
+        }
     }
 
     private DriverListVO convertToListVO(DriverEntity entity) {
