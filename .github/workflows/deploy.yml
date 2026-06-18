@@ -9,6 +9,20 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload deploy script
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "deploy-server.ps1"
+          target: "C:/Users/ginger/qicai/"
+          strip_components: 0
+
       - name: Deploy backend to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -18,6 +32,4 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script_stop: true
           script: |
-            cd /d C:\Users\ginger\qicai
-            git -c http.sslBackend=openssl pull origin main
-            call deploy-server.bat
+            powershell -ExecutionPolicy Bypass -File "C:\Users\ginger\qicai\deploy-server.ps1"
