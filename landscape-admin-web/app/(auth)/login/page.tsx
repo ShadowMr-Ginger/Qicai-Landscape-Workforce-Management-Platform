@@ -40,7 +40,7 @@ export default function LoginPage() {
           userId: userInfo.userId,
           userType: userInfo.userType as "ADMIN" | "DRIVER",
           name: userInfo.name,
-          roleName: "超级管理员",
+          roleName: userInfo.roleName,
         });
         router.push("/");
         return;
@@ -56,8 +56,8 @@ export default function LoginPage() {
       setAuth(mockToken, {
         userId: 1,
         userType: "ADMIN",
-        name: "超级管理员",
-        roleName: "超级管理员",
+        name: username,
+        roleName: "管理员",
       });
       setIsDemo(true);
       setTimeout(() => router.push("/"), 500);

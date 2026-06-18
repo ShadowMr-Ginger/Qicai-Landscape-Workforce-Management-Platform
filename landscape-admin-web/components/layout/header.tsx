@@ -107,7 +107,7 @@ export function Header() {
           </Avatar>
           <div className="hidden md:block">
             <p className="text-sm font-medium text-foreground">{user?.name || "管理员"}</p>
-            <p className="text-[10px] text-muted-foreground">{user?.roleName || "超级管理员"}</p>
+            <p className="text-[10px] text-muted-foreground">{user?.roleName || "管理员"}</p>
           </div>
         </div>
       </div>

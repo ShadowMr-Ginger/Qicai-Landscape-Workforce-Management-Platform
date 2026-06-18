@@ -441,10 +441,10 @@ ALTER TABLE `driver_attendance_records`
 -- 初始数据插入
 -- ============================================================
 
--- 1. 插入默认超级管理员 (密码: 123456，使用 BCrypt 加密后的示例值)
+-- 1. 插入默认管理员 (密码: 123456，使用 BCrypt 加密后的示例值)
 -- 注意: 生产环境请重新生成密码
 INSERT INTO `admins` (`username`, `password`, `real_name`, `phone`, `role_type`, `is_active`) VALUES
-('admin', '$2b$10$9VU6HH87JmmG6Mh6ZcgvR.anONPjdDiyEFE.6mA4sHpRMgRkmRB3.', '超级管理员', '13800138000', 1, 1);
+('admin', '$2b$10$9VU6HH87JmmG6Mh6ZcgvR.anONPjdDiyEFE.6mA4sHpRMgRkmRB3.', '管理员', '13800138000', 1, 1);
 
 -- 2. 插入默认工作类型
 INSERT INTO `work_types` (`type_name`, `description`, `sort_order`, `is_active`) VALUES

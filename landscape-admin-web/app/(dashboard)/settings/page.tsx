@@ -161,7 +161,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-green-500 dark:text-green-400" />
                   <span className="text-xs text-muted-foreground">
-                    {displayUser?.roleName || "超级管理员"}
+                    {displayUser?.roleName || "管理员"}
                   </span>
                 </div>
               </div>
