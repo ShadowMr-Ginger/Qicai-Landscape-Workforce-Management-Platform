@@ -107,9 +107,10 @@ public class DriverServiceImpl implements DriverService {
         DriverEntity entity = new DriverEntity();
         entity.setRealName(dto.getRealName());
         entity.setGender(dto.getGender());
-        entity.setPhone(dto.getPhone());
-        entity.setIdCard(dto.getIdCard());
-        entity.setEmergencyContactPhone(dto.getEmergencyContactPhone());
+        // 空字符串转 null，避免唯一索引 uk_phone 在多个空手机号时冲突
+        entity.setPhone(blankToNull(dto.getPhone()));
+        entity.setIdCard(blankToNull(dto.getIdCard()));
+        entity.setEmergencyContactPhone(blankToNull(dto.getEmergencyContactPhone()));
         entity.setBaseDailySalary(dto.getBaseDailySalary());
         entity.setOvertimeHourlyRate(dto.getOvertimeHourlyRate());
         // 新增司机默认密码 123456，未修改密码标志
@@ -163,6 +164,10 @@ public class DriverServiceImpl implements DriverService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
         BeanUtils.copyProperties(dto, entity);
+        // 空字符串转 null，避免唯一索引 uk_phone 冲突
+        entity.setPhone(blankToNull(entity.getPhone()));
+        entity.setIdCard(blankToNull(entity.getIdCard()));
+        entity.setEmergencyContactPhone(blankToNull(entity.getEmergencyContactPhone()));
         driverMapper.updateById(entity);
         log.info("修改司机信息成功: driverId={}", id);
         anomalyRecordService.checkDriverNameDuplicate(entity.getId(), entity.getRealName());
@@ -202,6 +207,13 @@ public class DriverServiceImpl implements DriverService {
         driverMapper.deleteById(id);
         log.info("删除司机成功: driverId={}", id);
         return attendanceCount.intValue();
+    }
+
+    /**
+     * 将空白字符串转为 null
+     */
+    private String blankToNull(String value) {
+        return StringUtils.hasText(value) ? value : null;
     }
 
     private DriverListVO convertToListVO(DriverEntity entity) {
