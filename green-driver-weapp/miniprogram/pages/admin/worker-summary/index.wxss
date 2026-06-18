@@ -1,0 +1,180 @@
+.summary-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 48rpx;
+}
+
+.group-list {
+  padding: 24rpx;
+}
+
+.group-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  background: #f9fafb;
+}
+
+.group-name {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.group-count {
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-right: 16rpx;
+}
+
+.group-arrow {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.group-body {
+  padding: 0 24rpx 24rpx;
+}
+
+.worker-item {
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #f3f4f6;
+}
+
+.worker-item:last-child {
+  border-bottom: none;
+}
+
+.worker-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.worker-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.worker-meta {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.worker-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.worker-status {
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.worker-status.employed {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.worker-status.resigned {
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12rpx;
+}
+
+.summary-cell {
+  background: #f9fafb;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 20rpx;
+  color: #9ca3af;
+  margin-bottom: 4rpx;
+}
+
+.summary-value {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.summary-value.orange {
+  color: #ea580c;
+}
+
+.summary-value.blue {
+  color: #2563eb;
+}
+
+.summary-value.green {
+  color: #16a34a;
+}
+
+.summary-value.red {
+  color: #ef4444;
+}
+
+.summary-value.gray {
+  color: #6b7280;
+}
+
+.summary-value.purple {
+  color: #9333ea;
+}
+
+.summary-value.teal {
+  color: #0d9488;
+}
+
+.summary-value.pink {
+  color: #db2777;
+}
+
+.summary-value.brown {
+  color: #92400e;
+}
+
+.summary-loading {
+  text-align: center;
+  padding: 24rpx;
+  color: #9ca3af;
+  font-size: 24rpx;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 120rpx;
+  color: #d1d5db;
+  font-size: 28rpx;
+}
