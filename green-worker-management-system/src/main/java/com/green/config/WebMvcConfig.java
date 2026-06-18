@@ -1,8 +1,12 @@
 package com.green.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Web MVC 配置类
@@ -15,15 +19,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    @Value("${green.cors.allowed-origins:*}")
+    private String allowedOrigins;
+
     /**
      * 配置跨域映射
      * <p>开发环境允许所有来源，生产环境应限制为具体域名。</p>
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        
         registry.addMapping("/api/**")
-                // 允许的请求来源（开发环境：Next.js 默认端口 3000）
-                .allowedOrigins("http://localhost:3000")
+                // 允许的请求来源，支持多个域名逗号分隔，也支持通配符 *
+                .allowedOriginPatterns(origins.toArray(new String[0]))
                 // 允许的请求方法
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 // 允许的请求头

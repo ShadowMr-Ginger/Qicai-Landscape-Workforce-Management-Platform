@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ATTENDANCE_TYPE_TEXT = exports.ATTENDANCE_TYPE = exports.BATCH_STATUS_COLOR = exports.BATCH_STATUS_TEXT = exports.BATCH_STATUS = exports.STORAGE_KEYS = exports.API_BASE_URL = void 0;
 // API 基础地址
-exports.API_BASE_URL = 'http://192.168.175.129:8080/api';
+exports.API_BASE_URL = 'https://qicaiyuanlin.cn/api';
 // 本地存储键名
 exports.STORAGE_KEYS = {
     TOKEN: 'token',

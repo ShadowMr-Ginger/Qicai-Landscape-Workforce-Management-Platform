@@ -1,5 +1,5 @@
 // API 基础地址
-export const API_BASE_URL = 'http://192.168.175.129:8080/api'
+export const API_BASE_URL = 'https://qicaiyuanlin.cn/api'
 
 // 本地存储键名
 export const STORAGE_KEYS = {
