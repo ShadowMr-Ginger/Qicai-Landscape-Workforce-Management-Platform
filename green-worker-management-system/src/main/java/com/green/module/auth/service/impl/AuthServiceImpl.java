@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -53,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     private final WxApiUtil wxApiUtil;
     private final DriverMapper driverMapper;
     private final AdminMapper adminMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LoginVO adminLogin(AdminLoginDTO dto) {
@@ -74,15 +76,37 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public DriverLoginVO driverLogin(DriverLoginDTO dto) {
-        // 1. 执行 Spring Security 认证流程
-        // 司机登录时，username 即为姓名（name）
-        Authentication authentication = authenticate(dto.getName(), dto.getPassword());
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        // 1. 直接查询司机表（避免同名管理员被 Spring Security 优先匹配为 ADMIN）
+        DriverEntity driver = driverMapper.selectOne(
+                new LambdaQueryWrapper<DriverEntity>()
+                        .eq(DriverEntity::getRealName, dto.getName())
+                        .eq(DriverEntity::getIsActive, 1)
+        );
 
-        // 2. 生成 JWT Token
+        if (driver == null) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "账号或密码错误");
+        }
+
+        // 2. 校验密码
+        if (!passwordEncoder.matches(dto.getPassword(), driver.getPassword())) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "账号或密码错误");
+        }
+
+        // 3. 构建 LoginUser
+        LoginUser loginUser = LoginUser.builder()
+                .userId(driver.getId())
+                .username(driver.getRealName())
+                .realName(driver.getRealName())
+                .role(com.green.common.enums.RoleEnum.DRIVER)
+                .password(driver.getPassword())
+                .passwordChanged(driver.getPasswordChanged() != null && driver.getPasswordChanged() == 1)
+                .enabled(driver.getIsActive() == 1)
+                .build();
+
+        // 4. 生成 JWT Token
         String token = jwtTokenProvider.generateToken(loginUser);
 
-        // 3. 组装返回结果
+        // 5. 组装返回结果
         DriverLoginVO loginVO = new DriverLoginVO();
         loginVO.setToken(token);
         loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
