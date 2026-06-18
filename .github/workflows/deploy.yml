@@ -9,20 +9,6 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Upload deploy script
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          source: "deploy-server.ps1"
-          target: "C:/Users/ginger/qicai/"
-          strip_components: 0
-
       - name: Deploy backend to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -32,4 +18,29 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script_stop: true
           script: |
-            powershell -ExecutionPolicy Bypass -File "C:\Users\ginger\qicai\deploy-server.ps1"
+            powershell -Command @"
+            $ErrorActionPreference = 'Stop'
+
+            Write-Host '=== 1. 拉取最新代码 ==='
+            Set-Location -Path 'C:\Users\ginger\qicai'
+            & git -c http.sslBackend=openssl pull origin main
+            if ($LASTEXITCODE -ne 0) { throw "git pull failed with exit code $LASTEXITCODE" }
+
+            Write-Host '=== 2. 编译后端 ==='
+            Set-Location -Path 'C:\Users\ginger\qicai\green-worker-management-system'
+            & mvn clean package -DskipTests
+            if ($LASTEXITCODE -ne 0) { throw "mvn build failed with exit code $LASTEXITCODE" }
+
+            Write-Host '=== 3. 停止占用 8082 端口的进程 ==='
+            $connections = Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' }
+            foreach ($conn in $connections) {
+                Write-Host "Stopping PID: $($conn.OwningProcess)"
+                Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue
+            }
+            Start-Sleep -Seconds 2
+
+            Write-Host '=== 4. 启动后端（prod 环境）==='
+            & wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+
+            Write-Host '=== 部署完成 ==='
+            "@
