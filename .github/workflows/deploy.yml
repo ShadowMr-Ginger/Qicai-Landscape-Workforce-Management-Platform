@@ -15,8 +15,9 @@ jobs:
       - name: Create deploy package
         run: |
           ls -la
-          tar -czf deploy.tar.gz --exclude='.git' --exclude='target' --exclude='node_modules' --exclude='.next' .
-          ls -lh deploy.tar.gz
+          sudo apt-get update && sudo apt-get install -y zip
+          zip -r deploy.zip . -x "*.git/*" "*/target/*" "*/node_modules/*" "*/.next/*"
+          ls -lh deploy.zip
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
@@ -26,7 +27,7 @@ jobs:
           sshpass -p "${{ secrets.SSH_PASSWORD }}" scp \
             -P ${{ secrets.SSH_PORT }} \
             -o StrictHostKeyChecking=no \
-            deploy.tar.gz ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/C:/Users/ginger/qicai/deploy.tar.gz
+            deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/C:/Users/ginger/qicai/deploy.zip
 
       - name: Deploy backend on server
         run: |
@@ -35,7 +36,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'REMOTE_EOF'
           cd /d C:\Users\ginger\qicai
-          tar -xzf deploy.tar.gz -C .
+          powershell -Command "Expand-Archive -Path deploy.zip -DestinationPath . -Force"
           cd green-worker-management-system
           mvn clean package -DskipTests
           powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
