@@ -27,8 +27,8 @@ jobs:
           powershell -Command "Get-Content backend.err -Tail 100 -ErrorAction SilentlyContinue"
 
           echo === admin table ===
-          mysql -u root -e "SELECT id, username, real_name, is_active, deleted FROM landscape_workforce.admin;" 2>&1
+          mysql -u root -pshanwer666 -e "SELECT id, username, real_name, is_active, deleted FROM qicai_management.admin;" 2>&1
 
           echo === drivers table (hua xuefang) ===
-          mysql -u root -e "SELECT id, real_name, is_active, deleted FROM landscape_workforce.drivers WHERE real_name LIKE '%花雪芳%';" 2>&1
+          mysql -u root -pshanwer666 -e "SELECT id, real_name, is_active, deleted FROM qicai_management.drivers WHERE real_name LIKE '%花雪芳%';" 2>&1
           REMOTE_EOF
