@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-backend:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,21 +29,78 @@ jobs:
             -o StrictHostKeyChecking=no \
             deploy.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/C:/Users/ginger/qicai/deploy.zip
 
-      - name: Deploy backend on server
+      - name: Deploy backend and frontend on server
         run: |
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh \
             -p ${{ secrets.SSH_PORT }} \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'REMOTE_EOF'
           cd /d C:\Users\ginger\qicai
+
+          echo === Stop backend on 8082 ===
           powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+
+          echo === Stop frontend on 3001 ===
+          powershell -Command "Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+
           timeout /t 3 /nobreak >nul
+
+          echo === Extract new code ===
           powershell -Command "Expand-Archive -Path deploy.zip -DestinationPath . -Force"
+
+          echo === Build and start backend ===
           cd green-worker-management-system
           mvn -v
           mvn clean package -DskipTests
           for %%i in (target\green-worker-management-system-1.0.0-SNAPSHOT.jar) do @echo built jar: %%~ti %%~zi
           wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+          cd ..
+
           timeout /t 5 /nobreak >nul
+
+          echo === Ensure Node.js is available ===
+          set NODE_DIR=C:\Users\ginger\nodejs
+          set NODE_BIN=%NODE_DIR%\node-v20.18.1-win-x64
+          where node >nul 2>&1
+          if %errorlevel% neq 0 (
+            echo Node.js not found in PATH. Installing Node 20.18.1 x64 ...
+            if not exist %NODE_DIR% mkdir %NODE_DIR%
+            powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.18.1/node-v20.18.1-win-x64.zip' -OutFile '%NODE_DIR%\node.zip'"
+            powershell -Command "Expand-Archive -Path '%NODE_DIR%\node.zip' -DestinationPath '%NODE_DIR%' -Force"
+          ) else (
+            echo Node.js already installed.
+          )
+          set PATH=%NODE_BIN%;%PATH%
+          node -v
+          npm -v
+
+          echo === Build frontend ===
+          cd landscape-admin-web
+          if exist package-lock.json (
+            npm ci
+          ) else (
+            npm install
+          )
+          npm run build
+          cd ..
+
+          echo === Create persistent startup scripts ===
+          echo cd /d C:\Users\ginger\qicai\green-worker-management-system > start-backend.bat
+          echo java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod >> start-backend.bat
+
+          echo cd /d C:\Users\ginger\qicai\landscape-admin-web > start-frontend.bat
+          echo set PATH=%NODE_BIN%;%%PATH%% >> start-frontend.bat
+          echo set PORT=3001 >> start-frontend.bat
+          echo node .next\standalone\server.js >> start-frontend.bat
+
+          echo === Start frontend ===
+          wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai && start-frontend.bat"
+
+          timeout /t 5 /nobreak >nul
+
+          echo === Verify ports ===
+          echo Backend 8082:
           netstat -ano | findstr :8082
+          echo Frontend 3001:
+          netstat -ano | findstr :3001
           REMOTE_EOF
