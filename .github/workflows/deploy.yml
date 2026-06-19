@@ -53,7 +53,7 @@ jobs:
           mvn -v
           mvn clean package -DskipTests
           for %%i in (target\green-worker-management-system-1.0.0-SNAPSHOT.jar) do @echo built jar: %%~ti %%~zi
-          wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+          wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -Dfile.encoding=UTF-8 -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
           cd ..
 
           timeout /t 5 /nobreak >nul
@@ -86,7 +86,7 @@ jobs:
 
           echo === Create persistent startup scripts ===
           echo cd /d C:\Users\ginger\qicai\green-worker-management-system > start-backend.bat
-          echo java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod >> start-backend.bat
+          echo java -Dfile.encoding=UTF-8 -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod >> start-backend.bat
 
           echo cd /d C:\Users\ginger\qicai\landscape-admin-web > start-frontend.bat
           echo set PATH=%NODE_BIN%;%%PATH%% >> start-frontend.bat
