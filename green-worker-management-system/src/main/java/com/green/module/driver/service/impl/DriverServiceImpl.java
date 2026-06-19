@@ -194,22 +194,50 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public int countDriverAttendance(Long id) {
+        LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
+        wrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDeleted, 0);
+        return driverAttendanceRecordMapper.selectCount(wrapper).intValue();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteDriver(Long id) {
         DriverEntity entity = driverMapper.selectById(id);
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
         }
-        // 直接删除关联考勤记录（逻辑删除），返回实际删除数，避免 selectCount 统计异常
-        LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
-        deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
-        long attendanceCount = driverAttendanceRecordMapper.delete(deleteWrapper);
+        // 统计并逻辑删除关联的未删除考勤记录
+        int attendanceCount = countDriverAttendance(id);
         if (attendanceCount > 0) {
+            LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);
+            deleteWrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDeleted, 0);
+            driverAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除司机关联考勤记录: driverId={}, count={}", id, attendanceCount);
         }
-        driverMapper.deleteById(id);
+        // 将被删除司机姓名加上标记，释放唯一索引，便于后续添加同名司机
+        DriverEntity update = new DriverEntity();
+        update.setId(id);
+        update.setRealName(generateDeletedName(entity.getRealName(), id));
+        update.setDeleted(1);
+        driverMapper.updateById(update);
         log.info("删除司机成功: driverId={}", id);
-        return (int) attendanceCount;
+        return attendanceCount;
+    }
+
+    /**
+     * 生成删除后的唯一名称，避免占用唯一索引
+     */
+    private String generateDeletedName(String originalName, Long id) {
+        String suffix = "_deleted_" + id;
+        int maxLen = 50 - suffix.length();
+        String prefix = originalName == null ? "" : originalName;
+        if (prefix.length() > maxLen) {
+            prefix = prefix.substring(0, maxLen);
+        }
+        return prefix + suffix;
     }
 
     /**
@@ -225,7 +253,7 @@ public class DriverServiceImpl implements DriverService {
     private void checkRealNameUnique(Long currentId, String realName) {
         LambdaQueryWrapper<DriverEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(DriverEntity::getRealName, realName)
-                .eq(DriverEntity::getIsActive, 1)
+                .eq(DriverEntity::getDeleted, 0)
                 .ne(currentId != null, DriverEntity::getId, currentId);
         if (driverMapper.selectCount(wrapper) > 0) {
             throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS,

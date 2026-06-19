@@ -36,4 +36,6 @@ public interface DriverService {
     void resign(Long id);
 
     int deleteDriver(Long id);
+
+    int countDriverAttendance(Long id);
 }

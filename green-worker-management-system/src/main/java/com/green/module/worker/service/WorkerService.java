@@ -65,4 +65,6 @@ public interface WorkerService {
      * @return 关联考勤记录数量（用于警告提示）
      */
     int deleteWorker(Long id);
+
+    int countWorkerAttendance(Long id);
 }

@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker, getGroupList } from "@/lib/api";
+import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker, getGroupList, getWorkerAttendanceCount } from "@/lib/api";
 
 interface WorkerItem {
   id: number;
@@ -369,11 +369,10 @@ export default function WorkersPage() {
   const openDelete = async (worker: WorkerItem) => {
     setSelectedWorker(worker);
     try {
-      const res = await getWorkerDetail(worker.id);
-      // 实际 delete 接口会返回考勤数，但这里先模拟
-      setDeleteAttendanceCount(Math.floor(Math.random() * 50));
+      const res = await getWorkerAttendanceCount(worker.id);
+      setDeleteAttendanceCount(res.data || 0);
     } catch {
-      setDeleteAttendanceCount(Math.floor(Math.random() * 50));
+      setDeleteAttendanceCount(0);
     }
     setDeleteOpen(true);
   };

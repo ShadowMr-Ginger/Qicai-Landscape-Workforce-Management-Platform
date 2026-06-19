@@ -109,6 +109,12 @@ public class DriverController {
         return ApiResult.success("已设置为离职状态");
     }
 
+    @GetMapping("/api/admin/drivers/{id}/attendance-count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResult<Integer> attendanceCount(@PathVariable Long id) {
+        return ApiResult.success(driverService.countDriverAttendance(id));
+    }
+
     @DeleteMapping("/api/admin/drivers/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResult<Integer> delete(@PathVariable Long id, HttpServletRequest request) {

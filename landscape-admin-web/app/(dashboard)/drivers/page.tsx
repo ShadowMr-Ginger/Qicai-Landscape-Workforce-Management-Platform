@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver, resetDriverPassword } from "@/lib/api";
+import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver, resetDriverPassword, getDriverAttendanceCount } from "@/lib/api";
 
 interface DriverItem {
   id: number;
@@ -302,7 +302,12 @@ export default function DriversPage() {
 
   const openDelete = async (driver: DriverItem) => {
     setSelectedDriver(driver);
-    setDeleteAttendanceCount(Math.floor(Math.random() * 30));
+    try {
+      const res = await getDriverAttendanceCount(driver.id);
+      setDeleteAttendanceCount(res.data || 0);
+    } catch {
+      setDeleteAttendanceCount(0);
+    }
     setDeleteOpen(true);
   };
 

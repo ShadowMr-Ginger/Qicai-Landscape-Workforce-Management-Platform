@@ -113,6 +113,11 @@ export async function deleteWorker(id: number) {
   return res.data;
 }
 
+export async function getWorkerAttendanceCount(id: number) {
+  const res = await api.get(`/admin/workers/${id}/attendance-count`);
+  return res.data;
+}
+
 // ==================== 组别管理 ====================
 
 export async function getGroupList() {
@@ -184,6 +189,11 @@ export async function resignDriver(id: number) {
 
 export async function deleteDriver(id: number) {
   const res = await api.delete(`/admin/drivers/${id}`);
+  return res.data;
+}
+
+export async function getDriverAttendanceCount(id: number) {
+  const res = await api.get(`/admin/drivers/${id}/attendance-count`);
   return res.data;
 }
 

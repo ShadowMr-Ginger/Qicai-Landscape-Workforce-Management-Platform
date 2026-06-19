@@ -101,6 +101,17 @@ public class WorkerController {
     }
 
     /**
+     * 查询工人关联考勤记录数
+     *
+     * @param id 工人ID
+     * @return 关联考勤记录数量
+     */
+    @GetMapping("/{id}/attendance-count")
+    public ApiResult<Integer> attendanceCount(@PathVariable Long id) {
+        return ApiResult.success(workerService.countWorkerAttendance(id));
+    }
+
+    /**
      * 删除工人
      *
      * @param id 工人ID

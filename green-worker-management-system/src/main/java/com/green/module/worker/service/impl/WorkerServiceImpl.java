@@ -154,6 +154,14 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     @Override
+    public int countWorkerAttendance(Long id) {
+        LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
+        wrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getDeleted, 0);
+        return workerAttendanceRecordMapper.selectCount(wrapper).intValue();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteWorker(Long id) {
         WorkerEntity entity = workerMapper.selectById(id);
@@ -161,19 +169,38 @@ public class WorkerServiceImpl implements WorkerService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "工人不存在");
         }
 
-        // 直接删除关联考勤记录（逻辑删除），返回实际删除数，避免 selectCount 统计异常
-        LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
-        deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
-        long attendanceCount = workerAttendanceRecordMapper.delete(deleteWrapper);
+        // 统计并逻辑删除关联的未删除考勤记录
+        int attendanceCount = countWorkerAttendance(id);
         if (attendanceCount > 0) {
+            LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
+            deleteWrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getDeleted, 0);
+            workerAttendanceRecordMapper.delete(deleteWrapper);
             log.info("删除工人关联考勤记录: workerId={}, count={}", id, attendanceCount);
         }
 
-        // 删除工人
-        workerMapper.deleteById(id);
+        // 将被删除工人姓名加上标记，释放唯一索引，便于后续添加同名工人
+        WorkerEntity update = new WorkerEntity();
+        update.setId(id);
+        update.setName(generateDeletedName(entity.getName(), id));
+        update.setDeleted(1);
+        workerMapper.updateById(update);
         log.info("删除工人成功: workerId={}", id);
 
-        return (int) attendanceCount;
+        return attendanceCount;
+    }
+
+    /**
+     * 生成删除后的唯一名称，避免占用唯一索引
+     */
+    private String generateDeletedName(String originalName, Long id) {
+        String suffix = "_deleted_" + id;
+        int maxLen = 50 - suffix.length();
+        String prefix = originalName == null ? "" : originalName;
+        if (prefix.length() > maxLen) {
+            prefix = prefix.substring(0, maxLen);
+        }
+        return prefix + suffix;
     }
 
     /**
@@ -189,7 +216,7 @@ public class WorkerServiceImpl implements WorkerService {
     private void checkNameUnique(Long currentId, String name) {
         LambdaQueryWrapper<WorkerEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(WorkerEntity::getName, name)
-                .eq(WorkerEntity::getIsEmployed, 1)
+                .eq(WorkerEntity::getDeleted, 0)
                 .ne(currentId != null, WorkerEntity::getId, currentId);
         if (workerMapper.selectCount(wrapper) > 0) {
             throw new BusinessException(ResultCodeEnum.DATA_ALREADY_EXISTS,
