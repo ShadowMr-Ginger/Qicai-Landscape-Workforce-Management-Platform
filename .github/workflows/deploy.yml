@@ -36,10 +36,14 @@ jobs:
             -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} <<'REMOTE_EOF'
           cd /d C:\Users\ginger\qicai
+          powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+          timeout /t 3 /nobreak >nul
           powershell -Command "Expand-Archive -Path deploy.zip -DestinationPath . -Force"
           cd green-worker-management-system
+          mvn -v
           mvn clean package -DskipTests
-          powershell -Command "Get-NetTCPConnection -LocalPort 8082 -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
-          timeout /t 2 /nobreak >nul
+          for %%i in (target\green-worker-management-system-1.0.0-SNAPSHOT.jar) do @echo built jar: %%~ti %%~zi
           wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+          timeout /t 5 /nobreak >nul
+          netstat -ano | findstr :8082
           REMOTE_EOF
