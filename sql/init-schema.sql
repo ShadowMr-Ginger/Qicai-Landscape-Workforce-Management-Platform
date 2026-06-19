@@ -106,7 +106,7 @@ CREATE TABLE `drivers` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `real_name` VARCHAR(50) NOT NULL COMMENT '姓名',
     `gender` TINYINT NOT NULL DEFAULT 1 COMMENT '性别: 1-男, 2-女',
-    `phone` VARCHAR(20) NOT NULL COMMENT '手机号',
+    `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     `id_card` VARCHAR(18) DEFAULT NULL COMMENT '身份证号',
     `emergency_contact_phone` VARCHAR(20) DEFAULT NULL COMMENT '紧急联系人电话',
     `base_daily_salary` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '基础日薪(元)',
