@@ -7,7 +7,7 @@ import type { ApiResult } from '@/types';
  * <p>封装后端 API 调用，统一处理请求头、错误响应和 Token 失效跳转。</p>
  */
 const api = axios.create({
-  baseURL: (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api').trim(),
+  baseURL: (process.env.NEXT_PUBLIC_API_BASE_URL || '/api').trim(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
