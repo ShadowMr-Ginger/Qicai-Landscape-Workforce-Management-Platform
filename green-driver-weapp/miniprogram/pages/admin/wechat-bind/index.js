@@ -14,6 +14,20 @@ const auth_1 = require("../../../utils/auth");
 Page({
     data: {
         binding: false,
+        boundOpenid: '',
+    },
+    onLoad() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield (0, api_1.getCurrentUser)();
+                if (user === null || user === void 0 ? void 0 : user.wxOpenid) {
+                    this.setData({ boundOpenid: user.wxOpenid });
+                }
+            }
+            catch (_a) {
+                // ignore
+            }
+        });
     },
     bindWechat() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -26,12 +40,7 @@ Page({
                     wx.showToast({ title: '获取微信code失败', icon: 'none' });
                     return;
                 }
-                yield (0, api_1.bindAdminWechat)(wxRes.code);
-                (0, auth_1.setWxBound)(true);
-                wx.showToast({ title: '绑定成功', icon: 'success' });
-                setTimeout(() => {
-                    wx.switchTab({ url: '/pages/admin/home/index' });
-                }, 1000);
+                yield this.doBind(wxRes.code);
             }
             catch (err) {
                 wx.showToast({ title: err.message || '绑定失败', icon: 'none' });
@@ -39,6 +48,49 @@ Page({
             finally {
                 this.setData({ binding: false });
             }
+        });
+    },
+    doBind(wxCode, confirm) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield (0, api_1.bindAdminWechat)(wxCode, confirm);
+            if ((result === null || result === void 0 ? void 0 : result.status) === 'BOUND_SELF') {
+                wx.showToast({ title: '该账号已与当前微信号绑定', icon: 'none' });
+                (0, auth_1.setWxBound)(true);
+                setTimeout(() => {
+                    wx.switchTab({ url: '/pages/admin/home/index' });
+                }, 1500);
+                return;
+            }
+            if ((result === null || result === void 0 ? void 0 : result.status) === 'BOUND_OTHER') {
+                const boundOpenid = result.boundOpenid || '其他微信';
+                wx.showModal({
+                    title: '确认重新绑定',
+                    content: `该账号已绑定微信（${boundOpenid}），继续绑定当前账号将解除之前绑定的账号，是否继续？`,
+                    confirmText: '继续绑定',
+                    cancelText: '取消',
+                    success: (res) => __awaiter(this, void 0, void 0, function* () {
+                        if (res.confirm) {
+                            try {
+                                this.setData({ binding: true });
+                                yield this.doBind(wxCode, true);
+                            }
+                            catch (err) {
+                                wx.showToast({ title: err.message || '绑定失败', icon: 'none' });
+                            }
+                            finally {
+                                this.setData({ binding: false });
+                            }
+                        }
+                    }),
+                });
+                return;
+            }
+            // BOUND_SUCCESS
+            (0, auth_1.setWxBound)(true);
+            wx.showToast({ title: '绑定成功', icon: 'success' });
+            setTimeout(() => {
+                wx.switchTab({ url: '/pages/admin/home/index' });
+            }, 1000);
         });
     },
     skipBind() {

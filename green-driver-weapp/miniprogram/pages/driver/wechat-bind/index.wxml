@@ -4,7 +4,8 @@
       <text class="bind-icon">💬</text>
     </view>
     <text class="bind-title">绑定微信</text>
-    <text class="bind-desc">绑定微信后，下次可使用微信一键登录，更加便捷安全</text>
+    <text class="bind-desc" wx:if="{{!boundOpenid}}">绑定微信后，下次可使用微信一键登录，更加便捷安全</text>
+    <text class="bind-desc" wx:if="{{boundOpenid}}">当前账号已绑定微信：{{boundOpenid}}</text>
 
     <button
       class="btn btn-primary"

@@ -42,6 +42,9 @@ Page({
             }
         });
     },
+    goBindWechat() {
+        wx.navigateTo({ url: '/pages/admin/wechat-bind/index' });
+    },
     logout() {
         wx.showModal({
             title: '确认退出',

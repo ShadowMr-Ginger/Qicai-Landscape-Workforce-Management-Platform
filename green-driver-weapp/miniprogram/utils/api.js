@@ -122,10 +122,10 @@ function driverChangePassword(oldPassword, newPassword) {
         data: { oldPassword, newPassword },
     });
 }
-function bindWechat(wxCode) {
+function bindWechat(wxCode, confirm) {
     return request('/driver/bind-wx', {
         method: 'POST',
-        data: { wxCode },
+        data: { wxCode, confirm },
     });
 }
 // ==================== 常用工人 ====================
@@ -189,10 +189,10 @@ function adminWxLogin(wxCode) {
         noAuth: true,
     });
 }
-function bindAdminWechat(wxCode) {
+function bindAdminWechat(wxCode, confirm) {
     return request('/admin/bind-wx', {
         method: 'POST',
-        data: { wxCode },
+        data: { wxCode, confirm },
     });
 }
 // 管理员Dashboard统计

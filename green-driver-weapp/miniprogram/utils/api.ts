@@ -98,10 +98,10 @@ export function driverChangePassword(oldPassword: string, newPassword: string) {
   })
 }
 
-export function bindWechat(wxCode: string) {
+export function bindWechat(wxCode: string, confirm?: boolean) {
   return request('/driver/bind-wx', {
     method: 'POST',
-    data: { wxCode },
+    data: { wxCode, confirm },
   })
 }
 
@@ -183,10 +183,10 @@ export function adminWxLogin(wxCode: string) {
   })
 }
 
-export function bindAdminWechat(wxCode: string) {
+export function bindAdminWechat(wxCode: string, confirm?: boolean) {
   return request('/admin/bind-wx', {
     method: 'POST',
-    data: { wxCode },
+    data: { wxCode, confirm },
   })
 }
 

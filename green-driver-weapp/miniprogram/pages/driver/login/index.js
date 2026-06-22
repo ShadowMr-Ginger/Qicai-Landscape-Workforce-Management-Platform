@@ -81,19 +81,17 @@ Page({
     handleLoginSuccess(res) {
         const { token, userInfo, firstLogin } = res;
         (0, auth_1.saveLoginState)(token, 'driver', userInfo);
+        (0, auth_1.setWxBound)(!!(userInfo === null || userInfo === void 0 ? void 0 : userInfo.wxBound));
         if (firstLogin) {
             // 首次登录，强制修改密码
             wx.redirectTo({ url: '/pages/driver/change-password/index?firstLogin=true' });
         }
+        else if (!(userInfo === null || userInfo === void 0 ? void 0 : userInfo.wxBound)) {
+            // 未绑定微信，跳转绑定页
+            wx.redirectTo({ url: '/pages/driver/wechat-bind/index' });
+        }
         else {
-            // 检查是否已绑定微信
-            const wxBound = wx.getStorageSync('wxBound');
-            if (!wxBound) {
-                wx.redirectTo({ url: '/pages/driver/wechat-bind/index' });
-            }
-            else {
-                wx.switchTab({ url: '/pages/driver/home/index' });
-            }
+            wx.switchTab({ url: '/pages/driver/home/index' });
         }
     },
     /** 返回首页 */

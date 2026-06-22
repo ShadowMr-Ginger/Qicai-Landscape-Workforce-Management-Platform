@@ -34,4 +34,14 @@ public class CurrentUserVO {
      * 角色名称
      */
     private String roleName;
+
+    /**
+     * 是否已绑定微信
+     */
+    private Boolean wxBound;
+
+    /**
+     * 已绑定的微信 OpenID（脱敏后）
+     */
+    private String wxOpenid;
 }

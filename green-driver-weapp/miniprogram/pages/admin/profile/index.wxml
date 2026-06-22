@@ -10,6 +10,11 @@
   </view>
 
   <view class="profile-menu">
+    <view class="menu-item" bindtap="goBindWechat">
+      <text class="menu-icon">💬</text>
+      <text class="menu-text">微信绑定</text>
+      <text class="menu-arrow">›</text>
+    </view>
     <view class="menu-item" bindtap="logout">
       <text class="menu-icon">🚪</text>
       <text class="menu-text">退出登录</text>

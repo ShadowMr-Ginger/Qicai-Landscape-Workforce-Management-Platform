@@ -10,6 +10,7 @@ import com.green.module.auth.dto.DriverChangePasswordDTO;
 import com.green.module.driver.dto.CreateDriverDTO;
 import com.green.module.driver.dto.DriverQuery;
 import com.green.module.auth.dto.DriverWxBindDTO;
+import com.green.module.auth.vo.WxBindResultVO;
 import com.green.module.driver.dto.UpdateDriverDTO;
 import com.green.module.driver.entity.DriverEntity;
 import com.green.module.driver.mapper.DriverMapper;
@@ -137,7 +138,7 @@ public class DriverController {
 
     @PostMapping("/api/driver/bind-wx")
     @PreAuthorize("hasRole('DRIVER')")
-    public ApiResult<Void> bindWechat(@RequestBody @Valid DriverWxBindDTO dto, HttpServletRequest request) {
+    public ApiResult<WxBindResultVO> bindWechat(@RequestBody @Valid DriverWxBindDTO dto, HttpServletRequest request) {
         Long driverId = SecurityUtils.getCurrentUserId();
 
         // 1. 调用微信接口换取 OpenID
@@ -150,7 +151,21 @@ public class DriverController {
             return ApiResult.error(ResultCodeEnum.WX_BIND_FAILED, "获取微信用户信息失败");
         }
 
-        // 2. 检查 OpenID 是否已被其他司机绑定
+        String maskedOpenid = maskOpenid(openid);
+        DriverEntity currentDriver = driverMapper.selectById(driverId);
+        String boundOpenid = currentDriver != null ? currentDriver.getWxOpenid() : null;
+
+        // 2. 判断当前账号与当前微信的绑定关系
+        if (boundOpenid != null && !boundOpenid.isEmpty()) {
+            if (boundOpenid.equals(openid)) {
+                return ApiResult.success(WxBindResultVO.self(maskedOpenid));
+            }
+            if (!Boolean.TRUE.equals(dto.getConfirm())) {
+                return ApiResult.success(WxBindResultVO.other(maskedOpenid, maskOpenid(boundOpenid)));
+            }
+        }
+
+        // 3. 检查 OpenID 是否已被其他司机绑定
         com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<DriverEntity> wrapper =
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
         wrapper.eq(DriverEntity::getWxOpenid, openid)
@@ -159,7 +174,7 @@ public class DriverController {
             return ApiResult.error(ResultCodeEnum.WX_BIND_FAILED, "该微信已绑定其他司机账号");
         }
 
-        // 3. 绑定到当前司机
+        // 4. 绑定到当前司机
         DriverEntity driver = new DriverEntity();
         driver.setId(driverId);
         driver.setWxOpenid(openid);
@@ -169,6 +184,13 @@ public class DriverController {
         systemLogService.logAction(driverId, "DRIVER", "UPDATE",
                 "微信绑定", "司机绑定微信号", "SUCCESS", request);
 
-        return ApiResult.success("微信绑定成功");
+        return ApiResult.success(WxBindResultVO.success(maskedOpenid));
+    }
+
+    private String maskOpenid(String openid) {
+        if (openid == null || openid.length() < 8) {
+            return openid;
+        }
+        return openid.substring(0, 4) + "****" + openid.substring(openid.length() - 4);
     }
 }

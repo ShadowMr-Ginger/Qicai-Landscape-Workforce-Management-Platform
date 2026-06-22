@@ -86,7 +86,9 @@ public class AuthServiceImpl implements AuthService {
         // 5. 组装返回结果
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
-        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+        CurrentUserVO userInfo = convertToCurrentUserVO(loginUser);
+        userInfo.setWxBound(admin.getWxOpenid() != null && !admin.getWxOpenid().isEmpty());
+        loginVO.setUserInfo(userInfo);
 
         log.info("管理员登录成功: username={}", dto.getUsername());
         return loginVO;
@@ -127,7 +129,9 @@ public class AuthServiceImpl implements AuthService {
         // 5. 组装返回结果
         DriverLoginVO loginVO = new DriverLoginVO();
         loginVO.setToken(token);
-        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+        CurrentUserVO userInfo = convertToCurrentUserVO(loginUser);
+        userInfo.setWxBound(driver.getWxOpenid() != null && !driver.getWxOpenid().isEmpty());
+        loginVO.setUserInfo(userInfo);
         // 若 passwordChanged 为 false，表示首次登录（未修改默认密码）
         loginVO.setFirstLogin(Boolean.FALSE.equals(loginUser.getPasswordChanged()));
 
@@ -141,7 +145,21 @@ public class AuthServiceImpl implements AuthService {
         if (loginUser == null) {
             throw new BusinessException(ResultCodeEnum.UNAUTHORIZED);
         }
-        return convertToCurrentUserVO(loginUser);
+        CurrentUserVO vo = convertToCurrentUserVO(loginUser);
+        if (com.green.common.enums.RoleEnum.ADMIN.equals(loginUser.getRole())) {
+            AdminEntity admin = adminMapper.selectById(loginUser.getUserId());
+            if (admin != null) {
+                vo.setWxBound(admin.getWxOpenid() != null && !admin.getWxOpenid().isEmpty());
+                vo.setWxOpenid(maskOpenid(admin.getWxOpenid()));
+            }
+        } else if (com.green.common.enums.RoleEnum.DRIVER.equals(loginUser.getRole())) {
+            DriverEntity driver = driverMapper.selectById(loginUser.getUserId());
+            if (driver != null) {
+                vo.setWxBound(driver.getWxOpenid() != null && !driver.getWxOpenid().isEmpty());
+                vo.setWxOpenid(maskOpenid(driver.getWxOpenid()));
+            }
+        }
+        return vo;
     }
 
     @Override
@@ -251,5 +269,15 @@ public class AuthServiceImpl implements AuthService {
         vo.setName(loginUser.getRealName());
         vo.setRoleName(loginUser.getRole().getDescription());
         return vo;
+    }
+
+    /**
+     * OpenID 脱敏
+     */
+    private String maskOpenid(String openid) {
+        if (openid == null || openid.length() < 8) {
+            return openid;
+        }
+        return openid.substring(0, 4) + "****" + openid.substring(openid.length() - 4);
     }
 }

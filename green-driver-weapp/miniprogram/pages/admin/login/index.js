@@ -74,8 +74,8 @@ Page({
     handleLoginSuccess(res) {
         const { token, userInfo } = res;
         (0, auth_1.saveLoginState)(token, 'admin', userInfo);
-        const wxBound = wx.getStorageSync('wxBound');
-        if (!wxBound) {
+        (0, auth_1.setWxBound)(!!(userInfo === null || userInfo === void 0 ? void 0 : userInfo.wxBound));
+        if (!(userInfo === null || userInfo === void 0 ? void 0 : userInfo.wxBound)) {
             wx.redirectTo({ url: '/pages/admin/wechat-bind/index' });
         }
         else {

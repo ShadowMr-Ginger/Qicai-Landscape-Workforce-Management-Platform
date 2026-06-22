@@ -2,8 +2,9 @@
   <view class="bind-card">
     <view class="bind-icon">💬</view>
     <text class="bind-title">绑定微信</text>
-    <text class="bind-desc">绑定微信后，下次可直接使用微信一键登录</text>
-    <button class="bind-btn" loading="{{binding}}" bindtap="bindWechat">绑定微信</button>
+    <text class="bind-desc" wx:if="{{!boundOpenid}}">绑定微信后，下次可直接使用微信一键登录</text>
+    <text class="bind-desc" wx:if="{{boundOpenid}}">当前账号已绑定微信：{{boundOpenid}}</text>
+    <button class="bind-btn" loading="{{binding}}" disabled="{{binding}}" bindtap="bindWechat">绑定微信</button>
     <text class="skip-text" bindtap="skipBind">跳过，暂不绑定</text>
   </view>
 </view>

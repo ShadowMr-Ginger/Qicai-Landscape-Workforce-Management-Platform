@@ -1,13 +1,13 @@
-package com.green.module.auth.dto;
+package com.green.module.system.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * 司机微信绑定请求参数
+ * 管理员微信绑定请求参数
  */
 @Data
-public class DriverWxBindDTO {
+public class AdminWxBindDTO {
 
     /**
      * 微信登录临时凭证

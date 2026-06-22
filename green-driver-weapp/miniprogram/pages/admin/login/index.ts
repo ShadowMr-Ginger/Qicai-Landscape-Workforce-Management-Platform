@@ -61,8 +61,8 @@ Page({
   handleLoginSuccess(res: any) {
     const { token, userInfo } = res
     saveLoginState(token, 'admin', userInfo)
-    const wxBound = wx.getStorageSync('wxBound')
-    if (!wxBound) {
+    setWxBound(!!userInfo?.wxBound)
+    if (!userInfo?.wxBound) {
       wx.redirectTo({ url: '/pages/admin/wechat-bind/index' })
     } else {
       wx.switchTab({ url: '/pages/admin/home/index' })

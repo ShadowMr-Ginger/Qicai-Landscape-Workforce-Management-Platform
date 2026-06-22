@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ATTENDANCE_TYPE_TEXT = exports.ATTENDANCE_TYPE = exports.BATCH_STATUS_COLOR = exports.BATCH_STATUS_TEXT = exports.BATCH_STATUS = exports.STORAGE_KEYS = exports.API_BASE_URL = void 0;
+// 注意：本项目微信小程序实际运行的是同目录下的 constants.js
+// 微信开发者工具未启用 TypeScript 编译插件，修改本文件后需手动同步到 constants.js
 // API 基础地址
 exports.API_BASE_URL = 'https://www.qicaiyuanlin.cn/api';
 // 本地存储键名

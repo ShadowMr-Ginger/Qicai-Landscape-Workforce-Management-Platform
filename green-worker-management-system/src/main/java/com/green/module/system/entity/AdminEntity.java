@@ -86,8 +86,6 @@ public class AdminEntity extends BaseEntity {
     /**
      * 微信 OpenID
      * <p>用于微信一键登录</p>
-     * <p>注意：数据库添加 wx_openid 字段后，需移除此 @TableField(exist = false)</p>
      */
-    @TableField(exist = false)
     private String wxOpenid;
 }
