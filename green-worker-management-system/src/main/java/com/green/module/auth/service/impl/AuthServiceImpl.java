@@ -200,7 +200,10 @@ public class AuthServiceImpl implements AuthService {
 
         DriverLoginVO loginVO = new DriverLoginVO();
         loginVO.setToken(token);
-        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+        CurrentUserVO driverUserInfo = convertToCurrentUserVO(loginUser);
+        driverUserInfo.setWxBound(true);
+        driverUserInfo.setWxOpenid(maskOpenid(driver.getWxOpenid()));
+        loginVO.setUserInfo(driverUserInfo);
         loginVO.setFirstLogin(Boolean.FALSE.equals(loginUser.getPasswordChanged()));
 
         log.info("司机微信登录成功: driverId={}, name={}", driver.getId(), driver.getRealName());
@@ -244,7 +247,10 @@ public class AuthServiceImpl implements AuthService {
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
-        loginVO.setUserInfo(convertToCurrentUserVO(loginUser));
+        CurrentUserVO adminUserInfo = convertToCurrentUserVO(loginUser);
+        adminUserInfo.setWxBound(true);
+        adminUserInfo.setWxOpenid(maskOpenid(admin.getWxOpenid()));
+        loginVO.setUserInfo(adminUserInfo);
 
         log.info("管理员微信登录成功: adminId={}, username={}", admin.getId(), admin.getUsername());
         return loginVO;

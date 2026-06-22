@@ -66,9 +66,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // OPTIONS 预检请求放行（CORS 需要）
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // 公开接口：管理员登录、司机登录、接口文档
+                        // 公开接口：管理员登录、司机登录、微信一键登录、接口文档
                         .requestMatchers("/api/auth/admin/login").permitAll()
                         .requestMatchers("/api/auth/driver/login").permitAll()
+                        .requestMatchers("/api/auth/admin/wx-login").permitAll()
+                        .requestMatchers("/api/auth/driver/wx-login").permitAll()
                         .requestMatchers("/doc.html", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         // 其他所有请求需要认证
