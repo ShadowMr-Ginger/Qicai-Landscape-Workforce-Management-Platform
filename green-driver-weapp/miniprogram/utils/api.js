@@ -65,14 +65,24 @@ function request(url, options = {}) {
                 if (result.code === 200) {
                     resolve(result.data);
                 }
-                else if (result.code === 401) {
-                    // Token 过期，清除登录态并跳转
+                else if (result.code === 401 || result.code === 403) {
+                    // Token 过期或角色不匹配，清除登录态并跳转对应登录页
+                    const userType = wx.getStorageSync(constants_1.STORAGE_KEYS.USER_TYPE);
                     wx.removeStorageSync(constants_1.STORAGE_KEYS.TOKEN);
                     wx.removeStorageSync(constants_1.STORAGE_KEYS.USER_TYPE);
                     wx.removeStorageSync(constants_1.STORAGE_KEYS.USER_INFO);
-                    wx.showToast({ title: '登录已过期', icon: 'none' });
+                    wx.removeStorageSync(constants_1.STORAGE_KEYS.WX_BOUND);
+                    wx.showToast({ title: result.code === 401 ? '登录已过期' : '登录状态异常', icon: 'none' });
                     setTimeout(() => {
-                        wx.reLaunch({ url: '/pages/index/index' });
+                        if (userType === 'driver') {
+                            wx.reLaunch({ url: '/pages/driver/login/index' });
+                        }
+                        else if (userType === 'admin') {
+                            wx.reLaunch({ url: '/pages/admin/login/index' });
+                        }
+                        else {
+                            wx.reLaunch({ url: '/pages/index/index' });
+                        }
                     }, 1500);
                     reject(new Error(result.message || '未登录'));
                 }

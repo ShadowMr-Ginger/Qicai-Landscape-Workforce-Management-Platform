@@ -1,5 +1,5 @@
 import { bindAdminWechat, getCurrentUser } from '../../../utils/api'
-import { setWxBound } from '../../../utils/auth'
+import { setWxBound, getUserType, clearLoginState } from '../../../utils/auth'
 
 Page({
   data: {
@@ -8,6 +8,12 @@ Page({
   },
 
   async onLoad() {
+    const userType = getUserType()
+    if (userType !== 'admin') {
+      clearLoginState()
+      wx.reLaunch({ url: '/pages/admin/login/index' })
+      return
+    }
     try {
       const user: any = await getCurrentUser()
       if (user?.wxOpenid) {

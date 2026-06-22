@@ -18,6 +18,12 @@ Page({
     },
     onLoad() {
         return __awaiter(this, void 0, void 0, function* () {
+            const userType = (0, auth_1.getUserType)();
+            if (userType !== 'admin') {
+                (0, auth_1.clearLoginState)();
+                wx.reLaunch({ url: '/pages/admin/login/index' });
+                return;
+            }
             try {
                 const user = yield (0, api_1.getCurrentUser)();
                 if (user === null || user === void 0 ? void 0 : user.wxOpenid) {
