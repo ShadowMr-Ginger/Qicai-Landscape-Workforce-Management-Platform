@@ -46,7 +46,14 @@ const navItems: NavItem[] = [
       { title: "默认薪资", href: "/workers/salary-defaults" },
     ],
   },
-  { title: "司机管理", href: "/drivers", icon: UserCircle },
+  {
+    title: "司机管理",
+    icon: UserCircle,
+    children: [
+      { title: "司机列表", href: "/drivers" },
+      { title: "默认薪资", href: "/drivers/salary-defaults" },
+    ],
+  },
   {
     title: "考勤管理",
     icon: ClipboardCheck,
@@ -71,6 +78,7 @@ export function Sidebar() {
   const { user, sidebarCollapsed, toggleSidebar, logout } = useAuthStore();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     "工人管理": pathname === "/workers" || pathname === "/groups",
+    "司机管理": pathname === "/drivers" || pathname === "/drivers/salary-defaults",
   });
 
   const toggleMenu = (title: string) => {
@@ -159,7 +167,7 @@ export function Sidebar() {
                               : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                           )}
                         >
-                          {child.title === "工人列表" ? (
+                          {child.title === "工人列表" || child.title === "司机列表" ? (
                             <List className="w-4 h-4" />
                           ) : (
                             <FolderTree className="w-4 h-4" />

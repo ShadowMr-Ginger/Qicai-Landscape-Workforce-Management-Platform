@@ -45,6 +45,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { createDriver, getDriverList, getDriverDetail, updateDriver, resignDriver, deleteDriver, resetDriverPassword, getDriverAttendanceCount } from "@/lib/api";
+import { loadDriverSalaryDefaults } from "./salary-defaults/page";
 
 interface DriverItem {
   id: number;
@@ -214,7 +215,8 @@ export default function DriversPage() {
       });
       toast.success("新增司机成功，默认密码为 123456");
       setCreateOpen(false);
-      setCreateForm({ realName: "", gender: "1", phone: "", idCard: "", emergencyContactPhone: "", baseDailySalary: "", overtimeHourlyRate: "" });
+      const defaults = loadDriverSalaryDefaults();
+      setCreateForm({ realName: "", gender: "1", phone: "", idCard: "", emergencyContactPhone: "", baseDailySalary: String(defaults.baseDailySalary), overtimeHourlyRate: String(defaults.overtimeHourlyRate) });
       await fetchDrivers();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "新增司机失败，请检查网络或联系管理员");
@@ -360,7 +362,19 @@ export default function DriversPage() {
                 variant="default"
                 size="sm"
                 className="rounded-lg bg-blue-600 hover:bg-blue-700"
-                onClick={() => setCreateOpen(true)}
+                onClick={() => {
+                  const defaults = loadDriverSalaryDefaults();
+                  setCreateForm({
+                    realName: "",
+                    gender: "1",
+                    phone: "",
+                    idCard: "",
+                    emergencyContactPhone: "",
+                    baseDailySalary: String(defaults.baseDailySalary),
+                    overtimeHourlyRate: String(defaults.overtimeHourlyRate),
+                  });
+                  setCreateOpen(true);
+                }}
               >
                 <Car className="w-4 h-4 mr-1" />
                 新增司机
