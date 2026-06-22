@@ -1,3 +1,5 @@
+// 注意：本项目微信小程序实际运行的是同目录下的 constants.js
+// 微信开发者工具未启用 TypeScript 编译插件，修改本文件后需手动同步到 constants.js
 // API 基础地址
 export const API_BASE_URL = 'https://www.qicaiyuanlin.cn/api'
 
