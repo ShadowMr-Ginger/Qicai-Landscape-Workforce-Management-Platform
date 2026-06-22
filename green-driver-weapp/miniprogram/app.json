@@ -10,6 +10,7 @@
     "pages/driver/workers/index",
     "pages/driver/profile/index",
     "pages/admin/login/index",
+    "pages/admin/change-password/index",
     "pages/admin/wechat-bind/index",
     "pages/admin/home/index",
     "pages/admin/batch-review/index",

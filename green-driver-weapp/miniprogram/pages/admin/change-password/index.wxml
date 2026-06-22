@@ -1,0 +1,52 @@
+<view class="page-white">
+  <view class="page-header">
+    <text class="page-title">修改密码</text>
+    <text class="page-subtitle">定期更换密码可提升账号安全</text>
+  </view>
+
+  <view class="form-container">
+    <view class="form-item">
+      <text class="form-label">原密码</text>
+      <input
+        class="input"
+        placeholder="请输入原密码"
+        placeholder-class="input-placeholder"
+        password
+        value="{{oldPassword}}"
+        bindinput="onOldPasswordInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">新密码</text>
+      <input
+        class="input"
+        placeholder="请设置新密码（至少6位）"
+        placeholder-class="input-placeholder"
+        password
+        value="{{newPassword}}"
+        bindinput="onNewPasswordInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">确认密码</text>
+      <input
+        class="input"
+        placeholder="请再次输入新密码"
+        placeholder-class="input-placeholder"
+        password
+        value="{{confirmPassword}}"
+        bindinput="onConfirmPasswordInput"
+      />
+    </view>
+
+    <button
+      class="btn btn-primary"
+      style="margin-top: 48rpx;"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+      bindtap="onSubmit"
+    >确认修改</button>
+  </view>
+</view>

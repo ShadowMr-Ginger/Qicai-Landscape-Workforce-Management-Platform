@@ -45,6 +45,9 @@ Page({
     goBindWechat() {
         wx.navigateTo({ url: '/pages/admin/wechat-bind/index' });
     },
+    goChangePassword() {
+        wx.navigateTo({ url: '/pages/admin/change-password/index' });
+    },
     logout() {
         wx.showModal({
             title: '确认退出',

@@ -439,4 +439,9 @@ export async function runGlobalAnomalyCheck() {
   return res.data;
 }
 
+export async function changeAdminPassword(oldPassword: string, newPassword: string) {
+  const res = await api.post('/admin/change-password', { oldPassword, newPassword });
+  return res.data;
+}
+
 export default api;

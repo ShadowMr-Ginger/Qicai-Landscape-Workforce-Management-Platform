@@ -21,6 +21,7 @@ exports.getWorkTypeList = getWorkTypeList;
 exports.adminLogin = adminLogin;
 exports.adminWxLogin = adminWxLogin;
 exports.bindAdminWechat = bindAdminWechat;
+exports.adminChangePassword = adminChangePassword;
 exports.getAdminDashboardStats = getAdminDashboardStats;
 exports.getAdminBatches = getAdminBatches;
 exports.getAdminBatchDetail = getAdminBatchDetail;
@@ -203,6 +204,12 @@ function bindAdminWechat(wxCode, confirm) {
     return request('/admin/bind-wx', {
         method: 'POST',
         data: { wxCode, confirm },
+    });
+}
+function adminChangePassword(oldPassword, newPassword) {
+    return request('/admin/change-password', {
+        method: 'POST',
+        data: { oldPassword, newPassword },
     });
 }
 // 管理员Dashboard统计

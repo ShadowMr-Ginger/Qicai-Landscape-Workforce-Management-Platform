@@ -198,6 +198,13 @@ export function bindAdminWechat(wxCode: string, confirm?: boolean) {
   })
 }
 
+export function adminChangePassword(oldPassword: string, newPassword: string) {
+  return request('/admin/change-password', {
+    method: 'POST',
+    data: { oldPassword, newPassword },
+  })
+}
+
 // 管理员Dashboard统计
 export function getAdminDashboardStats() {
   return request('/admin/attendance/dashboard/stats', { method: 'GET' })

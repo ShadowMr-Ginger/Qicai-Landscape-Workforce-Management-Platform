@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { getCurrentUser } from "@/lib/api";
+import { getCurrentUser, changeAdminPassword } from "@/lib/api";
 
 const themeOptions = [
   { value: "light" as const, label: "浅色模式", icon: Sun },
@@ -71,12 +71,15 @@ export default function SettingsPage() {
       return;
     }
     setChangingPassword(true);
-    // TODO: 接入后端修改密码接口
-    setTimeout(() => {
-      toast.info("密码修改功能尚未接入后端，请联系系统管理员");
-      setChangingPassword(false);
+    try {
+      await changeAdminPassword(passwordForm.oldPassword, passwordForm.newPassword);
+      toast.success("密码修改成功");
       setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
-    }, 600);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "密码修改失败");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const displayUser = currentUser || user;
