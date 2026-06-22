@@ -1,4 +1,4 @@
-import { driverChangePassword } from '../../../utils/api'
+import { driverChangePassword, getCurrentUser } from '../../../utils/api'
 import { saveLoginState } from '../../../utils/auth'
 
 Page({
@@ -45,15 +45,26 @@ Page({
     this.setData({ loading: true })
     try {
       const newToken = await driverChangePassword(firstLogin ? '123456' : oldPassword, newPassword)
-      wx.showToast({ title: '修改成功', icon: 'success' })
 
       // 保存新 Token，更新 passwordChanged 状态
       if (newToken) {
-        wx.setStorageSync('token', newToken)
-        const userInfo = wx.getStorageSync('userInfo') || {}
-        userInfo.passwordChanged = true
-        wx.setStorageSync('userInfo', userInfo)
+        const currentUserInfo = wx.getStorageSync('userInfo') || {}
+        currentUserInfo.passwordChanged = true
+        saveLoginState(newToken, 'driver', currentUserInfo)
+
+        // 立即刷新用户信息，确保 token 可用
+        try {
+          const freshUser: any = await getCurrentUser()
+          if (freshUser) {
+            freshUser.passwordChanged = true
+            saveLoginState(newToken, 'driver', freshUser)
+          }
+        } catch {
+          // ignore
+        }
       }
+
+      wx.showToast({ title: '修改成功', icon: 'success' })
 
       if (firstLogin) {
         // 跳转到微信绑定
