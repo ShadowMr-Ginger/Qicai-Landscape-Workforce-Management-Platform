@@ -22,7 +22,9 @@ export function request<T>(url: string, options: RequestOptions = {}): Promise<T
     if (!noAuth) {
       const token = wx.getStorageSync(STORAGE_KEYS.TOKEN)
       if (token) {
-        reqHeader.Authorization = `Bearer ${token}`
+        const tokenStr = String(token).trim()
+        console.log('[request] token preview:', tokenStr.substring(0, 30), 'length:', tokenStr.length)
+        reqHeader.Authorization = `Bearer ${tokenStr}`
       }
     }
 
