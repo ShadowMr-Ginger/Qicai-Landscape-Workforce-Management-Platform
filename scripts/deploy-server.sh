@@ -18,36 +18,29 @@ BACKUP_DIR=/home/deploy/qicai-backup-$(date +%Y%m%d-%H%M%S)
 echo "=== Backup current version to $BACKUP_DIR ==="
 cp -r "$DEPLOY_DIR" "$BACKUP_DIR" 2>/dev/null || true
 
-# 停止旧服务
-echo "=== Stop old services ==="
-pkill -f "green-worker-management-system-1.0.0-SNAPSHOT.jar" || true
-pkill -f ".next/standalone/server.js" || true
+# 停止服务
+echo "=== Stop services ==="
+systemctl stop qicai-backend qicai-frontend || true
 sleep 3
 
-# 构建并启动后端
+# 构建后端
 echo "=== Build backend ==="
 cd green-worker-management-system
 mvn clean package -DskipTests
 cd ..
 
-echo "=== Start backend on 8081 ==="
-nohup java -Dfile.encoding=UTF-8 \
-  -Dspring.profiles.active=prod \
-  -jar green-worker-management-system/target/green-worker-management-system-1.0.0-SNAPSHOT.jar \
-  > backend.log 2>&1 &
-
-sleep 15
-
-# 构建并启动前端
+# 构建前端
 echo "=== Build frontend ==="
 cd landscape-admin-web
 npm ci
 npm run build
 cd ..
 
-echo "=== Start frontend on 3001 ==="
-PORT=3001 nohup node landscape-admin-web/.next/standalone/server.js > frontend.log 2>&1 &
-
+# 启动服务
+echo "=== Start services ==="
+systemctl start qicai-backend
+sleep 15
+systemctl start qicai-frontend
 sleep 5
 
 echo "=== Verify ports ==="
