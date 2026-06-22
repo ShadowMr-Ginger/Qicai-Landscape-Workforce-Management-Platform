@@ -20,12 +20,12 @@ cp -r "$DEPLOY_DIR" "$BACKUP_DIR" 2>/dev/null || true
 
 # 停止服务
 echo "=== Stop services ==="
-systemctl stop qicai-backend qicai-frontend || true
+sudo systemctl stop qicai-backend qicai-frontend || true
 sleep 5
 
 # 确保旧 Java 进程完全退出，释放 jar 文件句柄
 echo "=== Ensure backend process stopped ==="
-pkill -f 'green-worker-management-system-1.0.0-SNAPSHOT.jar' || true
+sudo pkill -f 'green-worker-management-system-1.0.0-SNAPSHOT.jar' || true
 sleep 5
 ps aux | grep 'green-worker-management-system-1.0.0-SNAPSHOT.jar' | grep -v grep || echo 'Backend process stopped'
 
@@ -44,9 +44,9 @@ cd ..
 
 # 启动服务
 echo "=== Start services ==="
-systemctl start qicai-backend
+sudo systemctl start qicai-backend
 sleep 15
-systemctl start qicai-frontend
+sudo systemctl start qicai-frontend
 sleep 5
 
 echo "=== Verify ports ==="
