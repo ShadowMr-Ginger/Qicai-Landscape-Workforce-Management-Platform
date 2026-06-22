@@ -51,22 +51,17 @@ function request(url, options = {}) {
         if (!noAuth) {
             const token = wx.getStorageSync(constants_1.STORAGE_KEYS.TOKEN);
             if (token) {
-                const tokenStr = String(token).trim();
-                console.log('[request] token preview:', tokenStr.substring(0, 30), 'length:', tokenStr.length);
-                reqHeader.Authorization = `Bearer ${tokenStr}`;
+                reqHeader.Authorization = `Bearer ${String(token).trim()}`;
             }
         }
-        const fullUrl = `${constants_1.API_BASE_URL}${url}`;
-        console.log('[request]', method, fullUrl, 'token存在:', !!reqHeader.Authorization);
         wx.request({
-            url: fullUrl,
+            url: `${constants_1.API_BASE_URL}${url}`,
             method,
             data,
             header: reqHeader,
             timeout: 10000,
             success: (res) => {
                 const result = res.data;
-                console.log('[request success]', fullUrl, 'statusCode:', res.statusCode, 'code:', result === null || result === void 0 ? void 0 : result.code, 'msg:', result === null || result === void 0 ? void 0 : result.message);
                 if (result.code === 200) {
                     resolve(result.data);
                 }
@@ -82,13 +77,11 @@ function request(url, options = {}) {
                     reject(new Error(result.message || '未登录'));
                 }
                 else {
-                    console.error('[request business error]', fullUrl, result);
                     wx.showToast({ title: result.message || '请求失败', icon: 'none' });
                     reject(new Error(result.message));
                 }
             },
             fail: (err) => {
-                console.error('[request fail]', fullUrl, err);
                 let msg = '网络错误';
                 if (err.errMsg && err.errMsg.includes('timeout')) {
                     msg = '请求超时，请检查网络或后端服务';
