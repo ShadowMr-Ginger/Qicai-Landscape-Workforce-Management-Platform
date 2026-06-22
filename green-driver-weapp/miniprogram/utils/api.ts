@@ -26,14 +26,18 @@ export function request<T>(url: string, options: RequestOptions = {}): Promise<T
       }
     }
 
+    const fullUrl = `${API_BASE_URL}${url}`
+    console.log('[request]', method, fullUrl, 'token存在:', !!reqHeader.Authorization)
+
     wx.request({
-      url: `${API_BASE_URL}${url}`,
+      url: fullUrl,
       method,
       data,
       header: reqHeader,
       timeout: 10000,
       success: (res) => {
         const result = res.data as any
+        console.log('[request success]', fullUrl, 'statusCode:', res.statusCode, 'code:', result?.code, 'msg:', result?.message)
         if (result.code === 200) {
           resolve(result.data)
         } else if (result.code === 401) {
@@ -47,11 +51,13 @@ export function request<T>(url: string, options: RequestOptions = {}): Promise<T
           }, 1500)
           reject(new Error(result.message || '未登录'))
         } else {
+          console.error('[request business error]', fullUrl, result)
           wx.showToast({ title: result.message || '请求失败', icon: 'none' })
           reject(new Error(result.message))
         }
       },
       fail: (err) => {
+        console.error('[request fail]', fullUrl, err)
         let msg = '网络错误'
         if (err.errMsg && err.errMsg.includes('timeout')) {
           msg = '请求超时，请检查网络或后端服务'
