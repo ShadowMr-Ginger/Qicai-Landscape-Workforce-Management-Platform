@@ -1,5 +1,7 @@
 # 绿化工人管理系统 (Qicai Landscape Workforce Management)
 
+![Deploy](https://github.com/ShadowMr-Ginger/Qicai-Landscape-Workforce-Management-Platform/actions/workflows/deploy.yml/badge.svg)
+
 ## 📋 项目简介
 
 本系统是一个面向绿化工程行业的工人与司机考勤、工资管理平台。
