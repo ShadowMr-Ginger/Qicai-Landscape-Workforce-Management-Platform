@@ -16,7 +16,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
@@ -32,7 +32,7 @@ jobs:
             WX_APP_SECRET=${{ secrets.WX_APP_SECRET }}
             EOF
             chmod 600 /home/deploy/qicai/.env
-            chown ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} /home/deploy/qicai/.env
+            chown root:root /home/deploy/qicai/.env
 
       - name: Pull latest code and deploy
         uses: appleboy/ssh-action@v1.0.0
