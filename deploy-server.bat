@@ -11,8 +11,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo === 3. 停止占用 8082 端口的进程 ===
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8082 ^| findstr LISTENING') do (
+echo === 3. 停止占用 8081 端口的进程 ===
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8081 ^| findstr LISTENING') do (
     echo 发现 PID: %%a，正在终止...
     taskkill /PID %%a /F >nul 2>&1
     if errorlevel 1 (
@@ -22,6 +22,6 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8082 ^| findstr LISTENING') 
 timeout /t 2 /nobreak >nul
 
 echo === 4. 启动后端（prod 环境）===
-wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
+wmic process call create "cmd.exe /c cd /d C:\Users\ginger\qicai\green-worker-management-system && java -Dfile.encoding=UTF-8 -jar target\green-worker-management-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=prod"
 
 echo === 部署完成 ===

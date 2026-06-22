@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-echo === 查找占用 8080 端口的进程 ===
+echo === 查找占用 8081 端口的进程 ===
 
 set PID=
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8080 ^| findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8081 ^| findstr LISTENING') do (
     set PID=%%a
 )
 
@@ -16,10 +16,10 @@ if defined PID (
     timeout /t 1 /nobreak >nul
     echo 进程已终止
 ) else (
-    echo 端口 8080 未被占用
+    echo 端口 8081 未被占用
 )
 
 echo.
 echo === 启动 Spring Boot 后端 ===
 cd /d "%~dp0green-worker-management-system"
-call mvn spring-boot:run -q
+call mvn spring-boot:run -q -Dspring-boot.run.jvmArguments="-Dfile.encoding=UTF-8"

@@ -8,6 +8,11 @@ spring:
     activate:
       on-profile: dev
 
+  # 服务器配置
+  # 开发环境统一使用 8081，与生产/服务器保持一致
+server:
+  port: 8081
+
   # MySQL 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,6 +26,15 @@ spring:
       max-lifetime: 1200000
       connection-timeout: 20000
       pool-name: GreenHikariPool
+
+  # 强制使用 UTF-8 编码（防止 Windows 本地开发环境默认 GBK 导致中文乱码）
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-request: true
+      force-response: true
 
   # 开启 SQL 日志（开发环境便于调试）
 #  jpa:

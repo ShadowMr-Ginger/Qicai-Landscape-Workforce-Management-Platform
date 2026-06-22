@@ -24,9 +24,17 @@ spring:
 
 # 服务器配置
 server:
-  port: 8080
+  port: 8081
   # 优雅停机
   shutdown: graceful
+  # 强制使用 UTF-8 编码
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-request: true
+      force-response: true
 
 # 日志配置
 logging:

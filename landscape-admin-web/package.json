@@ -2,6 +2,9 @@
   "name": "landscape-admin-web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/copy-static.js",
