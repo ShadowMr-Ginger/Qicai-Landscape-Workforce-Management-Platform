@@ -12,7 +12,51 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Ensure deploy directory and .env on server
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build backend
+        run: |
+          cd green-worker-management-system
+          mvn clean package -DskipTests
+
+      - name: Build frontend
+        run: |
+          cd landscape-admin-web
+          npm ci
+          npm run build
+
+      - name: Package deployment artifacts
+        run: |
+          tar -czf deploy.tar.gz \
+            green-worker-management-system/target/green-worker-management-system-1.0.0-SNAPSHOT.jar \
+            landscape-admin-web/.next/standalone \
+            landscape-admin-web/package.json \
+            landscape-admin-web/package-lock.json \
+            scripts/deploy-server.sh \
+            sql
+          ls -lh deploy.tar.gz
+
+      - name: Upload artifacts to server
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: deploy.tar.gz
+          target: /home/deploy/qicai/
+          overwrite: true
+
+      - name: Ensure .env on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -20,7 +64,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            mkdir -p /home/deploy/qicai
             cat > /home/deploy/qicai/.env <<'EOF'
             MYSQL_HOST=localhost
             MYSQL_PORT=3306
@@ -32,34 +75,28 @@ jobs:
             WX_APP_SECRET=${{ secrets.WX_APP_SECRET }}
             EOF
             chmod 600 /home/deploy/qicai/.env
-            chown root:root /home/deploy/qicai/.env
 
-      - name: Pull latest code and deploy
+      - name: Extract and deploy on server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /home/deploy/qicai
-            if [ ! -d .git ]; then
-              git clone https://github.com/ShadowMr-Ginger/Qicai-Landscape-Workforce-Management-Platform.git .
-            else
-              git fetch --all
-              git reset --hard origin/main
-            fi
+            tar -xzf deploy.tar.gz --overwrite
             bash scripts/deploy-server.sh
 
       - name: Health check
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo "Backend port:"
-            ss -tlnp | grep ':8081' || netstat -tlnp | grep ':8081' || true
+            ss -tlnp 2>/dev/null | grep ':8081' || netstat -tlnp 2>/dev/null | grep ':8081' || true
             echo "Frontend port:"
-            ss -tlnp | grep ':3001' || netstat -tlnp | grep ':3001' || true
+            ss -tlnp 2>/dev/null | grep ':3001' || netstat -tlnp 2>/dev/null | grep ':3001' || true

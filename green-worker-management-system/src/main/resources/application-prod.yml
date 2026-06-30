@@ -75,9 +75,31 @@ logging:
     root: warn
     com.green: info
     org.springframework.security: error
+    com.green.common.backup: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
   file:
     name: backend.log
     max-size: 100MB
     max-history: 30
+
+# 数据库自动备份配置
+# 说明：
+#   1. 生产环境默认启用，每次应用启动时自动备份一次，并每 12 小时备份一次。
+#   2. 备份文件保留 7 天，超时自动清理。
+#   3. 备份目录请确保应用进程有写入权限。
+green:
+  backup:
+    enabled: true
+    # mysqldump 可执行文件路径；生产环境通常为 /usr/bin/mysqldump
+    mysqldump-path: /usr/bin/mysqldump
+    # 备份文件存放目录；建议与部署目录同级或使用独立挂载点
+    backup-dir: /home/deploy/qicai/backups
+    file-prefix: landscape_workforce
+    backup-on-startup: true
+    scheduled-enabled: true
+    # 每 12 小时执行一次：00:00、12:00
+    cron: "0 0 0/12 * * ?"
+    # 备份文件保留 7 天
+    retention: 7d
+    extra-options: "--single-transaction --routines --events --triggers"

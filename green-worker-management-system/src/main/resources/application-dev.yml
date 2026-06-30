@@ -8,11 +8,6 @@ spring:
     activate:
       on-profile: dev
 
-  # 服务器配置
-  # 开发环境统一使用 8081，与生产/服务器保持一致
-server:
-  port: 8081
-
   # MySQL 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -36,9 +31,10 @@ server:
       force-request: true
       force-response: true
 
-  # 开启 SQL 日志（开发环境便于调试）
-#  jpa:
-#    show-sql: true
+# 服务器配置
+# 开发环境统一使用 8081，与生产/服务器保持一致
+server:
+  port: 8081
 
 # MyBatis-Plus 配置
 mybatis-plus:
@@ -88,3 +84,17 @@ logging:
   level:
     com.green.mapper: debug
     org.springframework.jdbc: debug
+    com.green.common.backup: debug
+
+# 数据库自动备份配置（开发环境默认关闭，避免本地反复启动时产生大量备份）
+green:
+  backup:
+    enabled: false
+    mysqldump-path: mysqldump
+    backup-dir: ./backups
+    file-prefix: landscape_workforce
+    backup-on-startup: false
+    scheduled-enabled: false
+    cron: "0 0 0/12 * * ?"
+    retention: 7d
+    extra-options: "--single-transaction --routines --events --triggers"
