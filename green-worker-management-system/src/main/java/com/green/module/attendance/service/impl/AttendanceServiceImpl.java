@@ -1326,4 +1326,302 @@ public class AttendanceServiceImpl implements AttendanceService {
             log.info("司机考勤记录结算完成: driverId={}, count={}", personId, records.size());
         }
     }
+
+    // ==================== 月度考勤报表 ====================
+
+    @Override
+    public List<MonthOptionVO> listAttendanceMonths() {
+        Set<java.time.YearMonth> monthSet = new HashSet<>();
+
+        for (Map<String, Object> row : workerRecordMapper.selectDistinctMonths()) {
+            monthSet.add(toYearMonth(row));
+        }
+        for (Map<String, Object> row : driverRecordMapper.selectDistinctMonths()) {
+            monthSet.add(toYearMonth(row));
+        }
+
+        return monthSet.stream()
+                .sorted(Comparator.reverseOrder())
+                .map(ym -> new MonthOptionVO(ym.getYear(), ym.getMonthValue(),
+                        ym.getYear() + "年" + ym.getMonthValue() + "月"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GroupOptionVO> listWorkerGroupsWithRecords(Integer year, Integer month) {
+        List<Long> groupIds = workerRecordMapper.selectGroupIdsByMonth(year, month);
+        if (groupIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        LambdaQueryWrapper<GroupEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(GroupEntity::getId, groupIds);
+        wrapper.orderByAsc(GroupEntity::getId);
+        return groupMapper.selectList(wrapper).stream()
+                .map(g -> new GroupOptionVO(g.getId(), g.getGroupName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MonthlyReportVO getWorkerMonthlyReport(Integer year, Integer month, Long groupId) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+
+        GroupEntity group = groupMapper.selectById(groupId);
+        String groupName = group != null ? group.getGroupName() : "-";
+
+        // 查询该组别下所有在职工人
+        LambdaQueryWrapper<WorkerEntity> workerWrapper = new LambdaQueryWrapper<>();
+        workerWrapper.eq(WorkerEntity::getGroupId, groupId);
+        workerWrapper.eq(WorkerEntity::getIsEmployed, 1);
+        workerWrapper.orderByAsc(WorkerEntity::getId);
+        List<WorkerEntity> workers = workerMapper.selectList(workerWrapper);
+
+        // 查询该组别工人在该月的所有考勤记录
+        List<Long> workerIds = workers.stream().map(WorkerEntity::getId).collect(Collectors.toList());
+        List<WorkerAttendanceRecordEntity> records = new ArrayList<>();
+        if (!workerIds.isEmpty()) {
+            LambdaQueryWrapper<WorkerAttendanceRecordEntity> recordWrapper = new LambdaQueryWrapper<>();
+            recordWrapper.in(WorkerAttendanceRecordEntity::getWorkerId, workerIds);
+            recordWrapper.between(WorkerAttendanceRecordEntity::getAttendanceDate, start, end);
+            records = workerRecordMapper.selectList(recordWrapper);
+        }
+
+        Map<Long, Map<Integer, WorkerAttendanceRecordEntity>> workerDayMap = new HashMap<>();
+        for (WorkerAttendanceRecordEntity rec : records) {
+            workerDayMap
+                    .computeIfAbsent(rec.getWorkerId(), k -> new HashMap<>())
+                    .put(rec.getAttendanceDate().getDayOfMonth(), rec);
+        }
+
+        List<MonthlyReportRecordVO> reportRecords = new ArrayList<>();
+        int seq = 1;
+        for (WorkerEntity worker : workers) {
+            MonthlyReportRecordVO record = buildWorkerReportRecord(worker, workerDayMap.getOrDefault(worker.getId(), Collections.emptyMap()), ym, seq++);
+            reportRecords.add(record);
+        }
+
+        MonthlyReportRecordVO summary = buildSummary(reportRecords, ym);
+
+        MonthlyReportVO report = new MonthlyReportVO();
+        report.setYear(year);
+        report.setMonth(month);
+        report.setGroupName(groupName);
+        report.setDaysInMonth(ym.lengthOfMonth());
+        report.setRecords(reportRecords);
+        report.setSummary(summary);
+        return report;
+    }
+
+    @Override
+    public MonthlyReportVO getDriverMonthlyReport(Integer year, Integer month) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+
+        // 查询所有在职司机
+        LambdaQueryWrapper<DriverEntity> driverWrapper = new LambdaQueryWrapper<>();
+        driverWrapper.eq(DriverEntity::getIsActive, 1);
+        driverWrapper.orderByAsc(DriverEntity::getId);
+        List<DriverEntity> drivers = driverMapper.selectList(driverWrapper);
+
+        // 查询司机在该月的所有考勤记录
+        List<Long> driverIds = drivers.stream().map(DriverEntity::getId).collect(Collectors.toList());
+        List<DriverAttendanceRecordEntity> records = new ArrayList<>();
+        if (!driverIds.isEmpty()) {
+            LambdaQueryWrapper<DriverAttendanceRecordEntity> recordWrapper = new LambdaQueryWrapper<>();
+            recordWrapper.in(DriverAttendanceRecordEntity::getDriverId, driverIds);
+            recordWrapper.between(DriverAttendanceRecordEntity::getAttendanceDate, start, end);
+            records = driverRecordMapper.selectList(recordWrapper);
+        }
+
+        Map<Long, Map<Integer, DriverAttendanceRecordEntity>> driverDayMap = new HashMap<>();
+        for (DriverAttendanceRecordEntity rec : records) {
+            driverDayMap
+                    .computeIfAbsent(rec.getDriverId(), k -> new HashMap<>())
+                    .put(rec.getAttendanceDate().getDayOfMonth(), rec);
+        }
+
+        List<MonthlyReportRecordVO> reportRecords = new ArrayList<>();
+        int seq = 1;
+        for (DriverEntity driver : drivers) {
+            MonthlyReportRecordVO record = buildDriverReportRecord(driver, driverDayMap.getOrDefault(driver.getId(), Collections.emptyMap()), ym, seq++);
+            reportRecords.add(record);
+        }
+
+        MonthlyReportRecordVO summary = buildSummary(reportRecords, ym);
+
+        MonthlyReportVO report = new MonthlyReportVO();
+        report.setYear(year);
+        report.setMonth(month);
+        report.setGroupName("司机");
+        report.setDaysInMonth(ym.lengthOfMonth());
+        report.setRecords(reportRecords);
+        report.setSummary(summary);
+        return report;
+    }
+
+    // ==================== 月度报表私有辅助方法 ====================
+
+    private java.time.YearMonth toYearMonth(Map<String, Object> row) {
+        Integer year = ((Number) row.get("year")).intValue();
+        Integer month = ((Number) row.get("month")).intValue();
+        return java.time.YearMonth.of(year, month);
+    }
+
+    private MonthlyReportRecordVO buildWorkerReportRecord(WorkerEntity worker,
+                                                           Map<Integer, WorkerAttendanceRecordEntity> dayMap,
+                                                           YearMonth ym, int seq) {
+        MonthlyReportRecordVO vo = new MonthlyReportRecordVO();
+        vo.setNo(seq);
+        vo.setName(worker.getName());
+        vo.setDailyWages(buildDailyWages(ym, dayMap, true));
+        vo.setAttendanceDays(calculateAttendanceDays(dayMap.values()));
+        vo.setOvertimeHours(sumOvertimeHours(dayMap.values(), r -> r.getOvertimeHours()));
+        vo.setTotalWage(sumWage(dayMap.values(), WorkerAttendanceRecordEntity::getTotalWage));
+        vo.setRemark("");
+        return vo;
+    }
+
+    private MonthlyReportRecordVO buildDriverReportRecord(DriverEntity driver,
+                                                           Map<Integer, DriverAttendanceRecordEntity> dayMap,
+                                                           YearMonth ym, int seq) {
+        MonthlyReportRecordVO vo = new MonthlyReportRecordVO();
+        vo.setNo(seq);
+        vo.setName(driver.getRealName());
+        vo.setDailyWages(buildDailyWages(ym, dayMap, true));
+        vo.setAttendanceDays(BigDecimal.valueOf(dayMap.size()));
+        vo.setOvertimeHours(sumOvertimeHours(dayMap.values(), r -> r.getOvertimeHours()));
+        vo.setTotalWage(sumWage(dayMap.values(), DriverAttendanceRecordEntity::getTotalWage));
+        vo.setRemark("");
+        return vo;
+    }
+
+    private <T> List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, T> dayMap,
+                                                          java.util.function.Function<T, BigDecimal> wageExtractor,
+                                                          java.util.function.Function<T, BigDecimal> overtimeExtractor) {
+        List<MonthlyReportDayVO> days = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (int d = 1; d <= ym.lengthOfMonth(); d++) {
+            MonthlyReportDayVO day = new MonthlyReportDayVO();
+            day.setDay(d);
+
+            LocalDate date = ym.atDay(d);
+            if (date.isAfter(today)) {
+                // 今天之后的日期不显示
+                day.setEmpty(true);
+                day.setWage(BigDecimal.ZERO);
+                day.setOvertimeHours(BigDecimal.ZERO);
+            } else {
+                T rec = dayMap.get(d);
+                if (rec != null) {
+                    day.setEmpty(false);
+                    day.setWage(wageExtractor.apply(rec) != null ? wageExtractor.apply(rec) : BigDecimal.ZERO);
+                    BigDecimal ot = overtimeExtractor.apply(rec);
+                    day.setOvertimeHours(ot != null ? ot : BigDecimal.ZERO);
+                } else {
+                    day.setEmpty(true);
+                    day.setWage(BigDecimal.ZERO);
+                    day.setOvertimeHours(BigDecimal.ZERO);
+                }
+            }
+            days.add(day);
+        }
+        return days;
+    }
+
+    private List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, WorkerAttendanceRecordEntity> dayMap, boolean isWorker) {
+        return buildDailyWages(ym, dayMap, WorkerAttendanceRecordEntity::getDailyWage, WorkerAttendanceRecordEntity::getOvertimeHours);
+    }
+
+    private List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, DriverAttendanceRecordEntity> dayMap, Object ignored) {
+        return buildDailyWages(ym, dayMap, DriverAttendanceRecordEntity::getDailyWage, DriverAttendanceRecordEntity::getOvertimeHours);
+    }
+
+    private BigDecimal calculateAttendanceDays(Collection<WorkerAttendanceRecordEntity> records) {
+        BigDecimal days = BigDecimal.ZERO;
+        for (WorkerAttendanceRecordEntity rec : records) {
+            if (rec.getAttendanceType() != null && rec.getAttendanceType() == 1) {
+                days = days.add(new BigDecimal("0.5"));
+            } else if (rec.getAttendanceType() != null && rec.getAttendanceType() == 2) {
+                days = days.add(BigDecimal.ONE);
+            }
+        }
+        return days;
+    }
+
+    private <T> BigDecimal sumOvertimeHours(Collection<T> records, java.util.function.Function<T, BigDecimal> extractor) {
+        BigDecimal sum = BigDecimal.ZERO;
+        for (T rec : records) {
+            BigDecimal val = extractor.apply(rec);
+            if (val != null) {
+                sum = sum.add(val);
+            }
+        }
+        return sum;
+    }
+
+    private <T> BigDecimal sumWage(Collection<T> records, java.util.function.Function<T, BigDecimal> extractor) {
+        BigDecimal sum = BigDecimal.ZERO;
+        for (T rec : records) {
+            BigDecimal val = extractor.apply(rec);
+            if (val != null) {
+                sum = sum.add(val);
+            }
+        }
+        return sum;
+    }
+
+    private MonthlyReportRecordVO buildSummary(List<MonthlyReportRecordVO> records, YearMonth ym) {
+        MonthlyReportRecordVO summary = new MonthlyReportRecordVO();
+        summary.setNo(null);
+        summary.setName("合计");
+
+        List<MonthlyReportDayVO> summaryDays = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (int d = 1; d <= ym.lengthOfMonth(); d++) {
+            MonthlyReportDayVO day = new MonthlyReportDayVO();
+            day.setDay(d);
+            if (ym.atDay(d).isAfter(today)) {
+                day.setEmpty(true);
+                day.setWage(BigDecimal.ZERO);
+                day.setOvertimeHours(BigDecimal.ZERO);
+            } else {
+                final int dayNum = d;
+                BigDecimal dayTotal = BigDecimal.ZERO;
+                for (MonthlyReportRecordVO rec : records) {
+                    MonthlyReportDayVO rd = rec.getDailyWages().get(dayNum - 1);
+                    if (!rd.isEmpty() && rd.getWage() != null) {
+                        dayTotal = dayTotal.add(rd.getWage());
+                    }
+                }
+                day.setEmpty(dayTotal.compareTo(BigDecimal.ZERO) == 0);
+                day.setWage(dayTotal);
+                day.setOvertimeHours(BigDecimal.ZERO);
+            }
+            summaryDays.add(day);
+        }
+        summary.setDailyWages(summaryDays);
+
+        BigDecimal totalAttendanceDays = BigDecimal.ZERO;
+        BigDecimal totalOvertimeHours = BigDecimal.ZERO;
+        BigDecimal totalWage = BigDecimal.ZERO;
+        for (MonthlyReportRecordVO rec : records) {
+            if (rec.getAttendanceDays() != null) {
+                totalAttendanceDays = totalAttendanceDays.add(rec.getAttendanceDays());
+            }
+            if (rec.getOvertimeHours() != null) {
+                totalOvertimeHours = totalOvertimeHours.add(rec.getOvertimeHours());
+            }
+            if (rec.getTotalWage() != null) {
+                totalWage = totalWage.add(rec.getTotalWage());
+            }
+        }
+        summary.setAttendanceDays(totalAttendanceDays);
+        summary.setOvertimeHours(totalOvertimeHours);
+        summary.setTotalWage(totalWage);
+        summary.setRemark("");
+        return summary;
+    }
 }

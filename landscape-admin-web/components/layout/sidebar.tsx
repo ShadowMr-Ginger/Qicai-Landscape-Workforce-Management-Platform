@@ -20,6 +20,7 @@ import {
   FolderTree,
   FileText,
   AlertTriangle,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,13 @@ const navItems: NavItem[] = [
   { title: "工资结算", href: "/wages", icon: Wallet },
   { title: "项目管理", href: "/projects", icon: Building2 },
   { title: "异常记录", href: "/anomalies", icon: AlertTriangle },
+  {
+    title: "报表导出",
+    icon: FileSpreadsheet,
+    children: [
+      { title: "月度考勤表导出", href: "/reports/monthly-attendance" },
+    ],
+  },
   { title: "系统日志", href: "/system-logs", icon: FileText },
   { title: "系统设置", href: "/settings", icon: Settings },
 ];
@@ -79,6 +87,7 @@ export function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     "工人管理": pathname === "/workers" || pathname === "/groups",
     "司机管理": pathname === "/drivers" || pathname === "/drivers/salary-defaults",
+    "报表导出": pathname.startsWith("/reports"),
   });
 
   const toggleMenu = (title: string) => {

@@ -444,4 +444,26 @@ export async function changeAdminPassword(oldPassword: string, newPassword: stri
   return res.data;
 }
 
+// ==================== 月度考勤报表 ====================
+
+export async function getAttendanceMonths() {
+  const res = await api.get('/admin/attendance/report/months');
+  return res.data;
+}
+
+export async function getWorkerGroupsWithRecords(year: number, month: number) {
+  const res = await api.get('/admin/attendance/report/worker-groups', { params: { year, month } });
+  return res.data;
+}
+
+export async function getWorkerMonthlyReport(year: number, month: number, groupId: number) {
+  const res = await api.get('/admin/attendance/report/worker-monthly', { params: { year, month, groupId } });
+  return res.data;
+}
+
+export async function getDriverMonthlyReport(year: number, month: number) {
+  const res = await api.get('/admin/attendance/report/driver-monthly', { params: { year, month } });
+  return res.data;
+}
+
 export default api;

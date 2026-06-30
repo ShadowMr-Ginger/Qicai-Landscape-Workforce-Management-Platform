@@ -72,4 +72,14 @@ public interface AttendanceService {
     SettlePreviewVO previewDriverSettle(Long driverId, LocalDate dateFrom, LocalDate dateTo);
 
     void settleDriverRecords(Long driverId, LocalDate dateFrom, LocalDate dateTo);
+
+    // ==================== 月度考勤报表 ====================
+
+    List<MonthOptionVO> listAttendanceMonths();
+
+    List<GroupOptionVO> listWorkerGroupsWithRecords(Integer year, Integer month);
+
+    MonthlyReportVO getWorkerMonthlyReport(Integer year, Integer month, Long groupId);
+
+    MonthlyReportVO getDriverMonthlyReport(Integer year, Integer month);
 }

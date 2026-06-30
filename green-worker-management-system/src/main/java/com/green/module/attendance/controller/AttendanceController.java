@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -258,5 +259,34 @@ public class AttendanceController {
         stats.put("totalDrivers", totalDrivers);
 
         return ApiResult.success(stats);
+    }
+
+    // ==================== 月度考勤报表 ====================
+
+    @GetMapping("/report/months")
+    public ApiResult<List<MonthOptionVO>> listAttendanceMonths() {
+        return ApiResult.success(attendanceService.listAttendanceMonths());
+    }
+
+    @GetMapping("/report/worker-groups")
+    public ApiResult<List<GroupOptionVO>> listWorkerGroupsWithRecords(
+            @RequestParam Integer year,
+            @RequestParam Integer month) {
+        return ApiResult.success(attendanceService.listWorkerGroupsWithRecords(year, month));
+    }
+
+    @GetMapping("/report/worker-monthly")
+    public ApiResult<MonthlyReportVO> getWorkerMonthlyReport(
+            @RequestParam Integer year,
+            @RequestParam Integer month,
+            @RequestParam Long groupId) {
+        return ApiResult.success(attendanceService.getWorkerMonthlyReport(year, month, groupId));
+    }
+
+    @GetMapping("/report/driver-monthly")
+    public ApiResult<MonthlyReportVO> getDriverMonthlyReport(
+            @RequestParam Integer year,
+            @RequestParam Integer month) {
+        return ApiResult.success(attendanceService.getDriverMonthlyReport(year, month));
     }
 }
