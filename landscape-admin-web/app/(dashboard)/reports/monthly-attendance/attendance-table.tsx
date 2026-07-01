@@ -139,7 +139,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
             children.push(
               new TextRun({
                 text: `+${formatNumber(day.overtimeHours)}`,
-                size: 10, // 5pt
+                size: 14, // 7pt; superscript rendering makes it visually smaller than the wage
                 superScript: true,
                 color: "C00000",
               })
