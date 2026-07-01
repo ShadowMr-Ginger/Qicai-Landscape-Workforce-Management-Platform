@@ -66,9 +66,12 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
   const exportToWord = async () => {
     const rows: TableRow[] = [];
 
-    // 表头
-    const columnWidths = [500, 900, ...dayHeaders.map(() => 320), 600, 600, 700];
-    const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+    // A4 landscape content width = 16838 - 720(left) - 720(right) = 15398 twips
+    const pageContentWidth = 15398;
+    const fixedColumnsWidth = 500 + 900 + dayHeaders.length * 320 + 600 + 600 + 700;
+    const remarkWidth = Math.max(800, pageContentWidth - fixedColumnsWidth);
+    const tableWidth = fixedColumnsWidth + remarkWidth;
+    const columnWidths = [500, 900, ...dayHeaders.map(() => 320), 600, 600, 700, remarkWidth];
 
     const headerCells = [
       new TableCell({
@@ -79,7 +82,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
         children: [new Paragraph({ text: "姓名", alignment: AlignmentType.CENTER })],
         width: { size: 900, type: WidthType.DXA },
       }),
-      ...dayHeaders.map((d, i) =>
+      ...dayHeaders.map((d) =>
         new TableCell({
           children: [new Paragraph({ text: String(d), alignment: AlignmentType.CENTER })],
           width: { size: 320, type: WidthType.DXA },
@@ -96,6 +99,10 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
       new TableCell({
         children: [new Paragraph({ text: "合计工资", alignment: AlignmentType.CENTER })],
         width: { size: 700, type: WidthType.DXA },
+      }),
+      new TableCell({
+        children: [new Paragraph({ text: "备注", alignment: AlignmentType.CENTER })],
+        width: { size: remarkWidth, type: WidthType.DXA },
       }),
     ];
     rows.push(
@@ -149,6 +156,9 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
         }),
         new TableCell({
           children: [new Paragraph({ text: formatWage(record.totalWage), alignment: AlignmentType.CENTER })],
+        }),
+        new TableCell({
+          children: [new Paragraph({ text: record.remark || "", alignment: AlignmentType.CENTER })],
         }),
       ];
       rows.push(new TableRow({ children: cells }));
@@ -221,6 +231,9 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
       }),
       new TableCell({
         children: [new Paragraph({ text: formatWage(report.summary.totalWage), alignment: AlignmentType.CENTER })],
+      }),
+      new TableCell({
+        children: [new Paragraph("")],
       }),
     ];
     rows.push(new TableRow({ children: summaryCells }));
@@ -313,6 +326,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 <th className="col-days">出勤<br />天数</th>
                 <th className="col-ot">加班<br />时长</th>
                 <th className="col-total">合计<br />工资</th>
+                <th className="col-remark">备注</th>
               </tr>
             </thead>
             <tbody>
@@ -335,15 +349,16 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                   <td className="text-center">{formatNumber(record.attendanceDays)}</td>
                   <td className="text-center">{formatNumber(record.overtimeHours)}</td>
                   <td className="text-center font-medium">{formatWage(record.totalWage)}</td>
+                  <td>{record.remark}</td>
                 </tr>
               ))}
 
               {/* 空行 */}
               <tr className="blank-row">
-                <td colSpan={dayHeaders.length + 5}>&nbsp;</td>
+                <td colSpan={dayHeaders.length + 6}>&nbsp;</td>
               </tr>
               <tr className="blank-row">
-                <td colSpan={dayHeaders.length + 5}>&nbsp;</td>
+                <td colSpan={dayHeaders.length + 6}>&nbsp;</td>
               </tr>
 
               {/* 合计行 */}
@@ -358,6 +373,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 <td className="text-center font-bold">{formatNumber(report.summary.attendanceDays)}</td>
                 <td className="text-center font-bold">{formatNumber(report.summary.overtimeHours)}</td>
                 <td className="text-center font-bold">{formatWage(report.summary.totalWage)}</td>
+                <td></td>
               </tr>
             </tbody>
           </table>
@@ -452,6 +468,10 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
         .col-ot,
         .col-total {
           width: 48px;
+        }
+
+        .col-remark {
+          min-width: 120px;
         }
 
         .summary-row td {
