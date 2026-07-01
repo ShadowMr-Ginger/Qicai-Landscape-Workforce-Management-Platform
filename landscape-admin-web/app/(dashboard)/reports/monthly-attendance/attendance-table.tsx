@@ -67,32 +67,35 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
     const rows: TableRow[] = [];
 
     // 表头
+    const columnWidths = [500, 900, ...dayHeaders.map(() => 320), 600, 600, 700];
+    const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+
     const headerCells = [
       new TableCell({
         children: [new Paragraph({ text: "序号", alignment: AlignmentType.CENTER })],
-        width: { size: 5, type: WidthType.PERCENTAGE },
+        width: { size: 500, type: WidthType.DXA },
       }),
       new TableCell({
         children: [new Paragraph({ text: "姓名", alignment: AlignmentType.CENTER })],
-        width: { size: 8, type: WidthType.PERCENTAGE },
+        width: { size: 900, type: WidthType.DXA },
       }),
-      ...dayHeaders.map((d) =>
+      ...dayHeaders.map((d, i) =>
         new TableCell({
           children: [new Paragraph({ text: String(d), alignment: AlignmentType.CENTER })],
-          width: { size: 2, type: WidthType.PERCENTAGE },
+          width: { size: 320, type: WidthType.DXA },
         })
       ),
       new TableCell({
         children: [new Paragraph({ text: "出勤天数", alignment: AlignmentType.CENTER })],
-        width: { size: 6, type: WidthType.PERCENTAGE },
+        width: { size: 600, type: WidthType.DXA },
       }),
       new TableCell({
         children: [new Paragraph({ text: "加班时长", alignment: AlignmentType.CENTER })],
-        width: { size: 6, type: WidthType.PERCENTAGE },
+        width: { size: 600, type: WidthType.DXA },
       }),
       new TableCell({
         children: [new Paragraph({ text: "合计工资", alignment: AlignmentType.CENTER })],
-        width: { size: 8, type: WidthType.PERCENTAGE },
+        width: { size: 700, type: WidthType.DXA },
       }),
     ];
     rows.push(
@@ -235,8 +238,8 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
               },
               size: {
                 orientation: PageOrientation.LANDSCAPE,
-                width: 16838,
-                height: 11906,
+                width: 11906,
+                height: 16838,
               },
             },
           },
@@ -257,7 +260,8 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
             }),
             new Table({
               rows,
-              width: { size: 100, type: WidthType.PERCENTAGE },
+              width: { size: tableWidth, type: WidthType.DXA },
+              columnWidths,
             }),
           ],
         },
