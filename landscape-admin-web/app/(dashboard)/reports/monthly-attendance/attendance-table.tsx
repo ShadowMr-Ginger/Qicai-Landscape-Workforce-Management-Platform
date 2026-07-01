@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { cn } from "@/lib/utils";
 import type { MonthlyReportData } from "./types";
 
 interface AttendanceTableProps {
@@ -39,11 +38,18 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
     return Number.isInteger(num) ? String(num) : num.toFixed(2);
   };
 
+  const formatOvertime = (value: number | null | undefined) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return "";
+    const num = Number(value);
+    if (num === 0) return "";
+    return num.toFixed(1);
+  };
+
   const formatWage = (value: number | null | undefined) => {
     if (value === null || value === undefined || Number.isNaN(value)) return "";
     const num = Number(value);
     if (num === 0) return "0";
-    return Number.isInteger(num) ? String(num) : num.toFixed(2);
+    return num.toFixed(1);
   };
 
   return (
@@ -81,21 +87,19 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 <td className="text-center">{record.no}</td>
                 <td className="text-center font-medium">{record.name}</td>
                 {record.dailyWages.map((day) => (
-                  <td key={day.day} className="text-center">
+                  <td key={day.day} className="text-center cell-wage">
                     {!day.empty && (
-                      <span className="relative inline-block">
+                      <span className="wage-text">
                         {formatWage(day.wage)}
                         {day.overtimeHours > 0 && (
-                          <sup className="text-[8px] leading-none ml-0.5 text-red-600">
-                            +{formatNumber(day.overtimeHours)}
-                          </sup>
+                          <sup className="overtime-sup">+{formatOvertime(day.overtimeHours)}</sup>
                         )}
                       </span>
                     )}
                   </td>
                 ))}
                 <td className="text-center">{formatNumber(record.attendanceDays)}</td>
-                <td className="text-center">{formatNumber(record.overtimeHours)}</td>
+                <td className="text-center">{formatOvertime(record.overtimeHours)}</td>
                 <td className="text-center font-medium">{formatWage(record.totalWage)}</td>
                 <td>{record.remark}</td>
               </tr>
@@ -114,12 +118,12 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
               <td className="text-center">—</td>
               <td className="text-center font-bold">合计</td>
               {report.summary.dailyWages.map((day) => (
-                <td key={day.day} className="text-center font-bold">
-                  {!day.empty && formatWage(day.wage)}
+                <td key={day.day} className="text-center font-bold cell-wage">
+                  {!day.empty && <span className="wage-text">{formatWage(day.wage)}</span>}
                 </td>
               ))}
               <td className="text-center font-bold">{formatNumber(report.summary.attendanceDays)}</td>
-              <td className="text-center font-bold">{formatNumber(report.summary.overtimeHours)}</td>
+              <td className="text-center font-bold">{formatOvertime(report.summary.overtimeHours)}</td>
               <td className="text-center font-bold">{formatWage(report.summary.totalWage)}</td>
               <td></td>
             </tr>
@@ -131,7 +135,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
         @media print {
           @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 8mm 10mm 10mm 10mm;
           }
 
           body * {
@@ -156,20 +160,35 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            font-size: 10pt;
+            font-size: 9pt;
           }
 
           .report-table th,
           .report-table td {
             border: 0.5pt solid #333;
-            padding: 4pt 2pt;
+            padding: 3pt 1pt;
             vertical-align: middle;
-            word-break: break-all;
+            word-break: keep-all;
+            white-space: nowrap;
+            overflow: hidden;
           }
 
           .report-table thead th {
             background-color: #f0f0f0;
             font-weight: bold;
+          }
+
+          .wage-text {
+            font-size: 7.5pt;
+            white-space: nowrap;
+          }
+
+          .overtime-sup {
+            font-size: 6pt;
+            color: #c00;
+            margin-left: 1pt;
+            vertical-align: super;
+            line-height: 1;
           }
 
           .summary-row td {
@@ -178,21 +197,21 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
 
           .blank-row td {
             border: none;
-            height: 12pt;
+            height: 10pt;
           }
 
           .report-title {
-            font-size: 16pt;
+            font-size: 15pt;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 8pt;
+            margin-bottom: 6pt;
           }
 
           .report-meta {
             display: flex;
             justify-content: space-between;
-            font-size: 10pt;
-            margin-bottom: 8pt;
+            font-size: 9pt;
+            margin-bottom: 6pt;
           }
         }
       `}</style>
@@ -239,6 +258,24 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
         .report-table thead th {
           background-color: #f3f4f6;
           font-weight: 600;
+        }
+
+        .cell-wage {
+          white-space: nowrap;
+        }
+
+        .wage-text {
+          display: inline-flex;
+          align-items: flex-start;
+          font-size: 11px;
+          white-space: nowrap;
+        }
+
+        .overtime-sup {
+          font-size: 8px;
+          color: #dc2626;
+          margin-left: 2px;
+          line-height: 1;
         }
 
         .col-no {
