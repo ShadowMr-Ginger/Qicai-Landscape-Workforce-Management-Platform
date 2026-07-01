@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Printer, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -100,13 +100,9 @@ export default function WorkerMonthlyAttendancePage() {
       .finally(() => setLoading(false));
   }, [selectedYear, selectedMonth, selectedGroupId]);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button variant="outline" size="icon" onClick={() => router.push("/reports/monthly-attendance")}>
             <ArrowLeft className="w-4 h-4" />
@@ -116,10 +112,6 @@ export default function WorkerMonthlyAttendancePage() {
             <p className="text-sm text-muted-foreground">选择年月与组别后导出考勤表</p>
           </div>
         </div>
-        <Button onClick={handlePrint} disabled={!report || loading}>
-          <Printer className="w-4 h-4 mr-2" />
-          打印 / 导出 PDF
-        </Button>
       </div>
 
       <Card className="border-0 shadow-sm rounded-xl print:hidden">
