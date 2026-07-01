@@ -13,6 +13,8 @@ import {
   Packer,
   BorderStyle,
   TextRun,
+  PageOrientation,
+  VerticalAlign,
 } from "docx";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,25 +70,25 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
     const headerCells = [
       new TableCell({
         children: [new Paragraph({ text: "序号", alignment: AlignmentType.CENTER })],
-        width: { size: 6, type: WidthType.PERCENTAGE },
+        width: { size: 5, type: WidthType.PERCENTAGE },
       }),
       new TableCell({
         children: [new Paragraph({ text: "姓名", alignment: AlignmentType.CENTER })],
-        width: { size: 10, type: WidthType.PERCENTAGE },
+        width: { size: 8, type: WidthType.PERCENTAGE },
       }),
       ...dayHeaders.map((d) =>
         new TableCell({
           children: [new Paragraph({ text: String(d), alignment: AlignmentType.CENTER })],
-          width: { size: 2.2, type: WidthType.PERCENTAGE },
+          width: { size: 2, type: WidthType.PERCENTAGE },
         })
       ),
       new TableCell({
         children: [new Paragraph({ text: "出勤天数", alignment: AlignmentType.CENTER })],
-        width: { size: 7, type: WidthType.PERCENTAGE },
+        width: { size: 6, type: WidthType.PERCENTAGE },
       }),
       new TableCell({
         children: [new Paragraph({ text: "加班时长", alignment: AlignmentType.CENTER })],
-        width: { size: 7, type: WidthType.PERCENTAGE },
+        width: { size: 6, type: WidthType.PERCENTAGE },
       }),
       new TableCell({
         children: [new Paragraph({ text: "合计工资", alignment: AlignmentType.CENTER })],
@@ -110,11 +112,30 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
           children: [new Paragraph({ text: record.name, alignment: AlignmentType.CENTER })],
         }),
         ...record.dailyWages.map((day) => {
-          const text = day.empty
-            ? ""
-            : `${formatWage(day.wage)}${day.overtimeHours > 0 ? `+${formatNumber(day.overtimeHours)}` : ""}`;
+          if (day.empty) {
+            return new TableCell({
+              children: [new Paragraph("")],
+            });
+          }
+          const children: TextRun[] = [
+            new TextRun({
+              text: formatWage(day.wage),
+              size: 14, // 7pt
+            }),
+          ];
+          if (day.overtimeHours > 0) {
+            children.push(
+              new TextRun({
+                text: `+${formatNumber(day.overtimeHours)}`,
+                size: 10, // 5pt
+                superScript: true,
+                color: "C00000",
+              })
+            );
+          }
           return new TableCell({
-            children: [new Paragraph({ text, alignment: AlignmentType.CENTER })],
+            children: [new Paragraph({ children, alignment: AlignmentType.CENTER })],
+            verticalAlign: VerticalAlign.CENTER,
           });
         }),
         new TableCell({
@@ -172,7 +193,21 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
       }),
       ...report.summary.dailyWages.map((day) =>
         new TableCell({
-          children: [new Paragraph({ text: day.empty ? "" : formatWage(day.wage), alignment: AlignmentType.CENTER })],
+          children: [
+            new Paragraph({
+              children: day.empty
+                ? []
+                : [
+                    new TextRun({
+                      text: formatWage(day.wage),
+                      size: 14,
+                      bold: true,
+                    }),
+                  ],
+              alignment: AlignmentType.CENTER,
+            }),
+          ],
+          verticalAlign: VerticalAlign.CENTER,
         })
       ),
       new TableCell({
@@ -199,7 +234,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 left: 720,
               },
               size: {
-                orientation: "landscape",
+                orientation: PageOrientation.LANDSCAPE,
                 width: 16838,
                 height: 11906,
               },
