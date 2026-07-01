@@ -15,6 +15,8 @@ import {
   TextRun,
   PageOrientation,
   VerticalAlign,
+  TabStopType,
+  TabStopPosition,
 } from "docx";
 import { FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -265,10 +267,15 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
             }),
             new Paragraph({
               children: [
-                new TextRun({ text: `组别：${report.groupName}` }),
-                new TextRun({ text: `导出日期：${exportDateStr}` }),
+                new TextRun({ text: `组别：${report.groupName}\t\t\t\t导出日期：${exportDateStr}` }),
               ],
-              alignment: AlignmentType.BOTH,
+              tabStops: [
+                {
+                  type: TabStopType.RIGHT,
+                  position: TabStopPosition.MAX,
+                },
+              ],
+              alignment: AlignmentType.LEFT,
               spacing: { after: 200 },
             }),
             new Table({
