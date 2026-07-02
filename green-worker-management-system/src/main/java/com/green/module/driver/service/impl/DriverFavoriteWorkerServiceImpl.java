@@ -58,12 +58,19 @@ public class DriverFavoriteWorkerServiceImpl implements DriverFavoriteWorkerServ
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "工人不存在或已离职");
         }
 
-        // 检查是否已存在
+        // 检查是否已存在未删除记录
         LambdaQueryWrapper<DriverFavoriteWorkerEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(DriverFavoriteWorkerEntity::getDriverId, driverId)
                 .eq(DriverFavoriteWorkerEntity::getWorkerId, workerId);
         if (favoriteWorkerMapper.selectCount(wrapper) > 0) {
             throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "该工人已在常用列表中");
+        }
+
+        // 如果存在已逻辑删除的记录，则恢复，避免唯一索引冲突
+        DriverFavoriteWorkerEntity deleted = favoriteWorkerMapper.selectDeletedByDriverAndWorker(driverId, workerId);
+        if (deleted != null) {
+            favoriteWorkerMapper.restoreByDriverAndWorker(driverId, workerId);
+            return;
         }
 
         DriverFavoriteWorkerEntity entity = new DriverFavoriteWorkerEntity();
