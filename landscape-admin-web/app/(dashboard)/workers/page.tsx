@@ -102,6 +102,11 @@ export default function WorkersPage() {
   const [workerDetail, setWorkerDetail] = useState<WorkerDetail | null>(null);
   const [deleteAttendanceCount, setDeleteAttendanceCount] = useState(0);
 
+  const [pageNum, setPageNum] = useState(1);
+  const [pageSize] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(0);
+
   const [createForm, setCreateForm] = useState({
     name: "",
     gender: "1",
@@ -144,7 +149,7 @@ export default function WorkersPage() {
     };
   };
 
-  const fetchWorkers = async () => {
+  const fetchWorkers = async (page = pageNum) => {
     setLoading(true);
     try {
       const res = await getWorkerList({
@@ -153,12 +158,15 @@ export default function WorkersPage() {
         isSkilledWorker: isSkilled || undefined,
         groupId: groupId || undefined,
         isEmployed: showResigned ? 0 : 1,
-        pageNum: 1,
-        pageSize: 100,
+        pageNum: page,
+        pageSize,
       });
       if (res.code === 200 && res.data?.records) {
         // 后端连上了，始终信任后端数据（即使为空数组）
         setWorkers(res.data.records);
+        setTotal(res.data.total || 0);
+        setPages(res.data.pages || 0);
+        setPageNum(page);
       } else {
         // 后端返回异常状态码，fallback 模拟数据
         setWorkers(
@@ -188,7 +196,8 @@ export default function WorkersPage() {
   };
 
   useEffect(() => {
-    fetchWorkers();
+    setPageNum(1);
+    fetchWorkers(1);
   }, [showResigned]);
 
   // 新增弹窗打开时自动填充默认薪资
@@ -212,7 +221,8 @@ export default function WorkersPage() {
   }, []);
 
   const handleApplyFilter = () => {
-    fetchWorkers();
+    setPageNum(1);
+    fetchWorkers(1);
   };
 
   const handleReset = () => {
@@ -220,7 +230,8 @@ export default function WorkersPage() {
     setGender("");
     setIsSkilled("");
     setGroupId("");
-    fetchWorkers();
+    setPageNum(1);
+    fetchWorkers(1);
   };
 
   const openEdit = async (worker: WorkerItem) => {
@@ -409,7 +420,7 @@ export default function WorkersPage() {
             {showResigned ? "已离职工人" : "在职工人"}
           </h2>
           <Badge variant="secondary" className="rounded-md">
-            {workers.length} 人
+            {total} 人
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -645,6 +656,33 @@ export default function WorkersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {pages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            共 <span className="font-medium text-foreground/90">{total}</span> 条记录，
+            第 <span className="font-medium text-foreground/90">{pageNum}</span> / {pages} 页
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchWorkers(pageNum - 1)}
+              disabled={pageNum <= 1 || loading}
+            >
+              <ChevronLeft className="w-4 h-4" /> 上一页
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchWorkers(pageNum + 1)}
+              disabled={pageNum >= pages || loading}
+            >
+              下一页 <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* 新增弹窗 */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

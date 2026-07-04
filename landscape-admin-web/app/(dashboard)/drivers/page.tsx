@@ -10,6 +10,7 @@ import {
   Trash2,
   Eye,
   ChevronLeft,
+  ChevronRight,
   UserCheck,
   AlertTriangle,
   X,
@@ -97,6 +98,11 @@ export default function DriversPage() {
   const [driverDetail, setDriverDetail] = useState<DriverDetail | null>(null);
   const [deleteAttendanceCount, setDeleteAttendanceCount] = useState(0);
 
+  const [pageNum, setPageNum] = useState(1);
+  const [pageSize] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(0);
+
   const [createForm, setCreateForm] = useState({
     realName: "",
     gender: "1",
@@ -117,19 +123,22 @@ export default function DriversPage() {
     overtimeHourlyRate: "",
   });
 
-  const fetchDrivers = async () => {
+  const fetchDrivers = async (page = pageNum) => {
     setLoading(true);
     try {
       const res = await getDriverList({
         keyword,
         gender: gender || undefined,
         isActive: showResigned ? 0 : 1,
-        pageNum: 1,
-        pageSize: 100,
+        pageNum: page,
+        pageSize,
       });
       if (res.code === 200 && res.data?.records) {
         // 后端连上了，始终信任后端数据（即使为空数组）
         setDrivers(res.data.records);
+        setTotal(res.data.total || 0);
+        setPages(res.data.pages || 0);
+        setPageNum(page);
       } else {
         setDrivers(
           mockDrivers.filter((d) => {
@@ -155,17 +164,20 @@ export default function DriversPage() {
   };
 
   useEffect(() => {
-    fetchDrivers();
+    setPageNum(1);
+    fetchDrivers(1);
   }, [showResigned]);
 
   const handleApplyFilter = () => {
-    fetchDrivers();
+    setPageNum(1);
+    fetchDrivers(1);
   };
 
   const handleReset = () => {
     setKeyword("");
     setGender("");
-    fetchDrivers();
+    setPageNum(1);
+    fetchDrivers(1);
   };
 
   const openEdit = async (driver: DriverItem) => {
@@ -339,7 +351,7 @@ export default function DriversPage() {
           <h2 className="text-lg font-semibold text-foreground">
             {showResigned ? "已离职司机" : "在职司机"}
           </h2>
-          <Badge variant="secondary" className="rounded-md">{drivers.length} 人</Badge>
+          <Badge variant="secondary" className="rounded-md">{total} 人</Badge>
         </div>
         <div className="flex items-center gap-2">
           {!managing ? (
@@ -486,6 +498,33 @@ export default function DriversPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {pages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            共 <span className="font-medium text-foreground/90">{total}</span> 条记录，
+            第 <span className="font-medium text-foreground/90">{pageNum}</span> / {pages} 页
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchDrivers(pageNum - 1)}
+              disabled={pageNum <= 1 || loading}
+            >
+              <ChevronLeft className="w-4 h-4" /> 上一页
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchDrivers(pageNum + 1)}
+              disabled={pageNum >= pages || loading}
+            >
+              下一页 <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* 新增弹窗 */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

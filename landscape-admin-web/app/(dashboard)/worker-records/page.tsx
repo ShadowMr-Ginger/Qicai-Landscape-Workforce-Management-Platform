@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -118,12 +120,17 @@ export default function WorkerRecordsPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<RecordItem | null>(null);
 
-  const fetchRecords = async () => {
+  const [pageNum, setPageNum] = useState(1);
+  const [pageSize] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(0);
+
+  const fetchRecords = async (page = pageNum) => {
     setLoading(true);
     try {
       const res = await getWorkerAttendanceRecords({
-        pageNum: 1,
-        pageSize: 100,
+        pageNum: page,
+        pageSize,
         workerName: workerName || undefined,
         gender: gender || undefined,
         isSkilledWorker: isSkilled || undefined,
@@ -135,6 +142,9 @@ export default function WorkerRecordsPage() {
       });
       if (res.code === 200 && res.data?.records) {
         setRecords(res.data.records);
+        setTotal(res.data.total || 0);
+        setPages(res.data.pages || 0);
+        setPageNum(page);
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "获取记录失败");
@@ -173,7 +183,8 @@ export default function WorkerRecordsPage() {
     setDriverId("");
     setDateFrom(getWeekAgo());
     setDateTo(getToday());
-    fetchRecords();
+    setPageNum(1);
+    fetchRecords(1);
   };
 
   const openDetail = async (id: number) => {
@@ -335,7 +346,7 @@ export default function WorkerRecordsPage() {
                 <RotateCcw className="w-3.5 h-3.5 mr-1" />
                 重置
               </Button>
-              <Button size="sm" className="rounded-lg h-9 bg-green-600 hover:bg-green-700" onClick={fetchRecords}>
+              <Button size="sm" className="rounded-lg h-9 bg-green-600 hover:bg-green-700" onClick={() => { setPageNum(1); fetchRecords(1); }}>
                 <Search className="w-3.5 h-3.5 mr-1" />
                 查询
               </Button>
@@ -412,6 +423,33 @@ export default function WorkerRecordsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {pages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            共 <span className="font-medium text-foreground/90">{total}</span> 条记录，
+            第 <span className="font-medium text-foreground/90">{pageNum}</span> / {pages} 页
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchRecords(pageNum - 1)}
+              disabled={pageNum <= 1 || loading}
+            >
+              <ChevronLeft className="w-4 h-4" /> 上一页
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchRecords(pageNum + 1)}
+              disabled={pageNum >= pages || loading}
+            >
+              下一页 <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* 详情弹窗 */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
