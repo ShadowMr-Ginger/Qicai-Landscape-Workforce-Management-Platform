@@ -743,29 +743,52 @@ export default function BatchesPage() {
 
           <div className="space-y-3 py-2">
             {detailBatch?.status === 0 && (
-              <div className="flex items-center gap-2 rounded-xl border border-border p-3 bg-background/50">
-                <Building2 className="w-4 h-4 text-muted-foreground/70" />
-                <span className="text-xs text-muted-foreground">批量修改项目：</span>
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const pid = e.target.value ? Number(e.target.value) : null;
-                    const pName = projectOptions.find((p) => p.id === pid)?.projectName || "";
-                    setDetailRecords((prev) =>
-                      prev.map((r) => ({
-                        ...r,
-                        projectId: pid,
-                        projectName: pName,
-                      }))
-                    );
-                  }}
-                  className="h-8 rounded-lg border border-input bg-background px-2 text-xs flex-1"
-                >
-                  <option value="">请选择项目</option>
-                  {projectOptions.map((p) => (
-                    <option key={p.id} value={p.id}>{p.projectName}</option>
-                  ))}
-                </select>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 rounded-xl border border-border p-3 bg-background/50">
+                  <Building2 className="w-4 h-4 text-muted-foreground/70" />
+                  <span className="text-xs text-muted-foreground">批量修改项目：</span>
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      const pid = e.target.value ? Number(e.target.value) : null;
+                      const pName = projectOptions.find((p) => p.id === pid)?.projectName || "";
+                      setDetailRecords((prev) =>
+                        prev.map((r) => ({
+                          ...r,
+                          projectId: pid,
+                          projectName: pName,
+                        }))
+                      );
+                    }}
+                    className="h-8 rounded-lg border border-input bg-background px-2 text-xs flex-1"
+                  >
+                    <option value="">请选择项目</option>
+                    {projectOptions.map((p) => (
+                      <option key={p.id} value={p.id}>{p.projectName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 rounded-xl border border-border p-3 bg-background/50">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">批量修改考勤日期：</span>
+                  <Input
+                    type="date"
+                    value=""
+                    onChange={(e) => {
+                      const date = e.target.value;
+                      if (!date) return;
+                      setDetailRecords((prev) =>
+                        prev.map((r) => ({
+                          ...r,
+                          attendanceDate: date,
+                        }))
+                      );
+                      if (detailDriverRecord) {
+                        setDetailDriverRecord({ ...detailDriverRecord, attendanceDate: date });
+                      }
+                    }}
+                    className="h-8 rounded-lg text-xs px-2 flex-1"
+                  />
+                </div>
               </div>
             )}
 

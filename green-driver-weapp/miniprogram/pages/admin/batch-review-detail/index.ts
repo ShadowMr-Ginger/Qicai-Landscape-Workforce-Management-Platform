@@ -18,6 +18,8 @@ Page({
     workTypeOptions: [] as any[],
     // 批量设置项目
     batchProjectIndex: -1,
+    // 批量设置考勤日期
+    batchAttendanceDate: '',
   },
 
   onLoad(options: any) {
@@ -198,6 +200,24 @@ Page({
   // 批量设置项目选择变化
   onBatchProjectChange(e: any) {
     this.setData({ batchProjectIndex: parseInt(e.detail.value) })
+  },
+
+  // 批量设置考勤日期选择变化
+  onBatchDateChange(e: any) {
+    this.setData({ batchAttendanceDate: e.detail.value })
+  },
+
+  // 应用批量考勤日期设置
+  applyBatchDate() {
+    const date = this.data.batchAttendanceDate
+    if (!date) {
+      wx.showToast({ title: '请先选择日期', icon: 'none' })
+      return
+    }
+    const workers = this.data.workers.map((w: any) => ({ ...w, attendanceDate: date }))
+    const driverRecord = this.data.driverRecord ? { ...this.data.driverRecord, attendanceDate: date } : null
+    this.setData({ workers, driverRecord, batchAttendanceDate: '' })
+    wx.showToast({ title: '已批量修改日期', icon: 'success' })
   },
 
   // 应用批量项目设置

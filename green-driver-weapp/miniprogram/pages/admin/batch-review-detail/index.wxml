@@ -77,6 +77,18 @@
     <view class="worker-section">
       <text class="section-title">工人名单（{{workers.length}}人）</text>
 
+      <!-- 批量设置考勤日期 -->
+      <view class="batch-project-bar" wx:if="{{batch.status === 0}}">
+        <text class="batch-project-label">批量修改日期</text>
+        <picker mode="date" value="{{batchAttendanceDate || batch.batchDate}}" bindchange="onBatchDateChange">
+          <view class="batch-project-picker">
+            <text>{{batchAttendanceDate || batch.batchDate}}</text>
+            <text class="batch-project-arrow">›</text>
+          </view>
+        </picker>
+        <view class="batch-project-btn" bindtap="applyBatchDate">应用</view>
+      </view>
+
       <!-- 批量设置项目 -->
       <view class="batch-project-bar" wx:if="{{batch.status === 0 && projectOptions.length > 0}}">
         <text class="batch-project-label">批量设置项目</text>
