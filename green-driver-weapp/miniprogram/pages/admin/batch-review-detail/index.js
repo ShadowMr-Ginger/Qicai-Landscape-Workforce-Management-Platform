@@ -28,6 +28,8 @@ Page({
         workTypeOptions: [],
         // 批量设置项目
         batchProjectIndex: -1,
+        // 批量设置考勤日期
+        batchAttendanceDate: '',
     },
     onLoad(options) {
         const id = parseInt(options.id);
@@ -44,10 +46,11 @@ Page({
                     (0, api_1.getAdminProjects)().catch(() => []),
                     (0, api_1.getAdminWorkTypes)().catch(() => []),
                 ]);
+                const workers = (detail.workerRecords || []).map((w) => (Object.assign(Object.assign({}, w), { attendanceDate: w.attendanceDate || detail.batchDate })));
                 this.setData({
                     batch: detail,
-                    workers: detail.workerRecords || [],
-                    driverRecord,
+                    workers,
+                    driverRecord: Object.assign(Object.assign({}, driverRecord), { attendanceDate: driverRecord.attendanceDate || detail.batchDate }),
                     projectOptions: projectOptions || [],
                     workTypeOptions: workTypeOptions || [],
                 });
@@ -66,6 +69,7 @@ Page({
             id: null,
             driverId: detail.driverId,
             driverName: detail.driverName || '司机',
+            attendanceDate: detail.batchDate,
             attendanceType: 2,
             attendanceTypeText: '全天',
             overtimeHours: 0,
@@ -98,6 +102,11 @@ Page({
             driverRecord: Object.assign(Object.assign({}, this.data.driverRecord), { remark: e.detail.value }),
         });
     },
+    onDriverDateChange(e) {
+        this.setData({
+            driverRecord: Object.assign(Object.assign({}, this.data.driverRecord), { attendanceDate: e.detail.value }),
+        });
+    },
     // 打开工人编辑弹窗
     openWorkerEdit(e) {
         var _a;
@@ -127,6 +136,12 @@ Page({
             editPanelOpen: false,
             editingWorkerIndex: -1,
             editingWorker: null,
+        });
+    },
+    // 考勤日期变化
+    onWorkerDateChange(e) {
+        this.setData({
+            editingWorker: Object.assign(Object.assign({}, this.data.editingWorker), { attendanceDate: e.detail.value }),
         });
     },
     // 出勤类型选择变化
@@ -172,6 +187,22 @@ Page({
     // 批量设置项目选择变化
     onBatchProjectChange(e) {
         this.setData({ batchProjectIndex: parseInt(e.detail.value) });
+    },
+    // 批量设置考勤日期选择变化
+    onBatchDateChange(e) {
+        this.setData({ batchAttendanceDate: e.detail.value });
+    },
+    // 应用批量考勤日期设置
+    applyBatchDate() {
+        const date = this.data.batchAttendanceDate;
+        if (!date) {
+            wx.showToast({ title: '请先选择日期', icon: 'none' });
+            return;
+        }
+        const workers = this.data.workers.map((w) => (Object.assign(Object.assign({}, w), { attendanceDate: date })));
+        const driverRecord = this.data.driverRecord ? Object.assign(Object.assign({}, this.data.driverRecord), { attendanceDate: date }) : null;
+        this.setData({ workers, driverRecord, batchAttendanceDate: '' });
+        wx.showToast({ title: '已批量修改日期', icon: 'success' });
     },
     // 应用批量项目设置
     applyBatchProject() {
@@ -239,6 +270,7 @@ Page({
                                 batchId: id,
                                 workerRecords: this.data.workers.map((w) => ({
                                     recordId: w.id,
+                                    attendanceDate: w.attendanceDate,
                                     workTypeId: w.workTypeId,
                                     projectId: w.projectId,
                                     attendanceType: w.attendanceType,
@@ -252,6 +284,7 @@ Page({
                             if (driverRecord === null || driverRecord === void 0 ? void 0 : driverRecord.id) {
                                 payload.driverRecord = {
                                     recordId: driverRecord.id,
+                                    attendanceDate: driverRecord.attendanceDate,
                                     overtimeHours: driverRecord.overtimeHours,
                                     dailyWage: driverRecord.dailyWage,
                                     remark: driverRecord.remark,
