@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -32,6 +33,9 @@ public class ReviewBatchDTO {
         /** 项目ID */
         private Long projectId;
 
+        /** 考勤日期（提交时默认批次日期，审核时可修改） */
+        private LocalDate attendanceDate;
+
         /** 出勤类型: 1-半天, 2-全天 */
         private Integer attendanceType;
 
@@ -55,6 +59,9 @@ public class ReviewBatchDTO {
     public static class DriverRecordUpdateItem {
         @NotNull(message = "司机记录ID不能为空")
         private Long recordId;
+
+        /** 考勤日期（提交时默认批次日期，审核时可修改） */
+        private LocalDate attendanceDate;
 
         /** 加班时长 */
         private BigDecimal overtimeHours;

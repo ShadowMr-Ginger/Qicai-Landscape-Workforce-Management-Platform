@@ -219,6 +219,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setBatchId(batch.getId());
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
+            record.setAttendanceDate(batch.getBatchDate());
             record.setAttendanceType(dto.getAttendanceType());
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
@@ -278,6 +279,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setBatchId(batch.getId());
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
+            record.setAttendanceDate(batch.getBatchDate());
             record.setAttendanceType(dto.getAttendanceType());
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
@@ -349,6 +351,9 @@ public class AttendanceServiceImpl implements AttendanceService {
                 if (worker == null) continue;
 
                 // 更新可修改字段
+                if (item.getAttendanceDate() != null) {
+                    record.setAttendanceDate(item.getAttendanceDate());
+                }
                 if (item.getWorkTypeId() != null) {
                     record.setWorkTypeId(item.getWorkTypeId());
                 }
@@ -394,6 +399,9 @@ public class AttendanceServiceImpl implements AttendanceService {
             ReviewBatchDTO.DriverRecordUpdateItem driverItem = dto.getDriverRecord();
             AttendanceBatchDriverItemEntity driverRec = driverItemMapper.selectById(driverItem.getRecordId());
             if (driverRec != null && batchId.equals(driverRec.getBatchId())) {
+                if (driverItem.getAttendanceDate() != null) {
+                    driverRec.setAttendanceDate(driverItem.getAttendanceDate());
+                }
                 if (driverItem.getOvertimeHours() != null) {
                     driverRec.setOvertimeHours(driverItem.getOvertimeHours());
                 }
@@ -880,7 +888,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         rec.setDriverId(batch.getDriverId());
         rec.setWorkerId(item.getWorkerId());
         rec.setProjectId(item.getProjectId());
-        rec.setAttendanceDate(batch.getBatchDate());
+        rec.setAttendanceDate(item.getAttendanceDate() != null ? item.getAttendanceDate() : batch.getBatchDate());
         rec.setAttendanceType(item.getAttendanceType());
         rec.setOvertimeHours(item.getOvertimeHours());
         rec.setWorkTypeId(item.getWorkTypeId());
@@ -1038,7 +1046,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setDriverId(batch.getDriverId());
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
-            record.setAttendanceDate(batch.getBatchDate());
+            record.setAttendanceDate(item.getAttendanceDate() != null ? item.getAttendanceDate() : batch.getBatchDate());
             record.setAttendanceType(item.getAttendanceType());
             record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(item.getWorkTypeId());

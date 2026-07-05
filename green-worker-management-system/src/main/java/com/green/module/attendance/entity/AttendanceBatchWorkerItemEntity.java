@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -31,6 +32,9 @@ public class AttendanceBatchWorkerItemEntity implements Serializable {
 
     /** 分配的项目ID */
     private Long projectId;
+
+    /** 考勤日期（以提交审核批次时为准，审核时可修改） */
+    private LocalDate attendanceDate;
 
     /** 出勤类型: 1-半天, 2-全天 */
     private Integer attendanceType;

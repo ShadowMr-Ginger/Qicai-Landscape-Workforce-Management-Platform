@@ -35,10 +35,14 @@ Page({
         getAdminProjects().catch(() => []),
         getAdminWorkTypes().catch(() => []),
       ])
+      const workers = (detail.workerRecords || []).map((w: any) => ({
+        ...w,
+        attendanceDate: w.attendanceDate || detail.batchDate,
+      }))
       this.setData({
         batch: detail,
-        workers: detail.workerRecords || [],
-        driverRecord,
+        workers,
+        driverRecord: { ...driverRecord, attendanceDate: driverRecord.attendanceDate || detail.batchDate },
         projectOptions: projectOptions || [],
         workTypeOptions: workTypeOptions || [],
       })
@@ -55,6 +59,7 @@ Page({
       id: null,
       driverId: detail.driverId,
       driverName: detail.driverName || '司机',
+      attendanceDate: detail.batchDate,
       attendanceType: 2,
       attendanceTypeText: '全天',
       overtimeHours: 0,
@@ -91,6 +96,12 @@ Page({
     })
   },
 
+  onDriverDateChange(e: any) {
+    this.setData({
+      driverRecord: { ...this.data.driverRecord, attendanceDate: e.detail.value },
+    })
+  },
+
   // 打开工人编辑弹窗
   openWorkerEdit(e: any) {
     if (this.data.batch?.status !== 0) return
@@ -124,6 +135,13 @@ Page({
       editPanelOpen: false,
       editingWorkerIndex: -1,
       editingWorker: null,
+    })
+  },
+
+  // 考勤日期变化
+  onWorkerDateChange(e: any) {
+    this.setData({
+      editingWorker: { ...this.data.editingWorker, attendanceDate: e.detail.value },
     })
   },
 
@@ -258,6 +276,7 @@ Page({
               batchId: id,
               workerRecords: this.data.workers.map((w: any) => ({
                 recordId: w.id,
+                attendanceDate: w.attendanceDate,
                 workTypeId: w.workTypeId,
                 projectId: w.projectId,
                 attendanceType: w.attendanceType,
@@ -271,6 +290,7 @@ Page({
             if (driverRecord?.id) {
               payload.driverRecord = {
                 recordId: driverRecord.id,
+                attendanceDate: driverRecord.attendanceDate,
                 overtimeHours: driverRecord.overtimeHours,
                 dailyWage: driverRecord.dailyWage,
                 remark: driverRecord.remark,

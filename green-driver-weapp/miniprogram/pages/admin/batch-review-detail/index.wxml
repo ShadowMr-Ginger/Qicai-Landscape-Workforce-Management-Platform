@@ -11,10 +11,6 @@
         <text class="info-value">{{batch.driverName || '-'}}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">考勤日期</text>
-        <text class="info-value">{{batch.batchDate}}</text>
-      </view>
-      <view class="info-row">
         <text class="info-label">提交时间</text>
         <text class="info-value">{{batch.submitTime}}</text>
       </view>
@@ -30,6 +26,12 @@
         </view>
         <view class="driver-meta">
           <text>工资{{driverRecord.totalWage}}元</text>
+        </view>
+        <view class="driver-edit-row" wx:if="{{batch.status === 0}}">
+          <text class="edit-label">考勤日期</text>
+          <picker mode="date" value="{{driverRecord.attendanceDate || batch.batchDate}}" bindchange="onDriverDateChange">
+            <view class="edit-input" style="line-height: 36px;">{{driverRecord.attendanceDate || batch.batchDate}}</view>
+          </picker>
         </view>
         <view class="driver-edit-row" wx:if="{{batch.status === 0}}">
           <text class="edit-label">加班(小时)</text>
@@ -52,6 +54,7 @@
           />
         </view>
         <view class="driver-meta" wx:else>
+          <text>日期{{driverRecord.attendanceDate || batch.batchDate}}</text>
           <text wx:if="{{driverRecord.overtimeHours > 0}}">加班{{driverRecord.overtimeHours}}h</text>
           <text>日薪{{driverRecord.dailyWage}}元</text>
         </view>
@@ -134,6 +137,16 @@
         <view class="edit-panel-row">
           <text class="edit-panel-label">工人</text>
           <text class="edit-panel-value">{{editingWorker.workerName}}</text>
+        </view>
+
+        <view class="edit-panel-row">
+          <text class="edit-panel-label">考勤日期</text>
+          <picker mode="date" value="{{editingWorker.attendanceDate || batch.batchDate}}" bindchange="onWorkerDateChange">
+            <view class="edit-panel-picker">
+              <text>{{editingWorker.attendanceDate || batch.batchDate}}</text>
+              <text class="edit-panel-arrow">›</text>
+            </view>
+          </picker>
         </view>
 
         <view class="edit-panel-row">

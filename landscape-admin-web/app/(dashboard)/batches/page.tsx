@@ -79,6 +79,7 @@ interface BatchWorkerRecord {
   workerId: number;
   workerName: string;
   groupName: string;
+  attendanceDate: string;
   projectId: number | null;
   projectName: string;
   workTypeId: number | null;
@@ -312,6 +313,7 @@ export default function BatchesPage() {
         } catch { /* ignore */ }
         const records = (res.data.workerRecords || []).map((r: any) => ({
           ...r,
+          attendanceDate: r.attendanceDate || res.data.batchDate,
           projectId: r.projectId ?? defaultPid,
           projectName: r.projectName ?? defaultPName,
         }));
@@ -352,6 +354,7 @@ export default function BatchesPage() {
         batchId: detailBatch.id,
         workerRecords: detailRecords.map((r) => ({
           recordId: r.id,
+          attendanceDate: r.attendanceDate,
           workTypeId: r.workTypeId,
           projectId: r.projectId,
           attendanceType: r.attendanceType,
@@ -365,6 +368,7 @@ export default function BatchesPage() {
       if (detailDriverRecord?.id) {
         payload.driverRecord = {
           recordId: detailDriverRecord.id,
+          attendanceDate: detailDriverRecord.attendanceDate,
           overtimeHours: detailDriverRecord.overtimeHours,
           dailyWage: detailDriverRecord.dailyWage,
           remark: detailDriverRecord.remark,
@@ -783,6 +787,21 @@ export default function BatchesPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
+                    <Label className="text-[10px] text-yellow-700 dark:text-yellow-300">考勤日期</Label>
+                    {detailBatch?.status === 0 ? (
+                      <Input
+                        type="date"
+                        value={detailDriverRecord.attendanceDate}
+                        onChange={(e) =>
+                          setDetailDriverRecord({ ...detailDriverRecord, attendanceDate: e.target.value })
+                        }
+                        className="h-8 rounded-lg text-xs px-2"
+                      />
+                    ) : (
+                      <p className="text-xs text-foreground/90">{detailDriverRecord.attendanceDate}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1">
                     <Label className="text-[10px] text-yellow-700 dark:text-yellow-300">出勤</Label>
                     <p className="text-xs text-foreground/90">{detailDriverRecord.attendanceTypeText}</p>
                   </div>
@@ -873,6 +892,23 @@ export default function BatchesPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground/70">考勤日期</Label>
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={record.attendanceDate}
+                          onChange={(e) => {
+                            const newRecords = [...detailRecords];
+                            newRecords[idx].attendanceDate = e.target.value;
+                            setDetailRecords(newRecords);
+                          }}
+                          className="h-8 rounded-lg text-xs px-2"
+                        />
+                      ) : (
+                        <p className="text-xs text-foreground/90">{record.attendanceDate}</p>
+                      )}
+                    </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] text-muted-foreground/70">出勤</Label>
                       {isEditing ? (

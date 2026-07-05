@@ -300,6 +300,7 @@ CREATE TABLE `attendance_batch_worker_items` (
     `batch_id` BIGINT NOT NULL COMMENT '所属考勤批次ID',
     `worker_id` BIGINT NOT NULL COMMENT '工人ID',
     `project_id` BIGINT DEFAULT NULL COMMENT '分配的项目ID',
+    `attendance_date` DATE NOT NULL COMMENT '考勤日期（提交时默认批次日期，审核时可修改）',
     `attendance_type` TINYINT NOT NULL DEFAULT 2 COMMENT '出勤类型: 1-半天, 2-全天',
     `overtime_hours` DECIMAL(3,1) NOT NULL DEFAULT 0.0 COMMENT '加班时长(小时，0.5小时粒度)',
     `work_type_id` BIGINT DEFAULT NULL COMMENT '工作类型ID',
