@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Plus,
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import ServiceItemManager from "./service-item-manager";
 import {
   getProjectList,
   createProject,
@@ -36,6 +37,12 @@ import {
   closeProject,
   reopenProject,
   getProjectCalendar,
+  getProjectDetailStats,
+  getProjectRevenueRecords,
+  createProjectRevenueRecord,
+  updateProjectRevenueRecord,
+  deleteProjectRevenueRecord,
+  getCommonServiceNames,
 } from "@/lib/api";
 
 interface ProjectItem {
@@ -46,18 +53,45 @@ interface ProjectItem {
   endDate?: string;
   status: number;
   statusText?: string;
-  maleDailyRevenue?: number;
-  femaleDailyRevenue?: number;
   grossMargin?: number;
-  totalRevenue?: number;
-  profit?: number;
-  netProfit?: number;
   isSystem?: number;
   isSystemText?: string;
   isClosed?: number;
   isClosedText?: string;
   closeTime?: string;
   createTime?: string;
+}
+
+interface ProjectStats {
+  totalWorkerDays: number;
+  todayWorkerDays: number;
+  unpaidWage: number;
+}
+
+interface RevenueItem {
+  id?: number;
+  serviceName: string;
+  workerType: number;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  remark: string;
+}
+
+interface RevenueRecord {
+  id: number;
+  projectId: number;
+  recordDate: string;
+  totalAmount: number;
+  remark: string;
+  createTime: string;
+  items: RevenueItem[];
+}
+
+interface ServiceNameItem {
+  id: number;
+  serviceName: string;
+  isSystem: number;
 }
 
 interface CalendarDay {
@@ -80,7 +114,18 @@ interface CalendarSummary {
 
 const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === "object" && "response" in err) {
+    const res = (err as { response?: { data?: { message?: string } } }).response;
+    if (res?.data?.message) return res.data.message;
+  }
+  if (err instanceof Error) return err.message;
+  return fallback;
+}
+
 export default function ProjectsPage() {
+  const getToday = () => new Date().toISOString().split("T")[0];
+
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
@@ -94,21 +139,15 @@ export default function ProjectsPage() {
   const [createForm, setCreateForm] = useState({
     projectName: "",
     projectAddress: "",
-    maleDailyRevenue: "",
-    femaleDailyRevenue: "",
     grossMargin: "",
-    startDate: "",
-    endDate: "",
+    startDate: getToday(),
   });
 
   const [editForm, setEditForm] = useState({
     projectName: "",
     projectAddress: "",
-    maleDailyRevenue: "",
-    femaleDailyRevenue: "",
     grossMargin: "",
     startDate: "",
-    endDate: "",
   });
 
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
@@ -116,6 +155,28 @@ export default function ProjectsPage() {
   // 结项/重启确认弹窗
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"close" | "reopen" | null>(null);
+
+  // 子选项卡: projects | services
+  const [activeTab, setActiveTab] = useState<"projects" | "services">("projects");
+
+  // 项目详情弹窗
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailStats, setDetailStats] = useState<ProjectStats>({ totalWorkerDays: 0, todayWorkerDays: 0, unpaidWage: 0 });
+  const [revenueRecords, setRevenueRecords] = useState<RevenueRecord[]>([]);
+  const [revenueDetailOpen, setRevenueDetailOpen] = useState(false);
+  const [selectedRevenueRecord, setSelectedRevenueRecord] = useState<RevenueRecord | null>(null);
+
+  // 营业记录编辑弹窗
+  const [revenueEditOpen, setRevenueEditOpen] = useState(false);
+  const [revenueEditForm, setRevenueEditForm] = useState<{
+    recordId?: number;
+    recordDate: string;
+    remark: string;
+    items: RevenueItem[];
+  }>({ recordDate: getToday(), remark: "", items: [] });
+
+  // 常用服务名称
+  const [serviceNames, setServiceNames] = useState<ServiceNameItem[]>([]);
 
   // 日历状态
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -128,7 +189,7 @@ export default function ProjectsPage() {
     totalNetProfit: 0,
   });
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getProjectList({
@@ -139,16 +200,19 @@ export default function ProjectsPage() {
       if (res.code === 200 && res.data?.records) {
         setProjects(res.data.records);
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "获取项目列表失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "获取项目列表失败"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [keyword]);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchProjects();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchProjects]);
 
   // ===== 新增 =====
   const handleCreate = async () => {
@@ -156,12 +220,8 @@ export default function ProjectsPage() {
       toast.error("项目标题不能为空");
       return;
     }
-    if (!createForm.maleDailyRevenue || Number(createForm.maleDailyRevenue) < 0) {
-      toast.error("男工一日营业额不能为空");
-      return;
-    }
-    if (!createForm.femaleDailyRevenue || Number(createForm.femaleDailyRevenue) < 0) {
-      toast.error("女工一日营业额不能为空");
+    if (!createForm.startDate) {
+      toast.error("开始日期不能为空");
       return;
     }
     const gm = Number(createForm.grossMargin);
@@ -173,18 +233,15 @@ export default function ProjectsPage() {
       await createProject({
         projectName: createForm.projectName.trim(),
         projectAddress: createForm.projectAddress || undefined,
-        maleDailyRevenue: Number(createForm.maleDailyRevenue),
-        femaleDailyRevenue: Number(createForm.femaleDailyRevenue),
         grossMargin: gm,
         startDate: createForm.startDate || undefined,
-        endDate: createForm.endDate || undefined,
       });
       toast.success("新增项目成功");
       setCreateOpen(false);
-      setCreateForm({ projectName: "", projectAddress: "", maleDailyRevenue: "", femaleDailyRevenue: "", grossMargin: "", startDate: "", endDate: "" });
+      setCreateForm({ projectName: "", projectAddress: "", grossMargin: "", startDate: getToday() });
       fetchProjects();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "新增失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "新增失败"));
     }
   };
 
@@ -194,11 +251,8 @@ export default function ProjectsPage() {
     setEditForm({
       projectName: item.projectName || "",
       projectAddress: item.projectAddress || "",
-      maleDailyRevenue: item.maleDailyRevenue != null ? String(item.maleDailyRevenue) : "",
-      femaleDailyRevenue: item.femaleDailyRevenue != null ? String(item.femaleDailyRevenue) : "",
       grossMargin: item.grossMargin != null ? String(item.grossMargin) : "",
       startDate: item.startDate || "",
-      endDate: item.endDate || "",
     });
     setEditOpen(true);
   };
@@ -219,18 +273,15 @@ export default function ProjectsPage() {
         projectName: editForm.projectName.trim(),
       };
       if (editForm.projectAddress !== undefined) data.projectAddress = editForm.projectAddress || undefined;
-      if (editForm.maleDailyRevenue !== "") data.maleDailyRevenue = Number(editForm.maleDailyRevenue);
-      if (editForm.femaleDailyRevenue !== "") data.femaleDailyRevenue = Number(editForm.femaleDailyRevenue);
       if (gm !== undefined) data.grossMargin = gm;
       if (editForm.startDate) data.startDate = editForm.startDate;
-      if (editForm.endDate) data.endDate = editForm.endDate;
 
       await updateProject(selectedProject.id, data);
       toast.success("修改成功");
       setEditOpen(false);
       fetchProjects();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "修改失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "修改失败"));
     }
   };
 
@@ -258,8 +309,168 @@ export default function ProjectsPage() {
       }
       setConfirmOpen(false);
       fetchProjects();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "操作失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "操作失败"));
+    }
+  };
+
+  // ===== 项目详情 =====
+  const openProjectDetail = async (item: ProjectItem) => {
+    setSelectedProject(item);
+    setDetailOpen(true);
+    try {
+      const [statsRes, recordsRes] = await Promise.all([
+        getProjectDetailStats(item.id),
+        getProjectRevenueRecords(item.id),
+      ]);
+      if (statsRes.code === 200 && statsRes.data) {
+        setDetailStats(statsRes.data);
+      }
+      if (recordsRes.code === 200 && recordsRes.data) {
+        setRevenueRecords(recordsRes.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "加载项目详情失败"));
+    }
+  };
+
+  // ===== 营业记录 =====
+  const resetRevenueEditForm = (record?: RevenueRecord) => {
+    if (record) {
+      setRevenueEditForm({
+        recordId: record.id,
+        recordDate: record.recordDate,
+        remark: record.remark || "",
+        items: record.items.map((it) => ({ ...it })),
+      });
+    } else {
+      setRevenueEditForm({
+        recordDate: getToday(),
+        remark: "",
+        items: [],
+      });
+    }
+  };
+
+  const openCreateRevenue = async () => {
+    resetRevenueEditForm();
+    await fetchServiceNames();
+    setRevenueEditOpen(true);
+  };
+
+  const openEditRevenue = async (record: RevenueRecord) => {
+    resetRevenueEditForm(record);
+    await fetchServiceNames();
+    setRevenueEditOpen(true);
+  };
+
+  const handleSaveRevenue = async () => {
+    if (!selectedProject) return;
+    if (!revenueEditForm.recordDate) {
+      toast.error("请选择营业日期");
+      return;
+    }
+    if (revenueEditForm.items.length === 0) {
+      toast.error("请至少添加一项服务");
+      return;
+    }
+    for (const item of revenueEditForm.items) {
+      if (!item.serviceName.trim()) {
+        toast.error("服务名称不能为空");
+        return;
+      }
+      if (!item.quantity || item.quantity < 1) {
+        toast.error("数量至少为1");
+        return;
+      }
+      if (item.unitPrice < 0) {
+        toast.error("单价不能为负数");
+        return;
+      }
+    }
+    try {
+      const payload = {
+        recordDate: revenueEditForm.recordDate,
+        remark: revenueEditForm.remark || undefined,
+        items: revenueEditForm.items.map((it) => ({
+          serviceName: it.serviceName,
+          workerType: it.workerType,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          remark: it.remark || undefined,
+        })),
+      };
+      if (revenueEditForm.recordId) {
+        await updateProjectRevenueRecord(revenueEditForm.recordId, payload);
+        toast.success("营业记录修改成功");
+      } else {
+        await createProjectRevenueRecord(selectedProject.id, payload);
+        toast.success("营业记录新增成功");
+      }
+      setRevenueEditOpen(false);
+      // 刷新详情
+      const recordsRes = await getProjectRevenueRecords(selectedProject.id);
+      if (recordsRes.code === 200 && recordsRes.data) {
+        setRevenueRecords(recordsRes.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "保存失败"));
+    }
+  };
+
+  const handleDeleteRevenue = async (record: RevenueRecord) => {
+    if (!selectedProject) return;
+    if (!confirm("确定删除这条营业记录吗？")) return;
+    try {
+      await deleteProjectRevenueRecord(record.id);
+      toast.success("删除成功");
+      setRevenueRecords(revenueRecords.filter((r) => r.id !== record.id));
+      if (selectedRevenueRecord?.id === record.id) {
+        setRevenueDetailOpen(false);
+        setSelectedRevenueRecord(null);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "删除失败"));
+    }
+  };
+
+  const addRevenueItem = () => {
+    setRevenueEditForm((prev) => ({
+      ...prev,
+      items: [...prev.items, { serviceName: "", workerType: 1, quantity: 1, unitPrice: 0, totalPrice: 0, remark: "" }],
+    }));
+  };
+
+  const removeRevenueItem = (idx: number) => {
+    setRevenueEditForm((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== idx),
+    }));
+  };
+
+  const updateRevenueItem = (idx: number, field: keyof RevenueItem, value: string | number) => {
+    setRevenueEditForm((prev) => {
+      const items = [...prev.items];
+      const item = { ...items[idx], [field]: value };
+      if (field === "quantity" || field === "unitPrice") {
+        const qty = Number(field === "quantity" ? value : item.quantity) || 0;
+        const price = Number(field === "unitPrice" ? value : item.unitPrice) || 0;
+        item.totalPrice = Math.round(qty * price * 100) / 100;
+      }
+      items[idx] = item;
+      return { ...prev, items };
+    });
+  };
+
+  // ===== 常用服务名称 =====
+  const fetchServiceNames = async () => {
+    try {
+      const res = await getCommonServiceNames();
+      if (res.code === 200 && res.data) {
+        setServiceNames(res.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "获取常用服务名称失败"));
     }
   };
 
@@ -274,8 +485,8 @@ export default function ProjectsPage() {
       await deleteProject(item.id);
       toast.success("删除成功");
       fetchProjects();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "删除失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "删除失败"));
     }
   };
 
@@ -298,8 +509,8 @@ export default function ProjectsPage() {
         setCalDays(res.data.days || []);
         setCalSummary(res.data.summary || { totalRevenue: 0, totalProfit: 0, totalPayableWage: 0, totalNetProfit: 0 });
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "获取日历失败");
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "获取日历失败"));
     }
   };
 
@@ -372,6 +583,29 @@ export default function ProjectsPage() {
         </div>
       </div>
 
+      {/* 子选项卡 */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant={activeTab === "projects" ? "default" : "outline"}
+          size="sm"
+          className={`rounded-lg ${activeTab === "projects" ? "bg-green-600 hover:bg-green-700" : ""}`}
+          onClick={() => setActiveTab("projects")}
+        >
+          项目列表
+        </Button>
+        <Button
+          variant={activeTab === "services" ? "default" : "outline"}
+          size="sm"
+          className={`rounded-lg ${activeTab === "services" ? "bg-green-600 hover:bg-green-700" : ""}`}
+          onClick={() => setActiveTab("services")}
+        >
+          管理常用服务名称
+        </Button>
+      </div>
+
+      {activeTab === "projects" && (
+      <>
+
       {/* 搜索 */}
       <Card className="border-0 shadow-sm rounded-xl">
         <CardContent className="p-4">
@@ -397,13 +631,20 @@ export default function ProjectsPage() {
       <Card className="border-0 shadow-sm rounded-xl overflow-hidden">
         <CardContent className="p-0">
           <div className="divide-y divide-gray-50">
-            {projects.length === 0 ? (
+            {loading ? (
+              <p className="text-center py-12 text-muted-foreground/70 text-sm">加载中...</p>
+            ) : projects.length === 0 ? (
               <p className="text-center py-12 text-muted-foreground/70 text-sm">暂无项目</p>
             ) : (
               projects.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between px-5 py-4 hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors"
+                  className={`flex items-center justify-between px-5 py-4 transition-colors ${
+                    manageMode ? "hover:bg-green-50 dark:hover:bg-green-950/20" : "hover:bg-green-50 dark:hover:bg-green-950/20 cursor-pointer"
+                  }`}
+                  onClick={() => {
+                    if (!manageMode) openProjectDetail(item);
+                  }}
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-700 dark:text-green-300 text-sm font-bold shrink-0">
@@ -426,17 +667,14 @@ export default function ProjectsPage() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground/70 mt-1 flex-wrap">
-                        <span>男:{item.maleDailyRevenue?.toFixed(2) ?? "0.00"}元/天</span>
-                        <span>女:{item.femaleDailyRevenue?.toFixed(2) ?? "0.00"}元/天</span>
                         <span>毛利率:{((item.grossMargin ?? 0) * 100).toFixed(0)}%</span>
+                        {item.startDate && <span>开始:{item.startDate}</span>}
+                        {item.endDate && <span>结束:{item.endDate}</span>}
                         {item.projectAddress && <span className="truncate max-w-[200px]">{item.projectAddress}</span>}
                       </div>
-                      {/* 净利润显著展示 */}
-                      <div className="mt-2">
-                        <span className={`text-sm font-bold ${(item.netProfit ?? 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}>
-                          净利润 ¥{item.netProfit?.toFixed(2) ?? "0.00"}
-                        </span>
-                      </div>
+                      {!manageMode && (
+                        <div className="mt-1 text-xs text-muted-foreground/70">点击查看详情与营业记录</div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -445,7 +683,10 @@ export default function ProjectsPage() {
                       variant="ghost"
                       size="icon"
                       className="w-8 h-8 rounded-lg text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30"
-                      onClick={() => openCalendar(item)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCalendar(item);
+                      }}
                       title="日历"
                     >
                       <Calendar className="w-4 h-4" />
@@ -456,7 +697,7 @@ export default function ProjectsPage() {
                         variant="ghost"
                         size="icon"
                         className="w-8 h-8 rounded-lg text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-                        onClick={() => openCloseConfirm(item)}
+                        onClick={(e) => { e.stopPropagation(); openCloseConfirm(item); }}
                         title="结项"
                       >
                         <CheckCircle2 className="w-4 h-4" />
@@ -468,7 +709,7 @@ export default function ProjectsPage() {
                         variant="ghost"
                         size="icon"
                         className="w-8 h-8 rounded-lg text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/30"
-                        onClick={() => openReopenConfirm(item)}
+                        onClick={(e) => { e.stopPropagation(); openReopenConfirm(item); }}
                         title="重启"
                       >
                         <RotateCcw className="w-4 h-4" />
@@ -480,7 +721,7 @@ export default function ProjectsPage() {
                         variant="ghost"
                         size="icon"
                         className="w-8 h-8 rounded-lg text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                        onClick={() => openEdit(item)}
+                        onClick={(e) => { e.stopPropagation(); openEdit(item); }}
                         title="编辑"
                       >
                         <Pencil className="w-4 h-4" />
@@ -492,7 +733,7 @@ export default function ProjectsPage() {
                         variant="ghost"
                         size="icon"
                         className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
-                        onClick={() => handleDelete(item)}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
                         title="删除"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -522,32 +763,6 @@ export default function ProjectsPage() {
                 placeholder="例如：道路养护"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>男工一日营业额 <span className="text-red-500">*</span></Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={createForm.maleDailyRevenue}
-                  onChange={(e) => setCreateForm({ ...createForm, maleDailyRevenue: e.target.value })}
-                  className="rounded-lg"
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>女工一日营业额 <span className="text-red-500">*</span></Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={createForm.femaleDailyRevenue}
-                  onChange={(e) => setCreateForm({ ...createForm, femaleDailyRevenue: e.target.value })}
-                  className="rounded-lg"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
             <div className="space-y-1.5">
               <Label>毛利率 <span className="text-red-500">*</span>（0~1 之间，如 0.3 表示 30%）</Label>
               <Input
@@ -570,25 +785,14 @@ export default function ProjectsPage() {
                 placeholder="选填"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>开始日期</Label>
-                <Input
-                  type="date"
-                  value={createForm.startDate}
-                  onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>结束日期</Label>
-                <Input
-                  type="date"
-                  value={createForm.endDate}
-                  onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label>开始日期 <span className="text-red-500">*</span></Label>
+              <Input
+                type="date"
+                value={createForm.startDate}
+                onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
+                className="rounded-lg"
+              />
             </div>
           </div>
           <DialogFooter>
@@ -613,30 +817,6 @@ export default function ProjectsPage() {
                 className="rounded-lg"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>男工一日营业额</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={editForm.maleDailyRevenue}
-                  onChange={(e) => setEditForm({ ...editForm, maleDailyRevenue: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>女工一日营业额</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={editForm.femaleDailyRevenue}
-                  onChange={(e) => setEditForm({ ...editForm, femaleDailyRevenue: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
-            </div>
             <div className="space-y-1.5">
               <Label>毛利率（0~1）</Label>
               <Input
@@ -657,25 +837,14 @@ export default function ProjectsPage() {
                 className="rounded-lg"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>开始日期</Label>
-                <Input
-                  type="date"
-                  value={editForm.startDate}
-                  onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>结束日期</Label>
-                <Input
-                  type="date"
-                  value={editForm.endDate}
-                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label>开始日期</Label>
+              <Input
+                type="date"
+                value={editForm.startDate}
+                onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
+                className="rounded-lg"
+              />
             </div>
           </div>
           <DialogFooter>
@@ -776,6 +945,278 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* ===== 项目详情弹窗 ===== */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="rounded-2xl max-w-3xl max-h-[92vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg flex items-center gap-2">
+              <Eye className="w-5 h-5 text-green-600" />
+              {selectedProject?.projectName}
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* 三个统计 rounded boxes */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 text-center">
+              <p className="text-xs text-blue-500 mb-1">总工作天数</p>
+              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{detailStats.totalWorkerDays}</p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-4 text-center">
+              <p className="text-xs text-green-500 mb-1">今日工作天数</p>
+              <p className="text-2xl font-bold text-green-700 dark:text-green-300">{detailStats.todayWorkerDays}</p>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 text-center">
+              <p className="text-xs text-amber-500 mb-1">累计未付工资</p>
+              <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">¥{detailStats.unpaidWage.toFixed(2)}</p>
+            </div>
+          </div>
+
+          {/* 营业记录 */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold">营业记录</h4>
+              <Button
+                size="sm"
+                className="rounded-lg bg-green-600 hover:bg-green-700"
+                onClick={openCreateRevenue}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                新增营业记录
+              </Button>
+            </div>
+            {revenueRecords.length === 0 ? (
+              <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
+                暂无营业记录
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {revenueRecords.map((record) => (
+                  <div
+                    key={record.id}
+                    className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-medium">{record.recordDate}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {record.items.length} 项服务 · {record.remark || "无备注"}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold">¥{record.totalAmount.toFixed(2)}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg"
+                        onClick={() => { setSelectedRevenueRecord(record); setRevenueDetailOpen(true); }}
+                        title="查看"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => openEditRevenue(record)}
+                        title="编辑"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteRevenue(record)}
+                        title="删除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== 营业记录明细弹窗 ===== */}
+      <Dialog open={revenueDetailOpen} onOpenChange={setRevenueDetailOpen}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg">
+              营业记录明细 · {selectedRevenueRecord?.recordDate}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {(selectedRevenueRecord?.items || []).map((item, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-xl border border-border p-3"
+              >
+                <div>
+                  <div className="text-sm font-medium">{item.serviceName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {item.workerType === 2 ? "女工" : "男工"} · {item.quantity} × ¥{item.unitPrice.toFixed(2)}
+                  </div>
+                  {item.remark && <div className="text-xs text-muted-foreground mt-0.5">备注：{item.remark}</div>}
+                </div>
+                <div className="text-sm font-bold">¥{item.totalPrice.toFixed(2)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end text-sm font-bold pt-2">
+            合计：¥{selectedRevenueRecord?.totalAmount.toFixed(2)}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== 营业记录编辑弹窗 ===== */}
+      <Dialog open={revenueEditOpen} onOpenChange={setRevenueEditOpen}>
+        <DialogContent className="rounded-2xl max-w-2xl max-h-[92vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg">
+              {revenueEditForm.recordId ? "编辑营业记录" : "新增营业记录"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>营业日期 <span className="text-red-500">*</span></Label>
+                <Input
+                  type="date"
+                  value={revenueEditForm.recordDate}
+                  onChange={(e) => setRevenueEditForm({ ...revenueEditForm, recordDate: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>备注</Label>
+                <Input
+                  value={revenueEditForm.remark}
+                  onChange={(e) => setRevenueEditForm({ ...revenueEditForm, remark: e.target.value })}
+                  className="rounded-lg"
+                  placeholder="选填"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>服务项</Label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-lg"
+                  onClick={addRevenueItem}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  添加服务项
+                </Button>
+              </div>
+
+              {revenueEditForm.items.length === 0 && (
+                <div className="text-center py-4 text-sm text-muted-foreground bg-muted/30 rounded-xl">
+                  请点击右上角添加服务项
+                </div>
+              )}
+
+              {revenueEditForm.items.map((item, idx) => (
+                <div key={idx} className="rounded-xl border border-border p-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">服务名称</Label>
+                      <select
+                        className="w-full h-9 rounded-lg border border-input bg-background px-2 text-sm"
+                        value={serviceNames.some((s) => s.serviceName === item.serviceName) ? item.serviceName : ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) updateRevenueItem(idx, "serviceName", val);
+                        }}
+                      >
+                        <option value="">选择常用服务</option>
+                        {serviceNames.map((s) => (
+                          <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">或手动输入</Label>
+                      <Input
+                        value={item.serviceName}
+                        onChange={(e) => updateRevenueItem(idx, "serviceName", e.target.value)}
+                        className="rounded-lg h-9 text-sm"
+                        placeholder="服务名称"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs">类型</Label>
+                      <select
+                        className="w-full h-9 rounded-lg border border-input bg-background px-2 text-sm"
+                        value={item.workerType}
+                        onChange={(e) => updateRevenueItem(idx, "workerType", Number(e.target.value))}
+                      >
+                        <option value={1}>男工</option>
+                        <option value={2}>女工</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">数量</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) => updateRevenueItem(idx, "quantity", Number(e.target.value))}
+                        className="rounded-lg h-9 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">单价</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        value={item.unitPrice}
+                        onChange={(e) => updateRevenueItem(idx, "unitPrice", Number(e.target.value))}
+                        className="rounded-lg h-9 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">总价</Label>
+                      <div className="h-9 flex items-center text-sm font-bold">¥{item.totalPrice.toFixed(2)}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">备注</Label>
+                      <Input
+                        value={item.remark}
+                        onChange={(e) => updateRevenueItem(idx, "remark", e.target.value)}
+                        className="rounded-lg h-9 text-sm"
+                        placeholder="选填"
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-9 h-9 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => removeRevenueItem(idx)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setRevenueEditOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleSaveRevenue}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* 结项/重启确认弹窗 */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="rounded-2xl max-w-sm">
@@ -800,6 +1241,9 @@ export default function ProjectsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>)}
+
+      {activeTab === "services" && <ServiceItemManager />}
     </div>
   );
 }

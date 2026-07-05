@@ -18,20 +18,30 @@ public class CreateProjectDTO {
     @NotBlank(message = "项目标题不能为空")
     private String projectName;
 
-    @NotNull(message = "男工一日营业额不能为空")
-    @DecimalMin(value = "0.00", message = "营业额不能为负数")
-    private BigDecimal maleDailyRevenue;
-
-    @NotNull(message = "女工一日营业额不能为空")
-    @DecimalMin(value = "0.00", message = "营业额不能为负数")
-    private BigDecimal femaleDailyRevenue;
-
     @NotNull(message = "毛利率不能为空")
     @DecimalMin(value = "0.00", message = "毛利率不能为负数")
     @DecimalMax(value = "1.00", message = "毛利率不能超过1")
     private BigDecimal grossMargin;
 
     private String projectAddress;
+
+    @NotNull(message = "开始日期不能为空")
     private LocalDate startDate;
+
+    /**
+     * 结束日期（创建时不需要，结项时写入）
+     */
     private LocalDate endDate;
+
+    /**
+     * 已弃用：男工一日营业额，保留字段兼容旧数据
+     */
+    @Deprecated
+    private BigDecimal maleDailyRevenue;
+
+    /**
+     * 已弃用：女工一日营业额，保留字段兼容旧数据
+     */
+    @Deprecated
+    private BigDecimal femaleDailyRevenue;
 }

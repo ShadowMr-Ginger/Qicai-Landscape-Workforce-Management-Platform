@@ -63,6 +63,9 @@ public class ReviewBatchDTO {
         /** 考勤日期（提交时默认批次日期，审核时可修改） */
         private LocalDate attendanceDate;
 
+        /** 关联项目ID（审核时确定） */
+        private Long projectId;
+
         /** 加班时长 */
         private BigDecimal overtimeHours;
 

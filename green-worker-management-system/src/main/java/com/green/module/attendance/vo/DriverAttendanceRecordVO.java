@@ -16,6 +16,8 @@ public class DriverAttendanceRecordVO {
     private Long id;
     private Long driverId;
     private String driverName;
+    private Long projectId;
+    private String projectName;
     private Long workTypeId;
     private String workTypeName;
 

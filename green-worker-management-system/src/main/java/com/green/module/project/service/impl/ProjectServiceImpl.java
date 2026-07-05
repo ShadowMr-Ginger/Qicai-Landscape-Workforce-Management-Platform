@@ -19,6 +19,7 @@ import com.green.module.project.vo.ProjectCalendarSummaryVO;
 import com.green.module.project.vo.ProjectVO;
 import com.green.module.worker.entity.WorkerEntity;
 import com.green.module.worker.mapper.WorkerMapper;
+import com.green.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -80,13 +81,21 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(CreateProjectDTO dto) {
+        if (dto.getProjectName() == null || dto.getProjectName().trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "项目标题不能为空");
+        }
+        String projectName = dto.getProjectName().trim();
+        checkProjectNameUnique(null, projectName);
+
         ProjectEntity entity = new ProjectEntity();
         BeanUtils.copyProperties(dto, entity);
+        entity.setProjectName(projectName);
         entity.setStatus(1);
         entity.setIsSystem(0);
         entity.setIsClosed(0);
         entity.setTotalRevenue(BigDecimal.ZERO);
         entity.setProfit(BigDecimal.ZERO);
+        entity.setCreatedBy(SecurityUtils.getCurrentUserId());
         projectMapper.insert(entity);
         return entity.getId();
     }
@@ -101,8 +110,36 @@ public class ProjectServiceImpl implements ProjectService {
         if (entity.getIsSystem() != null && entity.getIsSystem() == 1) {
             throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "系统项目不可编辑");
         }
-        BeanUtils.copyProperties(dto, entity);
+        if (dto.getProjectName() != null) {
+            String projectName = dto.getProjectName().trim();
+            if (projectName.isEmpty()) {
+                throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "项目标题不能为空");
+            }
+            checkProjectNameUnique(id, projectName);
+            entity.setProjectName(projectName);
+        }
+        if (dto.getGrossMargin() != null) {
+            entity.setGrossMargin(dto.getGrossMargin());
+        }
+        if (dto.getProjectAddress() != null) {
+            entity.setProjectAddress(dto.getProjectAddress());
+        }
+        if (dto.getStartDate() != null) {
+            entity.setStartDate(dto.getStartDate());
+        }
         projectMapper.updateById(entity);
+    }
+
+    private void checkProjectNameUnique(Long excludeId, String projectName) {
+        QueryWrapper<ProjectEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("project_name", projectName).eq("deleted", 0);
+        if (excludeId != null) {
+            wrapper.ne("id", excludeId);
+        }
+        Long count = projectMapper.selectCount(wrapper);
+        if (count != null && count > 0) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "项目名称已存在，请更换");
+        }
     }
 
     @Override
@@ -166,6 +203,55 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.selectList(wrapper).stream()
             .map(this::convertToVO)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> getProjectDetailStats(Long projectId) {
+        ProjectEntity project = projectMapper.selectById(projectId);
+        if (project == null) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "项目不存在");
+        }
+
+        LocalDate today = LocalDate.now();
+
+        // 总工数（天）：该项目下所有未删除工人考勤记录条数（1条=1人天）
+        Long totalWorkerDays = workerAttendanceRecordMapper.selectCount(
+            new QueryWrapper<WorkerAttendanceRecordEntity>()
+                .eq("project_id", projectId)
+                .eq("deleted", 0)
+        );
+
+        // 今日工数（天）
+        Long todayWorkerDays = workerAttendanceRecordMapper.selectCount(
+            new QueryWrapper<WorkerAttendanceRecordEntity>()
+                .eq("project_id", projectId)
+                .eq("attendance_date", today)
+                .eq("deleted", 0)
+        );
+
+        // 工人待发工资累计（含司机）：未结清的工人+司机考勤记录总工资
+        BigDecimal workerUnpaid = workerAttendanceRecordMapper.selectList(
+            new QueryWrapper<WorkerAttendanceRecordEntity>()
+                .eq("project_id", projectId)
+                .eq("is_settled", 0)
+                .eq("deleted", 0)
+        ).stream().map(r -> r.getTotalWage() != null ? r.getTotalWage() : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal driverUnpaid = driverAttendanceRecordMapper.selectList(
+            new QueryWrapper<DriverAttendanceRecordEntity>()
+                .eq("project_id", projectId)
+                .eq("is_settled", 0)
+                .eq("deleted", 0)
+        ).stream().map(r -> r.getTotalWage() != null ? r.getTotalWage() : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("projectId", projectId);
+        result.put("totalWorkerDays", totalWorkerDays != null ? totalWorkerDays : 0L);
+        result.put("todayWorkerDays", todayWorkerDays != null ? todayWorkerDays : 0L);
+        result.put("unpaidWage", workerUnpaid.add(driverUnpaid));
+        return result;
     }
 
     @Override

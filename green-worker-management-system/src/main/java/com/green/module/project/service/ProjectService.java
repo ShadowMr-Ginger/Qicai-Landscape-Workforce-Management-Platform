@@ -32,4 +32,9 @@ public interface ProjectService {
     Map<String, Object> getProjectCalendar(Long projectId, Integer year, Integer month);
 
     Map<String, Object> getTodayStats();
+
+    /**
+     * 获取项目详情页统计：总工数、今日工数、待发工资累计
+     */
+    Map<String, Object> getProjectDetailStats(Long projectId);
 }

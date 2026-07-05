@@ -402,6 +402,9 @@ public class AttendanceServiceImpl implements AttendanceService {
                 if (driverItem.getAttendanceDate() != null) {
                     driverRec.setAttendanceDate(driverItem.getAttendanceDate());
                 }
+                if (driverItem.getProjectId() != null) {
+                    driverRec.setProjectId(driverItem.getProjectId());
+                }
                 if (driverItem.getOvertimeHours() != null) {
                     driverRec.setOvertimeHours(driverItem.getOvertimeHours());
                 }
@@ -904,6 +907,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         DriverAttendanceRecordVO vo = new DriverAttendanceRecordVO();
         vo.setId(rec.getId());
         vo.setDriverId(rec.getDriverId());
+        vo.setProjectId(rec.getProjectId());
         vo.setWorkTypeId(rec.getWorkTypeId());
         vo.setAttendanceDate(rec.getAttendanceDate());
         vo.setAttendanceType(rec.getAttendanceType());
@@ -922,6 +926,12 @@ public class AttendanceServiceImpl implements AttendanceService {
             vo.setDriverName(driver.getRealName());
             vo.setBaseDailySalary(driver.getBaseDailySalary());
             vo.setOvertimeHourlyRate(driver.getOvertimeHourlyRate());
+        }
+
+        // 查询项目名称
+        if (rec.getProjectId() != null) {
+            com.green.module.project.entity.ProjectEntity project = projectMapper.selectById(rec.getProjectId());
+            vo.setProjectName(project != null ? project.getProjectName() : "-");
         }
 
         // 查询作业类型名称
@@ -1076,6 +1086,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         DriverAttendanceRecordEntity record = new DriverAttendanceRecordEntity();
         record.setDriverId(item.getDriverId());
+        record.setProjectId(item.getProjectId());
         record.setAttendanceDate(item.getAttendanceDate());
         record.setAttendanceType(item.getAttendanceType());
         record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);

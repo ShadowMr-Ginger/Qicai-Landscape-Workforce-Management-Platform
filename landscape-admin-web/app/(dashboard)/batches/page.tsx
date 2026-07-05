@@ -99,6 +99,8 @@ interface BatchDriverRecord {
   id: number | null;
   driverId: number;
   driverName: string;
+  projectId: number | null;
+  projectName: string;
   attendanceDate: string;
   attendanceType: number;
   attendanceTypeText: string;
@@ -253,6 +255,7 @@ export default function BatchesPage() {
     fetchWorkers();
     fetchGroups();
     fetchWorkTypes(true);
+    fetchProjects();
     setCreateOpen(true);
   };
 
@@ -324,6 +327,8 @@ export default function BatchesPage() {
             id: rawDriver.id ?? null,
             driverId: rawDriver.driverId,
             driverName: rawDriver.driverName || res.data.driverName || "司机",
+            projectId: rawDriver.projectId ?? defaultPid,
+            projectName: rawDriver.projectName ?? defaultPName,
             attendanceDate: rawDriver.attendanceDate,
             attendanceType: rawDriver.attendanceType ?? 2,
             attendanceTypeText: rawDriver.attendanceTypeText || "全天",
@@ -369,6 +374,7 @@ export default function BatchesPage() {
         payload.driverRecord = {
           recordId: detailDriverRecord.id,
           attendanceDate: detailDriverRecord.attendanceDate,
+          projectId: detailDriverRecord.projectId,
           overtimeHours: detailDriverRecord.overtimeHours,
           dailyWage: detailDriverRecord.dailyWage,
           remark: detailDriverRecord.remark,
@@ -877,6 +883,27 @@ export default function BatchesPage() {
                   <div className="space-y-1">
                     <Label className="text-[10px] text-yellow-700 dark:text-yellow-300">加班工资(元)</Label>
                     <p className="text-xs text-foreground/90">¥{detailDriverRecord.overtimeWage}</p>
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <Label className="text-[10px] text-yellow-700 dark:text-yellow-300">分配项目</Label>
+                    {detailBatch?.status === 0 ? (
+                      <select
+                        className="w-full h-8 rounded-lg border border-input bg-background px-2 text-xs"
+                        value={detailDriverRecord.projectId ?? defaultProjectId ?? ""}
+                        onChange={(e) =>
+                          setDetailDriverRecord({
+                            ...detailDriverRecord,
+                            projectId: e.target.value ? Number(e.target.value) : null,
+                          })
+                        }
+                      >
+                        {projectOptions.map((p) => (
+                          <option key={p.id} value={p.id}>{p.projectName}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <p className="text-xs text-foreground/90">{detailDriverRecord.projectName || "-"}</p>
+                    )}
                   </div>
                   <div className="space-y-1 col-span-2">
                     <Label className="text-[10px] text-yellow-700 dark:text-yellow-300">备注</Label>

@@ -466,4 +466,46 @@ export async function getDriverMonthlyReport(year: number, month: number) {
   return res.data;
 }
 
+// ==================== 项目营业记录与常用服务名称 ====================
+
+export async function getProjectDetailStats(id: number) {
+  const res = await api.get(`/admin/projects/${id}/stats`);
+  return res.data;
+}
+
+export async function getProjectRevenueRecords(id: number) {
+  const res = await api.get(`/admin/projects/${id}/revenue-records`);
+  return res.data;
+}
+
+export async function createProjectRevenueRecord(id: number, data: Record<string, unknown>) {
+  const res = await api.post(`/admin/projects/${id}/revenue-records`, data);
+  return res.data;
+}
+
+export async function updateProjectRevenueRecord(recordId: number, data: Record<string, unknown>) {
+  const res = await api.put(`/admin/revenue-records/${recordId}`, data);
+  return res.data;
+}
+
+export async function deleteProjectRevenueRecord(recordId: number) {
+  const res = await api.delete(`/admin/revenue-records/${recordId}`);
+  return res.data;
+}
+
+export async function getCommonServiceNames() {
+  const res = await api.get('/admin/projects/common-service-names');
+  return res.data;
+}
+
+export async function createCommonServiceName(serviceName: string) {
+  const res = await api.post('/admin/projects/common-service-names', null, { params: { serviceName } });
+  return res.data;
+}
+
+export async function deleteCommonServiceName(id: number) {
+  const res = await api.delete(`/admin/projects/common-service-names/${id}`);
+  return res.data;
+}
+
 export default api;

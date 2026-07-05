@@ -22,6 +22,9 @@ public class DriverAttendanceRecordEntity extends BaseEntity {
     /** 司机ID */
     private Long driverId;
 
+    /** 关联项目ID */
+    private Long projectId;
+
     /** 考勤日期 */
     private LocalDate attendanceDate;
 

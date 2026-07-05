@@ -30,6 +30,9 @@ public class AttendanceBatchDriverItemEntity implements Serializable {
     /** 司机ID */
     private Long driverId;
 
+    /** 关联项目ID */
+    private Long projectId;
+
     /** 考勤日期 */
     private LocalDate attendanceDate;
 

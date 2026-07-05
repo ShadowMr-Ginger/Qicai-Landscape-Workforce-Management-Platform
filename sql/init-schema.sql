@@ -59,8 +59,8 @@ CREATE TABLE `projects` (
     `start_date` DATE DEFAULT NULL COMMENT '项目开始日期',
     `end_date` DATE DEFAULT NULL COMMENT '项目结束日期',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '项目状态: 1-进行中, 2-已结束',
-    `male_daily_revenue` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '男工一日营业额(元)',
-    `female_daily_revenue` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '女工一日营业额(元)',
+    `male_daily_revenue` DECIMAL(10,2) DEFAULT 0.00 COMMENT '男工一日营业额(元)（已弃用，保留兼容）',
+    `female_daily_revenue` DECIMAL(10,2) DEFAULT 0.00 COMMENT '女工一日营业额(元)（已弃用，保留兼容）',
     `gross_margin_rate` DECIMAL(5,4) NOT NULL DEFAULT 0.0000 COMMENT '毛利率(如0.2500=25%)',
     `total_revenue` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '项目总营业额(元)',
     `profit` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '利润(元)',
@@ -78,6 +78,62 @@ CREATE TABLE `projects` (
     KEY `idx_status` (`status`),
     KEY `idx_created_by` (`created_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工地项目表';
+
+-- ============================================================
+-- 3.1 项目营业记录表 (project_revenue_records)
+-- 说明: 记录项目每次营业额，与考勤次数脱钩，由管理员手动录入
+-- ============================================================
+CREATE TABLE `project_revenue_records` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `project_id` BIGINT NOT NULL COMMENT '所属项目ID',
+    `record_date` DATE NOT NULL COMMENT '营业日期',
+    `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '营业记录总金额(元)',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除标志: 0-未删除, 1-已删除',
+    `version` INT NOT NULL DEFAULT 1 COMMENT '乐观锁版本号',
+    PRIMARY KEY (`id`),
+    KEY `idx_project_id` (`project_id`),
+    KEY `idx_record_date` (`record_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录表';
+
+-- ============================================================
+-- 3.2 项目营业记录明细表 (project_revenue_record_items)
+-- 说明: 一条营业记录下的多项服务内容
+-- ============================================================
+CREATE TABLE `project_revenue_record_items` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `record_id` BIGINT NOT NULL COMMENT '所属营业记录ID',
+    `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
+    `worker_type` TINYINT NOT NULL DEFAULT 1 COMMENT '工人类型: 1-男工, 2-女工',
+    `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
+    `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
+    `total_price` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总价(元)',
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_record_id` (`record_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录明细表';
+
+-- ============================================================
+-- 3.3 常用服务名称表 (common_service_names)
+-- 说明: 管理员预设常用服务名称，便于录入营业记录时选择
+-- ============================================================
+CREATE TABLE `common_service_names` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
+    `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统预设: 0-否, 1-是',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除标志: 0-未删除, 1-已删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_service_name` (`service_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='常用服务名称表';
 
 -- ============================================================
 -- 4. 管理员表 (admins)
@@ -266,6 +322,7 @@ CREATE TABLE `worker_attendance_records` (
 CREATE TABLE `driver_attendance_records` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `driver_id` BIGINT NOT NULL COMMENT '司机ID',
+    `project_id` BIGINT DEFAULT NULL COMMENT '关联项目ID(审核时确定)',
     `attendance_date` DATE NOT NULL COMMENT '考勤日期',
     `attendance_type` TINYINT NOT NULL DEFAULT 2 COMMENT '出勤类型: 固定2-全天',
     `overtime_hours` DECIMAL(3,1) NOT NULL DEFAULT 0.0 COMMENT '加班时长(小时，0.5小时粒度)',
@@ -286,6 +343,7 @@ CREATE TABLE `driver_attendance_records` (
     `version` INT NOT NULL DEFAULT 1 COMMENT '乐观锁版本号',
     PRIMARY KEY (`id`),
     KEY `idx_attendance_date` (`attendance_date`),
+    KEY `idx_project_id` (`project_id`),
     KEY `idx_work_type_id` (`work_type_id`),
     KEY `idx_is_settled` (`is_settled`),
     KEY `idx_source_batch_id` (`source_batch_id`)
@@ -323,6 +381,7 @@ CREATE TABLE `attendance_batch_driver_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `batch_id` BIGINT NOT NULL COMMENT '所属考勤批次ID',
     `driver_id` BIGINT NOT NULL COMMENT '司机ID',
+    `project_id` BIGINT DEFAULT NULL COMMENT '关联项目ID(审核时确定)',
     `attendance_date` DATE NOT NULL COMMENT '考勤日期',
     `attendance_type` TINYINT NOT NULL DEFAULT 2 COMMENT '出勤类型: 固定2-全天',
     `overtime_hours` DECIMAL(3,1) NOT NULL DEFAULT 0.0 COMMENT '加班时长(小时，0.5小时粒度)',

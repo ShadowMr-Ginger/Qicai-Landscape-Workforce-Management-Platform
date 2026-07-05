@@ -99,4 +99,9 @@ public class ProjectController {
     public ApiResult<Map<String, Object>> getTodayStats() {
         return ApiResult.success(projectService.getTodayStats());
     }
+
+    @GetMapping("/{id}/detail-stats")
+    public ApiResult<Map<String, Object>> getProjectDetailStats(@PathVariable Long id) {
+        return ApiResult.success(projectService.getProjectDetailStats(id));
+    }
 }
