@@ -86,6 +86,14 @@ jobs:
           script: |
             cd /home/deploy/qicai
             tar -xzf deploy.tar.gz --overwrite
+
+            # 加载环境变量并执行数据库迁移
+            set -a
+            source .env
+            set +a
+            echo "Running database migration..."
+            mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB" < sql/add-worker-item-attendance-date.sql
+
             bash scripts/deploy-server.sh
 
       - name: Health check
