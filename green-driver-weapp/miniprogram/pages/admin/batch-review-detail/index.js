@@ -201,7 +201,7 @@ Page({
         }
         const workers = this.data.workers.map((w) => (Object.assign(Object.assign({}, w), { attendanceDate: date })));
         const driverRecord = this.data.driverRecord ? Object.assign(Object.assign({}, this.data.driverRecord), { attendanceDate: date }) : null;
-        this.setData({ workers, driverRecord, batchAttendanceDate: '' });
+        this.setData({ workers, driverRecord });
         wx.showToast({ title: '已批量修改日期', icon: 'success' });
     },
     // 应用批量项目设置

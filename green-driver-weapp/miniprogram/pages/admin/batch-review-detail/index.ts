@@ -216,7 +216,7 @@ Page({
     }
     const workers = this.data.workers.map((w: any) => ({ ...w, attendanceDate: date }))
     const driverRecord = this.data.driverRecord ? { ...this.data.driverRecord, attendanceDate: date } : null
-    this.setData({ workers, driverRecord, batchAttendanceDate: '' })
+    this.setData({ workers, driverRecord })
     wx.showToast({ title: '已批量修改日期', icon: 'success' })
   },
 
