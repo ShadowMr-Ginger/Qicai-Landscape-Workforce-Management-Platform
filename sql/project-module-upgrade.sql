@@ -79,6 +79,24 @@ PREPARE stmt FROM @addUpdateBySql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- 4.2 已有常用服务名称表补充 version 字段（兼容历史迁移）
+SET @columnname = 'version';
+SET @addVersionSql = (
+    SELECT IF(
+        (
+            SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = @dbname
+              AND TABLE_NAME = @tablename
+              AND COLUMN_NAME = @columnname
+        ) > 0,
+        'SELECT 1;',
+        "ALTER TABLE `common_service_names` ADD COLUMN `version` INT NOT NULL DEFAULT 1 COMMENT '乐观锁版本号' AFTER `deleted`;"
+    )
+);
+PREPARE stmt FROM @addVersionSql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- 5. 司机考勤记录表增加 project_id
 SET @dbname = DATABASE();
 SET @tablename = 'driver_attendance_records';
