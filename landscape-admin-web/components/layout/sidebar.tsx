@@ -65,7 +65,14 @@ const navItems: NavItem[] = [
     ],
   },
   { title: "工资结算", href: "/wages", icon: Wallet },
-  { title: "项目管理", href: "/projects", icon: Building2 },
+  {
+    title: "项目管理",
+    icon: Building2,
+    children: [
+      { title: "项目列表", href: "/projects" },
+      { title: "常用服务", href: "/projects/common-services" },
+    ],
+  },
   { title: "异常记录", href: "/anomalies", icon: AlertTriangle },
   {
     title: "报表导出",
@@ -87,6 +94,7 @@ export function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     "工人管理": pathname === "/workers" || pathname === "/groups",
     "司机管理": pathname === "/drivers" || pathname === "/drivers/salary-defaults",
+    "项目管理": pathname === "/projects" || pathname === "/projects/common-services",
     "报表导出": pathname.startsWith("/reports"),
   });
 

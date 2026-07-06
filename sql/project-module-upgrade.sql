@@ -51,12 +51,33 @@ CREATE TABLE IF NOT EXISTS `common_service_names` (
     `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
     `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统预设: 0-否, 1-是',
     `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-正常, 1-删除',
     PRIMARY KEY (`id`),
     KEY `idx_service_name` (`service_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='常用服务名称表';
+
+-- 4.1 已有常用服务名称表补充 update_by 字段（兼容历史迁移）
+SET @dbname = DATABASE();
+SET @tablename = 'common_service_names';
+SET @columnname = 'update_by';
+SET @addUpdateBySql = (
+    SELECT IF(
+        (
+            SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = @dbname
+              AND TABLE_NAME = @tablename
+              AND COLUMN_NAME = @columnname
+        ) > 0,
+        'SELECT 1;',
+        "ALTER TABLE `common_service_names` ADD COLUMN `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID' AFTER `create_by`;"
+    )
+);
+PREPARE stmt FROM @addUpdateBySql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 5. 司机考勤记录表增加 project_id
 SET @dbname = DATABASE();

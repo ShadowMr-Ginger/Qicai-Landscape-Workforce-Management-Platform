@@ -28,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ServiceItemManager from "./service-item-manager";
 import {
   getProjectList,
   createProject,
@@ -155,9 +154,6 @@ export default function ProjectsPage() {
   // 结项/重启确认弹窗
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"close" | "reopen" | null>(null);
-
-  // 子选项卡: projects | services
-  const [activeTab, setActiveTab] = useState<"projects" | "services">("projects");
 
   // 项目详情弹窗
   const [detailOpen, setDetailOpen] = useState(false);
@@ -582,29 +578,6 @@ export default function ProjectsPage() {
           )}
         </div>
       </div>
-
-      {/* 子选项卡 */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant={activeTab === "projects" ? "default" : "outline"}
-          size="sm"
-          className={`rounded-lg ${activeTab === "projects" ? "bg-green-600 hover:bg-green-700" : ""}`}
-          onClick={() => setActiveTab("projects")}
-        >
-          项目列表
-        </Button>
-        <Button
-          variant={activeTab === "services" ? "default" : "outline"}
-          size="sm"
-          className={`rounded-lg ${activeTab === "services" ? "bg-green-600 hover:bg-green-700" : ""}`}
-          onClick={() => setActiveTab("services")}
-        >
-          管理常用服务名称
-        </Button>
-      </div>
-
-      {activeTab === "projects" && (
-      <>
 
       {/* 搜索 */}
       <Card className="border-0 shadow-sm rounded-xl">
@@ -1241,9 +1214,6 @@ export default function ProjectsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </>)}
-
-      {activeTab === "services" && <ServiceItemManager />}
     </div>
   );
 }
