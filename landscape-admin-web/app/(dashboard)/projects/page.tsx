@@ -131,7 +131,11 @@ function getErrorMessage(err: unknown, fallback: string): string {
 }
 
 export default function ProjectsPage() {
-  const getToday = () => new Date().toISOString().split("T")[0];
+  const getToday = () => {
+    const now = new Date();
+    const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    return chinaTime.toISOString().split("T")[0];
+  };
 
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
