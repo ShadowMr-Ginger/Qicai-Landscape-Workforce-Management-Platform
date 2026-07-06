@@ -1203,12 +1203,12 @@ export default function ProjectsPage() {
       {/* ===== 服务项编辑侧滑窗口 ===== */}
       <Sheet open={serviceItemDialogOpen} onOpenChange={setServiceItemDialogOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md rounded-l-2xl">
-          <SheetHeader>
+          <SheetHeader className="px-6">
             <SheetTitle className="text-lg">
               {editingServiceItemIndex !== null ? "修改服务项" : "新增服务项"}
             </SheetTitle>
           </SheetHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 px-6">
             <div className="space-y-1.5">
               <Label>常用服务</Label>
               <select
@@ -1284,7 +1284,7 @@ export default function ProjectsPage() {
               />
             </div>
           </div>
-          <SheetFooter>
+          <SheetFooter className="px-6">
             <Button variant="outline" className="rounded-lg" onClick={() => setServiceItemDialogOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={saveServiceItem}>保存</Button>
           </SheetFooter>
