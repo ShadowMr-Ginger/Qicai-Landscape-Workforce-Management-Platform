@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Settings2,
   Eye,
+  Copy,
 } from "lucide-react";
 import {
   Dialog,
@@ -375,6 +376,16 @@ export default function ProjectsPage() {
 
   const openEditRevenue = async (record: RevenueRecord) => {
     resetRevenueEditForm(record);
+    await fetchServiceNames();
+    setRevenueEditOpen(true);
+  };
+
+  const copyRevenueTemplate = async (record: RevenueRecord) => {
+    setRevenueEditForm({
+      recordDate: getToday(),
+      remark: record.remark || "",
+      items: record.items.map((it) => ({ ...it })),
+    });
     await fetchServiceNames();
     setRevenueEditOpen(true);
   };
@@ -1056,6 +1067,15 @@ export default function ProjectsPage() {
                         title="编辑"
                       >
                         <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        onClick={() => copyRevenueTemplate(record)}
+                        title="复制模板"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
