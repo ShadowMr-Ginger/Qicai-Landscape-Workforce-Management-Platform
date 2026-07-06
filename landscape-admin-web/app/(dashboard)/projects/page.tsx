@@ -78,7 +78,7 @@ interface ProjectStats {
 interface RevenueItem {
   id?: number;
   serviceName: string;
-  workerType: number;
+  workerType: number | null;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
   const [editingServiceItemIndex, setEditingServiceItemIndex] = useState<number | null>(null);
   const [serviceItemForm, setServiceItemForm] = useState<RevenueItem>({
     serviceName: "",
-    workerType: 1,
+    workerType: null,
     quantity: 1,
     unitPrice: 0,
     totalPrice: 0,
@@ -471,7 +471,7 @@ export default function ProjectsPage() {
     setEditingServiceItemIndex(null);
     setServiceItemForm({
       serviceName: "",
-      workerType: 1,
+      workerType: null,
       quantity: 1,
       unitPrice: 0,
       totalPrice: 0,
@@ -495,7 +495,7 @@ export default function ProjectsPage() {
     }));
   };
 
-  const handleServiceItemFieldChange = (field: keyof RevenueItem, value: string | number) => {
+  const handleServiceItemFieldChange = (field: keyof RevenueItem, value: string | number | null) => {
     setServiceItemForm((prev) => {
       const next = { ...prev, [field]: value };
       if (field === "quantity" || field === "unitPrice") {
@@ -1117,7 +1117,7 @@ export default function ProjectsPage() {
                 <div>
                   <div className="text-sm font-medium">{item.serviceName}</div>
                   <div className="text-xs text-muted-foreground">
-                    {item.workerType === 2 ? "女工" : "男工"} · {item.quantity} × ¥{item.unitPrice.toFixed(2)}
+                    {item.workerType === null ? "" : `${item.workerType === 2 ? "女工" : "男工"} · `}{item.quantity} × ¥{item.unitPrice.toFixed(2)}
                   </div>
                   {item.remark && <div className="text-xs text-muted-foreground mt-0.5">备注：{item.remark}</div>}
                 </div>
@@ -1189,7 +1189,7 @@ export default function ProjectsPage() {
                   <div className="space-y-0.5">
                     <div className="text-sm font-medium">{item.serviceName}</div>
                     <div className="text-xs text-muted-foreground">
-                      {item.workerType === 2 ? "女工" : "男工"} · {item.quantity} × ¥{item.unitPrice.toFixed(2)}
+                      {item.workerType === null ? "" : `${item.workerType === 2 ? "女工" : "男工"} · `}{item.quantity} × ¥{item.unitPrice.toFixed(2)}
                     </div>
                     {item.remark && <div className="text-xs text-muted-foreground">备注：{item.remark}</div>}
                   </div>
@@ -1264,9 +1264,13 @@ export default function ProjectsPage() {
                 <Label>类型</Label>
                 <select
                   className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
-                  value={serviceItemForm.workerType}
-                  onChange={(e) => handleServiceItemFieldChange("workerType", Number(e.target.value))}
+                  value={serviceItemForm.workerType ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    handleServiceItemFieldChange("workerType", val === "" ? null : Number(val));
+                  }}
                 >
+                  <option value=""> </option>
                   <option value={1}>男工</option>
                   <option value={2}>女工</option>
                 </select>

@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `project_revenue_record_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `record_id` BIGINT NOT NULL COMMENT '所属营业记录ID',
     `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
-    `worker_type` TINYINT NOT NULL DEFAULT 1 COMMENT '工人类型: 1-男工, 2-女工',
+    `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工（为空表示未选择）',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
     `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
     `total_price` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总价(元)',
@@ -44,6 +44,26 @@ CREATE TABLE IF NOT EXISTS `project_revenue_record_items` (
     PRIMARY KEY (`id`),
     KEY `idx_record_id` (`record_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录明细表';
+
+-- 3.1 已有营业记录明细表允许 worker_type 为空（兼容历史迁移）
+SET @tablename = 'project_revenue_record_items';
+SET @columnname = 'worker_type';
+SET @modifyWorkerTypeSql = (
+    SELECT IF(
+        (
+            SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = @dbname
+              AND TABLE_NAME = @tablename
+              AND COLUMN_NAME = @columnname
+              AND IS_NULLABLE = 'NO'
+        ) > 0,
+        "ALTER TABLE `project_revenue_record_items` MODIFY COLUMN `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工（为空表示未选择）';",
+        'SELECT 1;'
+    )
+);
+PREPARE stmt FROM @modifyWorkerTypeSql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 4. 常用服务名称表
 CREATE TABLE IF NOT EXISTS `common_service_names` (

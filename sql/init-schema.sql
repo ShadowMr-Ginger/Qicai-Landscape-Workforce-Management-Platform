@@ -108,7 +108,7 @@ CREATE TABLE `project_revenue_record_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `record_id` BIGINT NOT NULL COMMENT '所属营业记录ID',
     `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
-    `worker_type` TINYINT NOT NULL DEFAULT 1 COMMENT '工人类型: 1-男工, 2-女工',
+    `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工（为空表示未选择）',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
     `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
     `total_price` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总价(元)',

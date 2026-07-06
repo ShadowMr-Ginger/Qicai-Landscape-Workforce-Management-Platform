@@ -32,7 +32,6 @@ public class CreateRevenueRecordDTO {
         @NotBlank(message = "服务名称不能为空")
         private String serviceName;
 
-        @NotNull(message = "工人类型不能为空")
         private Integer workerType;
 
         @NotNull(message = "数量不能为空")

@@ -202,7 +202,11 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         vo.setId(item.getId());
         vo.setServiceName(item.getServiceName());
         vo.setWorkerType(item.getWorkerType());
-        vo.setWorkerTypeText(item.getWorkerType() != null && item.getWorkerType() == 2 ? "女工" : "男工");
+        if (item.getWorkerType() == null) {
+            vo.setWorkerTypeText("");
+        } else {
+            vo.setWorkerTypeText(item.getWorkerType() == 2 ? "女工" : "男工");
+        }
         vo.setQuantity(item.getQuantity());
         vo.setUnitPrice(item.getUnitPrice());
         vo.setTotalPrice(item.getTotalPrice());
