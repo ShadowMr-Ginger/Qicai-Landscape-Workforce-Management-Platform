@@ -75,6 +75,10 @@ interface CalendarSummary {
   unsettledWage: number;
 }
 
+function getChinaNow(): Date {
+  return new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+}
+
 export default function WagesPage() {
   const [activeTab, setActiveTab] = useState<"workers" | "drivers">("workers");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -93,8 +97,8 @@ export default function WagesPage() {
   const [calendarPersonId, setCalendarPersonId] = useState<number | null>(null);
   const [calendarPersonName, setCalendarPersonName] = useState("");
   const [calendarIsWorker, setCalendarIsWorker] = useState(true);
-  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
-  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth() + 1);
+  const [calendarYear, setCalendarYear] = useState(getChinaNow().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(getChinaNow().getMonth() + 1);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
   const [calendarSummary, setCalendarSummary] = useState<CalendarSummary>({ totalWage: 0, settledWage: 0, unsettledWage: 0 });
   const [minMonth, setMinMonth] = useState<string | undefined>(undefined);
@@ -106,7 +110,7 @@ export default function WagesPage() {
   const [previewData, setPreviewData] = useState<any>(null);
   const [settling, setSettling] = useState(false);
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getChinaNow().toISOString().split("T")[0];
 
   // 加载工人数据
   const fetchWorkers = async () => {
@@ -209,10 +213,10 @@ export default function WagesPage() {
 
   // 查找最早未结清月份
   const findEarliestUnsettledMonth = async (personId: number, isWorker: boolean): Promise<string | undefined> => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = getChinaNow().getFullYear();
     // 从当年1月开始往前查最多24个月
     for (let offset = 0; offset < 24; offset++) {
-      const d = new Date(currentYear, new Date().getMonth() - offset, 1);
+      const d = new Date(currentYear, getChinaNow().getMonth() - offset, 1);
       const y = d.getFullYear();
       const m = d.getMonth() + 1;
       try {
@@ -241,7 +245,7 @@ export default function WagesPage() {
     setSelectedEnd(null);
 
     const earliestMonth = await findEarliestUnsettledMonth(personId, isWorker);
-    const now = new Date();
+    const now = getChinaNow();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     if (earliestMonth) {

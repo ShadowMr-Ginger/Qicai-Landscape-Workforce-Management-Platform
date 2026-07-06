@@ -46,8 +46,9 @@ export default function WorkerSummaryPage() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarWorkerId, setCalendarWorkerId] = useState<number | null>(null);
   const [calendarWorkerName, setCalendarWorkerName] = useState("");
-  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
-  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth() + 1);
+  const chinaNow = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+  const [calendarYear, setCalendarYear] = useState(chinaNow.getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(chinaNow.getMonth() + 1);
   const [calendarDays, setCalendarDays] = useState<any[]>([]);
   const [calendarSummary, setCalendarSummary] = useState({ totalWage: 0, settledWage: 0, unsettledWage: 0 });
 
@@ -114,7 +115,7 @@ export default function WorkerSummaryPage() {
   const openCalendar = async (worker: WorkerItem) => {
     setCalendarWorkerId(worker.id);
     setCalendarWorkerName(worker.name);
-    const now = new Date();
+    const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
     setCalendarYear(y);

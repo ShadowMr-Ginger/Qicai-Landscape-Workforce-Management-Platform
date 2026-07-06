@@ -47,7 +47,7 @@ export function CalendarView({
   onDayClick,
   detailContent,
 }: CalendarViewProps) {
-  const today = new Date();
+  const today = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
   const currentYM = today.getFullYear() * 12 + today.getMonth();
   const viewYM = year * 12 + month - 1;
   const canGoNext = viewYM < currentYM;

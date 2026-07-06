@@ -24,7 +24,7 @@ export default function DriverMonthlyAttendancePage() {
   const [loading, setLoading] = useState(false);
   const [selectedYearMonth, setSelectedYearMonth] = useState<string>("");
 
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => new Date(new Date().getTime() + 8 * 60 * 60 * 1000), []);
   const currentYearMonth = useMemo(
     () => `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`,
     [today]

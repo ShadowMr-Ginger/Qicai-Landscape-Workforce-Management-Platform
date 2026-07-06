@@ -199,8 +199,9 @@ export default function ProjectsPage() {
   const [serviceNames, setServiceNames] = useState<ServiceNameItem[]>([]);
 
   // 日历状态
-  const [calYear, setCalYear] = useState(new Date().getFullYear());
-  const [calMonth, setCalMonth] = useState(new Date().getMonth() + 1);
+  const chinaNow = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+  const [calYear, setCalYear] = useState(chinaNow.getFullYear());
+  const [calMonth, setCalMonth] = useState(chinaNow.getMonth() + 1);
   const [calDays, setCalDays] = useState<CalendarDay[]>([]);
   const [calSummary, setCalSummary] = useState<CalendarSummary>({
     totalRevenue: 0,
@@ -567,7 +568,7 @@ export default function ProjectsPage() {
   // ===== 日历 =====
   const openCalendar = async (item: ProjectItem) => {
     setSelectedProject(item);
-    const now = new Date();
+    const now = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
     setCalYear(y);
@@ -598,7 +599,7 @@ export default function ProjectsPage() {
   };
 
   const handleCalNext = () => {
-    const today = new Date();
+    const today = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
     const currentYM = today.getFullYear() * 12 + today.getMonth();
     const viewYM = calYear * 12 + calMonth - 1;
     if (viewYM >= currentYM) return;

@@ -72,7 +72,7 @@ function getToday(): string {
 }
 
 function getWeekAgo(): string {
-  const d = new Date();
+  const d = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
   d.setDate(d.getDate() - 7);
   return d.toISOString().split("T")[0];
 }
