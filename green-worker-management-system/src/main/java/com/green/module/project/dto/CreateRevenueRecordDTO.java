@@ -16,7 +16,6 @@ import java.util.List;
 @Data
 public class CreateRevenueRecordDTO {
 
-    @NotNull(message = "项目ID不能为空")
     private Long projectId;
 
     @NotNull(message = "营业日期不能为空")

@@ -23,6 +23,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -170,6 +177,18 @@ export default function ProjectsPage() {
     remark: string;
     items: RevenueItem[];
   }>({ recordDate: getToday(), remark: "", items: [] });
+
+  // 服务项编辑弹窗（新增/修改单条）
+  const [serviceItemDialogOpen, setServiceItemDialogOpen] = useState(false);
+  const [editingServiceItemIndex, setEditingServiceItemIndex] = useState<number | null>(null);
+  const [serviceItemForm, setServiceItemForm] = useState<RevenueItem>({
+    serviceName: "",
+    workerType: 1,
+    quantity: 1,
+    unitPrice: 0,
+    totalPrice: 0,
+    remark: "",
+  });
 
   // 常用服务名称
   const [serviceNames, setServiceNames] = useState<ServiceNameItem[]>([]);
@@ -430,32 +449,76 @@ export default function ProjectsPage() {
     }
   };
 
-  const addRevenueItem = () => {
-    setRevenueEditForm((prev) => ({
-      ...prev,
-      items: [...prev.items, { serviceName: "", workerType: 1, quantity: 1, unitPrice: 0, totalPrice: 0, remark: "" }],
-    }));
+  const calcItemTotalPrice = (qty: number, price: number) => Math.round(qty * price * 100) / 100;
+
+  const openAddServiceItem = () => {
+    setEditingServiceItemIndex(null);
+    setServiceItemForm({
+      serviceName: "",
+      workerType: 1,
+      quantity: 1,
+      unitPrice: 0,
+      totalPrice: 0,
+      remark: "",
+    });
+    setServiceItemDialogOpen(true);
   };
 
-  const removeRevenueItem = (idx: number) => {
+  const openEditServiceItem = (idx: number) => {
+    const item = revenueEditForm.items[idx];
+    if (!item) return;
+    setEditingServiceItemIndex(idx);
+    setServiceItemForm({ ...item });
+    setServiceItemDialogOpen(true);
+  };
+
+  const removeServiceItem = (idx: number) => {
     setRevenueEditForm((prev) => ({
       ...prev,
       items: prev.items.filter((_, i) => i !== idx),
     }));
   };
 
-  const updateRevenueItem = (idx: number, field: keyof RevenueItem, value: string | number) => {
-    setRevenueEditForm((prev) => {
-      const items = [...prev.items];
-      const item = { ...items[idx], [field]: value };
+  const handleServiceItemFieldChange = (field: keyof RevenueItem, value: string | number) => {
+    setServiceItemForm((prev) => {
+      const next = { ...prev, [field]: value };
       if (field === "quantity" || field === "unitPrice") {
-        const qty = Number(field === "quantity" ? value : item.quantity) || 0;
-        const price = Number(field === "unitPrice" ? value : item.unitPrice) || 0;
-        item.totalPrice = Math.round(qty * price * 100) / 100;
+        const qty = Number(next.quantity) || 0;
+        const price = Number(next.unitPrice) || 0;
+        next.totalPrice = calcItemTotalPrice(qty, price);
       }
-      items[idx] = item;
-      return { ...prev, items };
+      return next;
     });
+  };
+
+  const saveServiceItem = () => {
+    if (!serviceItemForm.serviceName.trim()) {
+      toast.error("请输入服务名称");
+      return;
+    }
+    if (!serviceItemForm.quantity || serviceItemForm.quantity < 1) {
+      toast.error("数量至少为1");
+      return;
+    }
+    if (serviceItemForm.unitPrice < 0) {
+      toast.error("单价不能为负数");
+      return;
+    }
+    const itemToSave: RevenueItem = {
+      ...serviceItemForm,
+      serviceName: serviceItemForm.serviceName.trim(),
+      totalPrice: calcItemTotalPrice(Number(serviceItemForm.quantity) || 0, Number(serviceItemForm.unitPrice) || 0),
+    };
+    setRevenueEditForm((prev) => {
+      if (editingServiceItemIndex !== null) {
+        const items = [...prev.items];
+        items[editingServiceItemIndex] = itemToSave;
+        return { ...prev, items };
+      }
+      return { ...prev, items: [...prev.items, itemToSave] };
+    });
+    setServiceItemDialogOpen(false);
+    setEditingServiceItemIndex(null);
   };
 
   // ===== 常用服务名称 =====
@@ -1080,7 +1143,7 @@ export default function ProjectsPage() {
                   size="sm"
                   variant="outline"
                   className="rounded-lg"
-                  onClick={addRevenueItem}
+                  onClick={openAddServiceItem}
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   添加服务项
@@ -1094,89 +1157,36 @@ export default function ProjectsPage() {
               )}
 
               {revenueEditForm.items.map((item, idx) => (
-                <div key={idx} className="rounded-xl border border-border p-3 space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">服务名称</Label>
-                      <select
-                        className="w-full h-9 rounded-lg border border-input bg-background px-2 text-sm"
-                        value={serviceNames.some((s) => s.serviceName === item.serviceName) ? item.serviceName : ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val) updateRevenueItem(idx, "serviceName", val);
-                        }}
-                      >
-                        <option value="">选择常用服务</option>
-                        {serviceNames.map((s) => (
-                          <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
-                        ))}
-                      </select>
+                <div
+                  key={idx}
+                  className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
+                >
+                  <div className="space-y-0.5">
+                    <div className="text-sm font-medium">{item.serviceName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {item.workerType === 2 ? "女工" : "男工"} · {item.quantity} × ¥{item.unitPrice.toFixed(2)}
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">或手动输入</Label>
-                      <Input
-                        value={item.serviceName}
-                        onChange={(e) => updateRevenueItem(idx, "serviceName", e.target.value)}
-                        className="rounded-lg h-9 text-sm"
-                        placeholder="服务名称"
-                      />
-                    </div>
+                    {item.remark && <div className="text-xs text-muted-foreground">备注：{item.remark}</div>}
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">类型</Label>
-                      <select
-                        className="w-full h-9 rounded-lg border border-input bg-background px-2 text-sm"
-                        value={item.workerType}
-                        onChange={(e) => updateRevenueItem(idx, "workerType", Number(e.target.value))}
-                      >
-                        <option value={1}>男工</option>
-                        <option value={2}>女工</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">数量</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) => updateRevenueItem(idx, "quantity", Number(e.target.value))}
-                        className="rounded-lg h-9 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">单价</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step={0.01}
-                        value={item.unitPrice}
-                        onChange={(e) => updateRevenueItem(idx, "unitPrice", Number(e.target.value))}
-                        className="rounded-lg h-9 text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">总价</Label>
-                      <div className="h-9 flex items-center text-sm font-bold">¥{item.totalPrice.toFixed(2)}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <div className="flex-1 space-y-1">
-                      <Label className="text-xs">备注</Label>
-                      <Input
-                        value={item.remark}
-                        onChange={(e) => updateRevenueItem(idx, "remark", e.target.value)}
-                        className="rounded-lg h-9 text-sm"
-                        placeholder="选填"
-                      />
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-bold mr-2">¥{item.totalPrice.toFixed(2)}</span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-9 h-9 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => removeRevenueItem(idx)}
+                      className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      onClick={() => openEditServiceItem(idx)}
+                      title="修改"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => removeServiceItem(idx)}
+                      title="删除"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -1189,6 +1199,97 @@ export default function ProjectsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ===== 服务项编辑侧滑窗口 ===== */}
+      <Sheet open={serviceItemDialogOpen} onOpenChange={setServiceItemDialogOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md rounded-l-2xl">
+          <SheetHeader>
+            <SheetTitle className="text-lg">
+              {editingServiceItemIndex !== null ? "修改服务项" : "新增服务项"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <Label>常用服务</Label>
+              <select
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                value={serviceNames.some((s) => s.serviceName === serviceItemForm.serviceName) ? serviceItemForm.serviceName : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) handleServiceItemFieldChange("serviceName", val);
+                }}
+              >
+                <option value="">选择常用服务</option>
+                {serviceNames.map((s) => (
+                  <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>服务名称 <span className="text-red-500">*</span></Label>
+              <Input
+                value={serviceItemForm.serviceName}
+                onChange={(e) => handleServiceItemFieldChange("serviceName", e.target.value)}
+                className="rounded-lg"
+                placeholder="服务名称"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>类型</Label>
+                <select
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                  value={serviceItemForm.workerType}
+                  onChange={(e) => handleServiceItemFieldChange("workerType", Number(e.target.value))}
+                >
+                  <option value={1}>男工</option>
+                  <option value={2}>女工</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>数量</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={serviceItemForm.quantity}
+                  onChange={(e) => handleServiceItemFieldChange("quantity", Number(e.target.value))}
+                  className="rounded-lg"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>单价</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={serviceItemForm.unitPrice}
+                  onChange={(e) => handleServiceItemFieldChange("unitPrice", Number(e.target.value))}
+                  className="rounded-lg"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>总价</Label>
+                <div className="h-10 flex items-center text-base font-bold">¥{serviceItemForm.totalPrice.toFixed(2)}</div>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>备注</Label>
+              <Input
+                value={serviceItemForm.remark}
+                onChange={(e) => handleServiceItemFieldChange("remark", e.target.value)}
+                className="rounded-lg"
+                placeholder="选填"
+              />
+            </div>
+          </div>
+          <SheetFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setServiceItemDialogOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={saveServiceItem}>保存</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* 结项/重启确认弹窗 */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
