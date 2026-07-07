@@ -7,10 +7,12 @@ import com.green.common.result.ResultCodeEnum;
 import com.green.module.project.dto.CreateRevenueRecordDTO;
 import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.entity.ProjectEntity;
 import com.green.module.project.entity.ProjectRevenueRecordEntity;
 import com.green.module.project.entity.ProjectRevenueRecordItemEntity;
 import com.green.module.project.mapper.CommonServiceNameMapper;
+import com.green.module.project.mapper.ProjectCommonServiceMapper;
 import com.green.module.project.mapper.ProjectMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordItemMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordMapper;
@@ -45,6 +47,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
     private final ProjectRevenueRecordMapper recordMapper;
     private final ProjectRevenueRecordItemMapper itemMapper;
     private final CommonServiceNameMapper commonServiceNameMapper;
+    private final ProjectCommonServiceMapper projectCommonServiceMapper;
     private final ProjectMapper projectMapper;
 
     @Override
@@ -100,6 +103,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         for (ProjectRevenueRecordItemEntity item : itemEntities) {
             item.setRecordId(record.getId());
             itemMapper.insert(item);
+            ensureProjectCommonService(record.getProjectId(), item.getServiceName(), item.getWorkerType(), item.getUnitPrice());
         }
 
         return record.getId();
@@ -150,6 +154,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         for (ProjectRevenueRecordItemEntity item : itemEntities) {
             item.setRecordId(recordId);
             itemMapper.insert(item);
+            ensureProjectCommonService(record.getProjectId(), item.getServiceName(), item.getWorkerType(), item.getUnitPrice());
         }
     }
 
@@ -260,6 +265,85 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "系统预设服务名称不可删除");
         }
         commonServiceNameMapper.deleteById(id);
+    }
+
+    // ==================== 项目内常用服务 ====================
+
+    @Override
+    public List<ProjectCommonServiceEntity> listProjectCommonServices(Long projectId) {
+        return projectCommonServiceMapper.selectList(
+            new QueryWrapper<ProjectCommonServiceEntity>()
+                .eq("project_id", projectId)
+                .eq("deleted", 0)
+                .orderByAsc("service_name")
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createProjectCommonService(Long projectId, String serviceName, Integer workerType, BigDecimal unitPrice) {
+        if (serviceName == null || serviceName.trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "服务名称不能为空");
+        }
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "单价不能为负数");
+        }
+        ProjectCommonServiceEntity entity = new ProjectCommonServiceEntity();
+        entity.setProjectId(projectId);
+        entity.setServiceName(serviceName.trim());
+        entity.setWorkerType(workerType);
+        entity.setUnitPrice(unitPrice);
+        projectCommonServiceMapper.insert(entity);
+        return entity.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateProjectCommonService(Long id, String serviceName, Integer workerType, BigDecimal unitPrice) {
+        ProjectCommonServiceEntity entity = projectCommonServiceMapper.selectById(id);
+        if (entity == null || entity.getDeleted() == 1) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目内常用服务不存在");
+        }
+        if (serviceName == null || serviceName.trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "服务名称不能为空");
+        }
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "单价不能为负数");
+        }
+        entity.setServiceName(serviceName.trim());
+        entity.setWorkerType(workerType);
+        entity.setUnitPrice(unitPrice);
+        projectCommonServiceMapper.updateById(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteProjectCommonService(Long id) {
+        ProjectCommonServiceEntity entity = projectCommonServiceMapper.selectById(id);
+        if (entity == null || entity.getDeleted() == 1) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目内常用服务不存在");
+        }
+        projectCommonServiceMapper.deleteById(id);
+    }
+
+    private void ensureProjectCommonService(Long projectId, String serviceName, Integer workerType, BigDecimal unitPrice) {
+        if (serviceName == null || serviceName.trim().isEmpty()) {
+            return;
+        }
+        long count = projectCommonServiceMapper.selectCount(
+            new QueryWrapper<ProjectCommonServiceEntity>()
+                .eq("project_id", projectId)
+                .eq("service_name", serviceName.trim())
+                .eq("deleted", 0)
+        );
+        if (count == 0) {
+            ProjectCommonServiceEntity entity = new ProjectCommonServiceEntity();
+            entity.setProjectId(projectId);
+            entity.setServiceName(serviceName.trim());
+            entity.setWorkerType(workerType);
+            entity.setUnitPrice(unitPrice == null ? BigDecimal.ZERO : unitPrice);
+            projectCommonServiceMapper.insert(entity);
+        }
     }
 
     private RevenueRecordVO convertToVO(ProjectRevenueRecordEntity record) {

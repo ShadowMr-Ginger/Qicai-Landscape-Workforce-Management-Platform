@@ -3,6 +3,7 @@ package com.green.module.project.service;
 import com.green.module.project.dto.CreateRevenueRecordDTO;
 import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.vo.RevenueRecordVO;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,4 +37,12 @@ public interface ProjectRevenueService {
     void updateCommonServiceName(Long id, String serviceName, BigDecimal basePrice);
 
     void deleteCommonServiceName(Long id);
+
+    List<ProjectCommonServiceEntity> listProjectCommonServices(Long projectId);
+
+    Long createProjectCommonService(Long projectId, String serviceName, Integer workerType, BigDecimal unitPrice);
+
+    void updateProjectCommonService(Long id, String serviceName, Integer workerType, BigDecimal unitPrice);
+
+    void deleteProjectCommonService(Long id);
 }

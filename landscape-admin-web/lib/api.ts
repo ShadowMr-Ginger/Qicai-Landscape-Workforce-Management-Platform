@@ -493,6 +493,32 @@ export async function deleteProjectRevenueRecord(recordId: number) {
   return res.data;
 }
 
+export async function getProjectCommonServices(projectId: number) {
+  const res = await api.get(`/admin/projects/${projectId}/common-services`);
+  return res.data;
+}
+
+export async function createProjectCommonService(
+  projectId: number,
+  data: { serviceName: string; workerType?: number | null; unitPrice: number }
+) {
+  const res = await api.post(`/admin/projects/${projectId}/common-services`, null, { params: data });
+  return res.data;
+}
+
+export async function updateProjectCommonService(
+  id: number,
+  data: { serviceName: string; workerType?: number | null; unitPrice: number }
+) {
+  const res = await api.put(`/admin/projects/common-services/${id}`, null, { params: data });
+  return res.data;
+}
+
+export async function deleteProjectCommonService(id: number) {
+  const res = await api.delete(`/admin/projects/common-services/${id}`);
+  return res.data;
+}
+
 export async function exportProjectRevenueRecords(id: number, params: { startDate: string; endDate: string; format: string }) {
   const res = await api.get(`/admin/projects/${id}/revenue-records/export`, {
     params,

@@ -4,6 +4,7 @@ import com.green.common.result.ApiResult;
 import com.green.module.project.dto.CreateRevenueRecordDTO;
 import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.service.ProjectRevenueService;
 import com.green.module.project.vo.RevenueRecordVO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -95,6 +96,36 @@ public class ProjectRevenueController {
     @DeleteMapping("/common-service-names/{id}")
     public ApiResult<Void> deleteCommonServiceName(@PathVariable Long id) {
         projectRevenueService.deleteCommonServiceName(id);
+        return ApiResult.success("删除成功");
+    }
+
+    @GetMapping("/{projectId}/common-services")
+    public ApiResult<List<ProjectCommonServiceEntity>> listProjectCommonServices(@PathVariable Long projectId) {
+        return ApiResult.success(projectRevenueService.listProjectCommonServices(projectId));
+    }
+
+    @PostMapping("/{projectId}/common-services")
+    public ApiResult<Long> createProjectCommonService(
+            @PathVariable Long projectId,
+            @RequestParam String serviceName,
+            @RequestParam(required = false) Integer workerType,
+            @RequestParam BigDecimal unitPrice) {
+        return ApiResult.success(projectRevenueService.createProjectCommonService(projectId, serviceName, workerType, unitPrice));
+    }
+
+    @PutMapping("/common-services/{id}")
+    public ApiResult<Void> updateProjectCommonService(
+            @PathVariable Long id,
+            @RequestParam String serviceName,
+            @RequestParam(required = false) Integer workerType,
+            @RequestParam BigDecimal unitPrice) {
+        projectRevenueService.updateProjectCommonService(id, serviceName, workerType, unitPrice);
+        return ApiResult.success("修改成功");
+    }
+
+    @DeleteMapping("/common-services/{id}")
+    public ApiResult<Void> deleteProjectCommonService(@PathVariable Long id) {
+        projectRevenueService.deleteProjectCommonService(id);
         return ApiResult.success("删除成功");
     }
 }

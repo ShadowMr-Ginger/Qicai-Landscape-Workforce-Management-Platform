@@ -17,6 +17,7 @@ import {
   Eye,
   Copy,
   Download,
+  Wrench,
 } from "lucide-react";
 import {
   Dialog,
@@ -35,7 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   getProjectList,
@@ -51,6 +52,10 @@ import {
   updateProjectRevenueRecord,
   deleteProjectRevenueRecord,
   getCommonServiceNames,
+  getProjectCommonServices,
+  createProjectCommonService,
+  updateProjectCommonService,
+  deleteProjectCommonService,
   exportProjectRevenueRecords,
 } from "@/lib/api";
 
@@ -102,6 +107,14 @@ interface ServiceNameItem {
   serviceName: string;
   basePrice?: number;
   isSystem: number;
+}
+
+interface ProjectCommonService {
+  id: number;
+  projectId: number;
+  serviceName: string;
+  workerType: number | null;
+  unitPrice: number;
 }
 
 interface CalendarDay {
@@ -206,6 +219,16 @@ export default function ProjectsPage() {
     format: "word",
   });
   const [exporting, setExporting] = useState(false);
+
+  // 项目内常用服务
+  const [projectCommonServices, setProjectCommonServices] = useState<ProjectCommonService[]>([]);
+  const [projectCommonServiceSheetOpen, setProjectCommonServiceSheetOpen] = useState(false);
+  const [editingProjectCommonService, setEditingProjectCommonService] = useState<ProjectCommonService | null>(null);
+  const [projectCommonServiceForm, setProjectCommonServiceForm] = useState({
+    serviceName: "",
+    workerType: null as number | null,
+    unitPrice: 0,
+  });
 
   // 常用服务名称
   const [serviceNames, setServiceNames] = useState<ServiceNameItem[]>([]);
@@ -352,15 +375,19 @@ export default function ProjectsPage() {
     setSelectedProject(item);
     setDetailOpen(true);
     try {
-      const [statsRes, recordsRes] = await Promise.all([
+      const [statsRes, recordsRes, servicesRes] = await Promise.all([
         getProjectDetailStats(item.id),
         getProjectRevenueRecords(item.id),
+        getProjectCommonServices(item.id),
       ]);
       if (statsRes.code === 200 && statsRes.data) {
         setDetailStats(statsRes.data);
       }
       if (recordsRes.code === 200 && recordsRes.data) {
         setRevenueRecords(recordsRes.data);
+      }
+      if (servicesRes.code === 200 && servicesRes.data) {
+        setProjectCommonServices(servicesRes.data);
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "加载项目详情失败"));
@@ -537,6 +564,72 @@ export default function ProjectsPage() {
       toast.error(getErrorMessage(err, "导出失败"));
     } finally {
       setExporting(false);
+    }
+  };
+
+  // ===== 项目内常用服务 =====
+  const openAddProjectCommonService = async () => {
+    setEditingProjectCommonService(null);
+    setProjectCommonServiceForm({ serviceName: "", workerType: null, unitPrice: 0 });
+    await fetchServiceNames();
+    setProjectCommonServiceSheetOpen(true);
+  };
+
+  const openEditProjectCommonService = (service: ProjectCommonService) => {
+    setEditingProjectCommonService(service);
+    setProjectCommonServiceForm({
+      serviceName: service.serviceName,
+      workerType: service.workerType,
+      unitPrice: service.unitPrice,
+    });
+    setProjectCommonServiceSheetOpen(true);
+  };
+
+  const handleSaveProjectCommonService = async () => {
+    if (!selectedProject) return;
+    if (!projectCommonServiceForm.serviceName.trim()) {
+      toast.error("请输入服务名称");
+      return;
+    }
+    if (projectCommonServiceForm.unitPrice < 0) {
+      toast.error("单价不能为负数");
+      return;
+    }
+    try {
+      const payload = {
+        serviceName: projectCommonServiceForm.serviceName.trim(),
+        workerType: projectCommonServiceForm.workerType,
+        unitPrice: projectCommonServiceForm.unitPrice,
+      };
+      if (editingProjectCommonService) {
+        await updateProjectCommonService(editingProjectCommonService.id, payload);
+        toast.success("修改成功");
+      } else {
+        await createProjectCommonService(selectedProject.id, payload);
+        toast.success("新增成功");
+      }
+      setProjectCommonServiceSheetOpen(false);
+      const res = await getProjectCommonServices(selectedProject.id);
+      if (res.code === 200 && res.data) {
+        setProjectCommonServices(res.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, editingProjectCommonService ? "修改失败" : "新增失败"));
+    }
+  };
+
+  const handleDeleteProjectCommonService = async (service: ProjectCommonService) => {
+    if (!selectedProject) return;
+    if (!confirm(`确定删除项目内常用服务「${service.serviceName}」吗？`)) return;
+    try {
+      await deleteProjectCommonService(service.id);
+      toast.success("删除成功");
+      const res = await getProjectCommonServices(selectedProject.id);
+      if (res.code === 200 && res.data) {
+        setProjectCommonServices(res.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "删除失败"));
     }
   };
 
@@ -1082,106 +1175,180 @@ export default function ProjectsPage() {
             </DialogTitle>
           </DialogHeader>
 
-          {/* 三个统计 rounded boxes */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 text-center">
-              <p className="text-xs text-blue-500 mb-1">总工作天数</p>
-              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{detailStats.totalWorkerDays}</p>
-            </div>
-            <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-4 text-center">
-              <p className="text-xs text-green-500 mb-1">今日工作天数</p>
-              <p className="text-2xl font-bold text-green-700 dark:text-green-300">{detailStats.todayWorkerDays}</p>
-            </div>
-            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 text-center">
-              <p className="text-xs text-amber-500 mb-1">累计未付工资</p>
-              <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">¥{detailStats.unpaidWage.toFixed(2)}</p>
-            </div>
-          </div>
-
-          {/* 营业记录 */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold">营业记录</h4>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="rounded-lg"
-                  onClick={openExportDialog}
-                >
-                  <Download className="w-4 h-4 mr-1" />
-                  导出营业记录
-                </Button>
-                <Button
-                  size="sm"
-                  className="rounded-lg bg-green-600 hover:bg-green-700"
-                  onClick={openCreateRevenue}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  新增营业记录
-                </Button>
-              </div>
-            </div>
-            {revenueRecords.length === 0 ? (
-              <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
-                暂无营业记录
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {revenueRecords.map((record) => (
-                  <div
-                    key={record.id}
-                    className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="space-y-0.5">
-                      <div className="text-sm font-medium">{record.recordDate}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {record.items.length} 项服务 · {record.remark || "无备注"}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold">¥{record.totalAmount.toFixed(2)}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg"
-                        onClick={() => { setSelectedRevenueRecord(record); setRevenueDetailOpen(true); }}
-                        title="查看"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => openEditRevenue(record)}
-                        title="编辑"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                        onClick={() => copyRevenueTemplate(record)}
-                        title="复制模板"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeleteRevenue(record)}
-                        title="删除"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+          <div className="grid grid-cols-[280px_1fr] gap-4">
+            {/* 左侧：项目内常用服务 */}
+            <div className="space-y-3">
+              <Card className="rounded-2xl border-border/60">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Wrench className="w-4 h-4 text-green-600" />
+                      项目内常用服务
+                    </CardTitle>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
+                      onClick={openAddProjectCommonService}
+                      title="新增项目内常用服务"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
-                ))}
+                </CardHeader>
+                <CardContent>
+                  {projectCommonServices.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
+                      暂无常用服务
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                      {projectCommonServices.map((service) => (
+                          <div
+                            key={service.id}
+                            className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
+                          >
+                            <div className="space-y-0.5 min-w-0">
+                              <div className="text-sm font-medium truncate">{service.serviceName}</div>
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 rounded">
+                                  {service.workerType === null ? "未选择" : service.workerType === 2 ? "女工" : "男工"}
+                                </Badge>
+                                <span>¥{service.unitPrice.toFixed(2)}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-0.5 shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => openEditProjectCommonService(service)}
+                                title="编辑"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteProjectCommonService(service)}
+                                title="删除"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 右侧：统计 + 营业记录 */}
+            <div className="space-y-3">
+              {/* 三个统计 rounded boxes */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 text-center">
+                  <p className="text-xs text-blue-500 mb-1">总工作天数</p>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{detailStats.totalWorkerDays}</p>
+                </div>
+                <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-4 text-center">
+                  <p className="text-xs text-green-500 mb-1">今日工作天数</p>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">{detailStats.todayWorkerDays}</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 text-center">
+                  <p className="text-xs text-amber-500 mb-1">累计未付工资</p>
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">¥{detailStats.unpaidWage.toFixed(2)}</p>
+                </div>
               </div>
-            )}
+
+              {/* 营业记录 */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold">营业记录</h4>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg"
+                      onClick={openExportDialog}
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      导出营业记录
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-lg bg-green-600 hover:bg-green-700"
+                      onClick={openCreateRevenue}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      新增营业记录
+                    </Button>
+                  </div>
+                </div>
+                {revenueRecords.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
+                    暂无营业记录
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {revenueRecords.map((record) => (
+                      <div
+                        key={record.id}
+                        className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
+                      >
+                        <div className="space-y-0.5">
+                          <div className="text-sm font-medium">{record.recordDate}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {record.items.length} 项服务 · {record.remark || "无备注"}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold">¥{record.totalAmount.toFixed(2)}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-7 h-7 rounded-lg"
+                            onClick={() => { setSelectedRevenueRecord(record); setRevenueDetailOpen(true); }}
+                            title="查看"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => openEditRevenue(record)}
+                            title="编辑"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                            onClick={() => copyRevenueTemplate(record)}
+                            title="复制模板"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteRevenue(record)}
+                            title="删除"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -1373,6 +1540,87 @@ export default function ProjectsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* ===== 项目内常用服务编辑侧滑窗口 ===== */}
+      <Sheet open={projectCommonServiceSheetOpen} onOpenChange={setProjectCommonServiceSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md rounded-l-2xl">
+          <SheetHeader className="px-6">
+            <SheetTitle className="text-lg">
+              {editingProjectCommonService ? "编辑项目内常用服务" : "新增项目内常用服务"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 py-4 px-6">
+            {!editingProjectCommonService && (
+              <div className="space-y-1.5">
+                <Label>选择全局常用服务作为模板</Label>
+                <select
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                  value=""
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val) {
+                      const selected = serviceNames.find((s) => s.serviceName === val);
+                      if (selected) {
+                        setProjectCommonServiceForm((prev) => ({
+                          ...prev,
+                          serviceName: selected.serviceName,
+                          unitPrice: selected.basePrice ?? prev.unitPrice,
+                        }));
+                      }
+                    }
+                  }}
+                >
+                  <option value="">选择模板（可选）</option>
+                  {serviceNames.map((s) => (
+                    <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label>服务名称 <span className="text-red-500">*</span></Label>
+              <Input
+                value={projectCommonServiceForm.serviceName}
+                onChange={(e) => setProjectCommonServiceForm({ ...projectCommonServiceForm, serviceName: e.target.value })}
+                className="rounded-lg"
+                placeholder="服务名称"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>类型</Label>
+                <select
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                  value={projectCommonServiceForm.workerType ?? ""}
+                  onChange={(e) => setProjectCommonServiceForm({
+                    ...projectCommonServiceForm,
+                    workerType: e.target.value === "" ? null : Number(e.target.value),
+                  })}
+                >
+                  <option value=""> </option>
+                  <option value={1}>男工</option>
+                  <option value={2}>女工</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>默认单价</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={projectCommonServiceForm.unitPrice}
+                  onChange={(e) => setProjectCommonServiceForm({ ...projectCommonServiceForm, unitPrice: Number(e.target.value) })}
+                  className="rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+          <SheetFooter className="px-6">
+            <Button variant="outline" className="rounded-lg" onClick={() => setProjectCommonServiceSheetOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleSaveProjectCommonService}>保存</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
       {/* ===== 服务项编辑侧滑窗口 ===== */}
       <Sheet open={serviceItemDialogOpen} onOpenChange={setServiceItemDialogOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md rounded-l-2xl">
@@ -1383,23 +1631,24 @@ export default function ProjectsPage() {
           </SheetHeader>
           <div className="space-y-4 py-4 px-6">
             <div className="space-y-1.5">
-              <Label>常用服务</Label>
+              <Label>项目常用服务</Label>
               <select
                 className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
-                value={serviceNames.some((s) => s.serviceName === serviceItemForm.serviceName) ? serviceItemForm.serviceName : ""}
+                value={projectCommonServices.some((s) => s.serviceName === serviceItemForm.serviceName) ? serviceItemForm.serviceName : ""}
                 onChange={(e) => {
                   const val = e.target.value;
                   if (val) {
-                    handleServiceItemFieldChange("serviceName", val);
-                    const selected = serviceNames.find((s) => s.serviceName === val);
-                    if (selected?.basePrice !== undefined) {
-                      handleServiceItemFieldChange("unitPrice", selected.basePrice);
+                    const selected = projectCommonServices.find((s) => s.serviceName === val);
+                    if (selected) {
+                      handleServiceItemFieldChange("serviceName", selected.serviceName);
+                      handleServiceItemFieldChange("workerType", selected.workerType);
+                      handleServiceItemFieldChange("unitPrice", selected.unitPrice);
                     }
                   }
                 }}
               >
-                <option value="">选择常用服务</option>
-                {serviceNames.map((s) => (
+                <option value="">选择项目常用服务</option>
+                {projectCommonServices.map((s) => (
                   <option key={s.id} value={s.serviceName}>{s.serviceName}</option>
                 ))}
               </select>

@@ -176,3 +176,21 @@ SET @addDriverItemProjectSql = (
 PREPARE stmt FROM @addDriverItemProjectSql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- 7. 项目内常用服务表
+CREATE TABLE IF NOT EXISTS `project_common_services` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `project_id` BIGINT NOT NULL COMMENT '项目ID',
+    `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
+    `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工，null-空白',
+    `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
+    `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
+    `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-正常, 1-删除',
+    `version` INT NOT NULL DEFAULT 1 COMMENT '乐观锁版本号',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_project_service` (`project_id`, `service_name`, `deleted`),
+    KEY `idx_project_id` (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目内常用服务表';
