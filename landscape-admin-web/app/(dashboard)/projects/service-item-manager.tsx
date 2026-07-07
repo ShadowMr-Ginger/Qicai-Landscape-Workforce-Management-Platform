@@ -170,7 +170,7 @@ export default function ServiceItemManager() {
                     )}
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    基础价格：{item.basePrice !== undefined ? `¥${item.basePrice.toFixed(2)}` : "未设置"}
+                    基础价格：{item.basePrice != null ? `¥${item.basePrice.toFixed(2)}` : "未设置"}
                   </span>
                 </div>
                 {item.isSystem !== 1 && (
