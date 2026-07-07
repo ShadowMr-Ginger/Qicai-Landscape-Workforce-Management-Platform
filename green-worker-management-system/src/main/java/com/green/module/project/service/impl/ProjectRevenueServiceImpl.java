@@ -12,14 +12,21 @@ import com.green.module.project.mapper.CommonServiceNameMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordItemMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordMapper;
 import com.green.module.project.service.ProjectRevenueService;
+import com.green.module.project.util.RevenueRecordExportUtil;
 import com.green.module.project.vo.RevenueRecordVO;
 import com.green.utils.SecurityUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -146,6 +153,35 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "营业记录不存在");
         }
         recordMapper.deleteById(recordId);
+    }
+
+    @Override
+    public void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate, String format, HttpServletResponse response) throws IOException {
+        List<ProjectRevenueRecordEntity> entities = recordMapper.selectList(
+            new QueryWrapper<ProjectRevenueRecordEntity>()
+                .eq("project_id", projectId)
+                .between("record_date", startDate, endDate)
+                .eq("deleted", 0)
+                .orderByAsc("record_date")
+        );
+        List<RevenueRecordVO> records = entities.stream().map(this::convertToVO).collect(Collectors.toList());
+
+        boolean isExcel = "excel".equalsIgnoreCase(format);
+        String filename = URLEncoder.encode("营业记录_" + startDate + "_" + endDate + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
+        response.setContentType(isExcel
+                ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+
+        try (OutputStream out = response.getOutputStream()) {
+            if (isExcel) {
+                RevenueRecordExportUtil.exportExcel(records, out);
+            } else {
+                RevenueRecordExportUtil.exportWord(records, out);
+            }
+            out.flush();
+        }
     }
 
     @Override

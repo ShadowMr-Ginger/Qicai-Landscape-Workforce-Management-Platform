@@ -5,6 +5,10 @@ import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
 import com.green.module.project.vo.RevenueRecordVO;
 
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -21,6 +25,8 @@ public interface ProjectRevenueService {
     void updateRecord(Long recordId, UpdateRevenueRecordDTO dto);
 
     void deleteRecord(Long recordId);
+
+    void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate, String format, HttpServletResponse response) throws IOException;
 
     List<CommonServiceNameEntity> listCommonServiceNames();
 

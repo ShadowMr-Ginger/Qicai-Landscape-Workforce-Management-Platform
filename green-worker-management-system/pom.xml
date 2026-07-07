@@ -110,6 +110,18 @@
             <version>${hutool.version}</version>
         </dependency>
 
+        <!-- Apache POI：Word/Excel 导出 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
         <!-- JWT：无状态 Token 认证 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

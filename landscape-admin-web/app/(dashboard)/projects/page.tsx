@@ -16,6 +16,7 @@ import {
   Settings2,
   Eye,
   Copy,
+  Download,
 } from "lucide-react";
 import {
   Dialog,
@@ -50,6 +51,7 @@ import {
   updateProjectRevenueRecord,
   deleteProjectRevenueRecord,
   getCommonServiceNames,
+  exportProjectRevenueRecords,
 } from "@/lib/api";
 
 interface ProjectItem {
@@ -194,6 +196,15 @@ export default function ProjectsPage() {
     totalPrice: 0,
     remark: "",
   });
+
+  // 营业记录导出
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportForm, setExportForm] = useState({
+    startDate: "",
+    endDate: "",
+    format: "word",
+  });
+  const [exporting, setExporting] = useState(false);
 
   // 常用服务名称
   const [serviceNames, setServiceNames] = useState<ServiceNameItem[]>([]);
@@ -462,6 +473,65 @@ export default function ProjectsPage() {
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "删除失败"));
+    }
+  };
+
+  const getDefaultExportDateRange = () => {
+    const now = new Date();
+    const chinaNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const year = chinaNow.getFullYear();
+    const month = chinaNow.getMonth();
+    const start = new Date(Date.UTC(year, month - 1, 1, 8, 0, 0));
+    const end = new Date(Date.UTC(year, month, 0, 8, 0, 0));
+    return {
+      startDate: start.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0],
+    };
+  };
+
+  const openExportDialog = () => {
+    const { startDate, endDate } = getDefaultExportDateRange();
+    setExportForm({ startDate, endDate, format: "word" });
+    setExportOpen(true);
+  };
+
+  const handleExport = async () => {
+    if (!selectedProject) return;
+    if (!exportForm.startDate || !exportForm.endDate) {
+      toast.error("请选择开始和结束日期");
+      return;
+    }
+    if (exportForm.startDate > exportForm.endDate) {
+      toast.error("开始日期不能晚于结束日期");
+      return;
+    }
+    setExporting(true);
+    try {
+      const res = await exportProjectRevenueRecords(selectedProject.id, {
+        startDate: exportForm.startDate,
+        endDate: exportForm.endDate,
+        format: exportForm.format,
+      });
+      const blob = new Blob([res.data], {
+        type: exportForm.format === "excel"
+          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const ext = exportForm.format === "excel" ? "xlsx" : "docx";
+      a.download = `营业记录_${selectedProject.projectName}_${exportForm.startDate}_${exportForm.endDate}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("导出成功");
+      setExportOpen(false);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "导出失败"));
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -1027,14 +1097,25 @@ export default function ProjectsPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold">营业记录</h4>
-              <Button
-                size="sm"
-                className="rounded-lg bg-green-600 hover:bg-green-700"
-                onClick={openCreateRevenue}
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                新增营业记录
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-lg"
+                  onClick={openExportDialog}
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  导出营业记录
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-lg bg-green-600 hover:bg-green-700"
+                  onClick={openCreateRevenue}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  新增营业记录
+                </Button>
+              </div>
             </div>
             {revenueRecords.length === 0 ? (
               <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
@@ -1221,6 +1302,68 @@ export default function ProjectsPage() {
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setRevenueEditOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleSaveRevenue}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== 营业记录导出弹窗 ===== */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="rounded-2xl max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg">导出营业记录</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>开始日期 <span className="text-red-500">*</span></Label>
+                <Input
+                  type="date"
+                  value={exportForm.startDate}
+                  onChange={(e) => setExportForm({ ...exportForm, startDate: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>结束日期 <span className="text-red-500">*</span></Label>
+                <Input
+                  type="date"
+                  value={exportForm.endDate}
+                  onChange={(e) => setExportForm({ ...exportForm, endDate: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>导出格式 <span className="text-red-500">*</span></Label>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    value="word"
+                    checked={exportForm.format === "word"}
+                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value })}
+                  />
+                  Word
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    value="excel"
+                    checked={exportForm.format === "excel"}
+                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value })}
+                  />
+                  Excel
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setExportOpen(false)} disabled={exporting}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleExport} disabled={exporting}>
+              {exporting ? "导出中..." : "确认导出"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

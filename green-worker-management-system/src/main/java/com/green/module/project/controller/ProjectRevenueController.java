@@ -6,11 +6,15 @@ import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
 import com.green.module.project.service.ProjectRevenueService;
 import com.green.module.project.vo.RevenueRecordVO;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -54,6 +58,16 @@ public class ProjectRevenueController {
     public ApiResult<Void> deleteRecord(@PathVariable Long recordId) {
         projectRevenueService.deleteRecord(recordId);
         return ApiResult.success("删除成功");
+    }
+
+    @GetMapping("/{projectId}/revenue-records/export")
+    public void exportRevenueRecords(
+            @PathVariable Long projectId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "word") String format,
+            HttpServletResponse response) throws IOException {
+        projectRevenueService.exportRecords(projectId, startDate, endDate, format, response);
     }
 
     @GetMapping("/common-service-names")
