@@ -1167,187 +1167,182 @@ export default function ProjectsPage() {
 
       {/* ===== 项目详情弹窗 ===== */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="rounded-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg flex items-center gap-2">
-              <Eye className="w-5 h-5 text-green-600" />
-              {selectedProject?.projectName}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
-            {/* 左侧：项目内常用服务 */}
-            <div className="space-y-3">
-              <Card className="rounded-2xl border-border/60">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Wrench className="w-4 h-4 text-green-600" />
-                      项目内常用服务
-                    </CardTitle>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
-                      onClick={openAddProjectCommonService}
-                      title="新增项目内常用服务"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+        <DialogContent
+          showCloseButton={false}
+          className="bg-transparent border-0 shadow-none ring-0 rounded-none p-0 max-w-none sm:max-w-none w-auto flex flex-col lg:flex-row items-start justify-center gap-4 overflow-visible"
+        >
+          {/* 左侧：项目内常用服务 */}
+          <div className="w-full lg:w-72 rounded-2xl bg-popover p-4 shadow-lg ring-1 ring-foreground/10 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b">
+              <div className="text-sm font-semibold flex items-center gap-2">
+                <Wrench className="w-4 h-4 text-green-600" />
+                项目内常用服务
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={openAddProjectCommonService}
+                title="新增项目内常用服务"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {projectCommonServices.length === 0 ? (
+              <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
+                暂无常用服务
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {projectCommonServices.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="text-sm font-medium truncate">{service.serviceName}</div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 rounded">
+                          {service.workerType === null ? "未选择" : service.workerType === 2 ? "女工" : "男工"}
+                        </Badge>
+                        <span>¥{service.unitPrice.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => openEditProjectCommonService(service)}
+                        title="编辑"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteProjectCommonService(service)}
+                        title="删除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {projectCommonServices.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
-                      暂无常用服务
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                      {projectCommonServices.map((service) => (
-                        <div
-                          key={service.id}
-                          className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
-                        >
-                          <div className="space-y-0.5 min-w-0">
-                            <div className="text-sm font-medium truncate">{service.serviceName}</div>
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 rounded">
-                                {service.workerType === null ? "未选择" : service.workerType === 2 ? "女工" : "男工"}
-                              </Badge>
-                              <span>¥{service.unitPrice.toFixed(2)}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-0.5 shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                              onClick={() => openEditProjectCommonService(service)}
-                              title="编辑"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleDeleteProjectCommonService(service)}
-                              title="删除"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 右侧：项目详情 */}
+          <div className="w-full lg:max-w-3xl rounded-2xl bg-popover p-4 shadow-lg ring-1 ring-foreground/10 max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg flex items-center gap-2">
+                <Eye className="w-5 h-5 text-green-600" />
+                {selectedProject?.projectName}
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* 三个统计 rounded boxes */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 text-center">
+                <p className="text-xs text-blue-500 mb-1">总工作天数</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{detailStats.totalWorkerDays}</p>
+              </div>
+              <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-4 text-center">
+                <p className="text-xs text-green-500 mb-1">今日工作天数</p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{detailStats.todayWorkerDays}</p>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 text-center">
+                <p className="text-xs text-amber-500 mb-1">累计未付工资</p>
+                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">¥{detailStats.unpaidWage.toFixed(2)}</p>
+              </div>
             </div>
 
-            {/* 右侧：统计 + 营业记录 */}
-            <div className="space-y-3 min-w-0">
-              {/* 三个统计 rounded boxes */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-blue-500 mb-1">总工作天数</p>
-                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{detailStats.totalWorkerDays}</p>
-                </div>
-                <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-green-500 mb-1">今日工作天数</p>
-                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">{detailStats.todayWorkerDays}</p>
-                </div>
-                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-amber-500 mb-1">累计未付工资</p>
-                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">¥{detailStats.unpaidWage.toFixed(2)}</p>
+            {/* 营业记录 */}
+            <div className="space-y-3 mt-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold">营业记录</h4>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-lg"
+                    onClick={openExportDialog}
+                  >
+                    <Download className="w-4 h-4 mr-1" />
+                    导出营业记录
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-lg bg-green-600 hover:bg-green-700"
+                    onClick={openCreateRevenue}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    新增营业记录
+                  </Button>
                 </div>
               </div>
-
-              {/* 营业记录 */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold">营业记录</h4>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-lg"
-                      onClick={openExportDialog}
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      导出营业记录
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="rounded-lg bg-green-600 hover:bg-green-700"
-                      onClick={openCreateRevenue}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      新增营业记录
-                    </Button>
-                  </div>
+              {revenueRecords.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
+                  暂无营业记录
                 </div>
-                {revenueRecords.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
-                    暂无营业记录
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {revenueRecords.map((record) => (
-                      <div
-                        key={record.id}
-                        className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
-                      >
-                        <div className="space-y-0.5 min-w-0">
-                          <div className="text-sm font-medium">{record.recordDate}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {record.items.length} 项服务 · {record.remark || "无备注"}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold">¥{record.totalAmount.toFixed(2)}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-7 h-7 rounded-lg"
-                            onClick={() => { setSelectedRevenueRecord(record); setRevenueDetailOpen(true); }}
-                            title="查看"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => openEditRevenue(record)}
-                            title="编辑"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                            onClick={() => copyRevenueTemplate(record)}
-                            title="复制模板"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDeleteRevenue(record)}
-                            title="删除"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+              ) : (
+                <div className="space-y-2">
+                  {revenueRecords.map((record) => (
+                    <div
+                      key={record.id}
+                      className="flex items-center justify-between rounded-xl border border-border p-3 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="text-sm font-medium">{record.recordDate}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {record.items.length} 项服务 · {record.remark || "无备注"}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold">¥{record.totalAmount.toFixed(2)}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg"
+                          onClick={() => { setSelectedRevenueRecord(record); setRevenueDetailOpen(true); }}
+                          title="查看"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => openEditRevenue(record)}
+                          title="编辑"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                          onClick={() => copyRevenueTemplate(record)}
+                          title="复制模板"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteRevenue(record)}
+                          title="删除"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>
