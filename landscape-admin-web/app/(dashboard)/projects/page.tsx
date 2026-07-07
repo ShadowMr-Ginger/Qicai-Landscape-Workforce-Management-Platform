@@ -478,10 +478,15 @@ export default function ProjectsPage() {
         toast.success("营业记录新增成功");
       }
       setRevenueEditOpen(false);
-      // 刷新详情
+      // 刷新营业记录
       const recordsRes = await getProjectRevenueRecords(selectedProject.id);
       if (recordsRes.code === 200 && recordsRes.data) {
         setRevenueRecords(recordsRes.data);
+      }
+      // 刷新项目内常用服务（后端会自动新增未出现过的服务名称）
+      const servicesRes = await getProjectCommonServices(selectedProject.id);
+      if (servicesRes.code === 200 && servicesRes.data) {
+        setProjectCommonServices(servicesRes.data);
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "保存失败"));
