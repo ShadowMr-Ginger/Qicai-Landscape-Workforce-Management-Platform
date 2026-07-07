@@ -80,15 +80,14 @@ CREATE TABLE `projects` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工地项目表';
 
 -- ============================================================
--- 3.1 项目营业记录表 (project_revenue_records)
--- 说明: 记录项目每次营业额，与考勤次数脱钩，由管理员手动录入
+-- 3.1 记录台账主表 (ledgers)
+-- 说明: 替代原 project_revenue_records，由管理员手动录入
 -- ============================================================
-CREATE TABLE `project_revenue_records` (
+CREATE TABLE `ledgers` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `project_id` BIGINT NOT NULL COMMENT '所属项目ID',
-    `record_date` DATE NOT NULL COMMENT '营业日期',
-    `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '营业记录总金额(元)',
-    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `record_date` DATE NOT NULL COMMENT '台账日期',
+    `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '台账总金额(元)',
     `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
     `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -98,26 +97,28 @@ CREATE TABLE `project_revenue_records` (
     PRIMARY KEY (`id`),
     KEY `idx_project_id` (`project_id`),
     KEY `idx_record_date` (`record_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='记录台账主表';
 
 -- ============================================================
--- 3.2 项目营业记录明细表 (project_revenue_record_items)
--- 说明: 一条营业记录下的多项服务内容
+-- 3.2 台账用工记录明细表 (ledger_items)
+-- 说明: 一条台账下的多项用工记录
 -- ============================================================
-CREATE TABLE `project_revenue_record_items` (
+CREATE TABLE `ledger_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `record_id` BIGINT NOT NULL COMMENT '所属营业记录ID',
+    `ledger_id` BIGINT NOT NULL COMMENT '所属台账ID',
     `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
-    `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工（为空表示未选择）',
+    `worker_type` TINYINT DEFAULT NULL COMMENT '工人类型: 1-男工, 2-女工, null-未选择',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
     `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
     `total_price` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总价(元)',
-    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `sort_order` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` INT NOT NULL DEFAULT 0 COMMENT '逻辑删除标志: 0-未删除, 1-已删除',
     PRIMARY KEY (`id`),
-    KEY `idx_record_id` (`record_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录明细表';
+    KEY `idx_ledger_id` (`ledger_id`),
+    KEY `idx_sort_order` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='台账用工记录明细表';
 
 -- ============================================================
 -- 3.3 常用服务名称表 (common_service_names)

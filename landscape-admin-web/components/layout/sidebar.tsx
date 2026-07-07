@@ -61,6 +61,7 @@ const navItems: NavItem[] = [
     children: [
       { title: "考勤审核", href: "/batches" },
       { title: "考勤记录", href: "/attendance-records" },
+      { title: "记录台账", href: "/ledgers" },
       { title: "作业类型", href: "/work-types" },
     ],
   },

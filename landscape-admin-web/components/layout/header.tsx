@@ -31,6 +31,7 @@ const breadcrumbMap: Record<string, string> = {
   "/driver-summary": "司机工资汇总",
   "/workers/salary-defaults": "默认薪资",
   "/attendance-records": "考勤记录",
+  "/ledgers": "记录台账",
   "/reports/monthly-attendance": "月度考勤表导出",
   "/reports/monthly-attendance/worker": "工人考勤表",
   "/reports/monthly-attendance/driver": "司机考勤表",

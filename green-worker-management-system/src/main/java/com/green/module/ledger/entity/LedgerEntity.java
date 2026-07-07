@@ -1,4 +1,4 @@
-package com.green.module.project.entity;
+package com.green.module.ledger.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.green.common.base.BaseEntity;
@@ -9,24 +9,21 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * 项目营业记录实体
+ * 记录台账主表实体
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("project_revenue_records")
-public class ProjectRevenueRecordEntity extends BaseEntity {
+@TableName("ledgers")
+public class LedgerEntity extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
     /** 所属项目ID */
     private Long projectId;
 
-    /** 营业日期 */
+    /** 台账日期 */
     private LocalDate recordDate;
 
-    /** 营业记录总金额 */
+    /** 台账总金额(元) */
     private BigDecimal totalAmount;
-
-    /** 备注 */
-    private String remark;
 }

@@ -15,7 +15,6 @@ import {
   ChevronRight,
   Settings2,
   Eye,
-  Copy,
   Download,
   Wrench,
 } from "lucide-react";
@@ -1268,25 +1267,15 @@ export default function ProjectsPage() {
             <div className="space-y-3 mt-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-semibold">营业记录</h4>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-lg"
-                    onClick={openExportDialog}
-                  >
-                    <Download className="w-4 h-4 mr-1" />
-                    导出营业记录
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="rounded-lg bg-green-600 hover:bg-green-700"
-                    onClick={openCreateRevenue}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    新增营业记录
-                  </Button>
-                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-lg"
+                  onClick={openExportDialog}
+                >
+                  <Download className="w-4 h-4 mr-1" />
+                  导出营业记录
+                </Button>
               </div>
               {revenueRecords.length === 0 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground bg-muted/30 rounded-xl">
@@ -1315,33 +1304,6 @@ export default function ProjectsPage() {
                           title="查看"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          onClick={() => openEditRevenue(record)}
-                          title="编辑"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-7 h-7 rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                          onClick={() => copyRevenueTemplate(record)}
-                          title="复制模板"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDeleteRevenue(record)}
-                          title="删除"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </div>
                     </div>

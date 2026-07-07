@@ -1,8 +1,8 @@
-package com.green.module.project.dto;
+package com.green.module.ledger.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -11,27 +11,31 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 修改营业记录DTO
+ * 记录台账保存/更新 DTO
  */
 @Data
-public class UpdateRevenueRecordDTO {
+public class LedgerDTO {
 
-    @NotNull(message = "营业日期不能为空")
+    private Long id;
+
+    @NotNull(message = "项目不能为空")
+    private Long projectId;
+
+    @NotNull(message = "台账日期不能为空")
     private LocalDate recordDate;
 
-    private String remark;
-
-    @NotNull(message = "服务项不能为空")
-    private List<@Valid RevenueItemDTO> items;
+    @NotEmpty(message = "请至少添加一条用工记录")
+    private List<@Valid LedgerItemDTO> items;
 
     @Data
-    public static class RevenueItemDTO {
+    public static class LedgerItemDTO {
 
         private Long id;
 
-        @NotBlank(message = "服务名称不能为空")
+        @NotNull(message = "服务名称不能为空")
         private String serviceName;
 
+        /** 工人类型: null-未选择, 1-男工, 2-女工 */
         private Integer workerType;
 
         @NotNull(message = "数量不能为空")
@@ -41,7 +45,5 @@ public class UpdateRevenueRecordDTO {
         @NotNull(message = "单价不能为空")
         @Min(value = 0, message = "单价不能为负数")
         private BigDecimal unitPrice;
-
-        private String remark;
     }
 }

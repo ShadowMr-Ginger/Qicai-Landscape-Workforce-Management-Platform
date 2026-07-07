@@ -1,25 +1,19 @@
 package com.green.module.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.green.common.exception.BusinessException;
 import com.green.common.result.ResultCodeEnum;
-import com.green.module.project.dto.CreateRevenueRecordDTO;
-import com.green.module.project.dto.UpdateRevenueRecordDTO;
+import com.green.module.ledger.service.LedgerService;
+import com.green.module.ledger.vo.LedgerVO;
 import com.green.module.project.entity.CommonServiceNameEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.entity.ProjectEntity;
-import com.green.module.project.entity.ProjectRevenueRecordEntity;
-import com.green.module.project.entity.ProjectRevenueRecordItemEntity;
 import com.green.module.project.mapper.CommonServiceNameMapper;
 import com.green.module.project.mapper.ProjectCommonServiceMapper;
 import com.green.module.project.mapper.ProjectMapper;
-import com.green.module.project.mapper.ProjectRevenueRecordItemMapper;
-import com.green.module.project.mapper.ProjectRevenueRecordMapper;
 import com.green.module.project.service.ProjectRevenueService;
 import com.green.module.project.util.RevenueRecordExportUtil;
 import com.green.module.project.vo.RevenueRecordVO;
-import com.green.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,159 +22,44 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 项目营业记录与常用服务名称服务实现
+ * 项目营业记录（台账投影）与常用服务名称服务实现
  */
 @Service
 @RequiredArgsConstructor
 public class ProjectRevenueServiceImpl implements ProjectRevenueService {
 
-    private final ProjectRevenueRecordMapper recordMapper;
-    private final ProjectRevenueRecordItemMapper itemMapper;
+    private final LedgerService ledgerService;
     private final CommonServiceNameMapper commonServiceNameMapper;
     private final ProjectCommonServiceMapper projectCommonServiceMapper;
     private final ProjectMapper projectMapper;
 
     @Override
     public List<RevenueRecordVO> listByProject(Long projectId) {
-        List<ProjectRevenueRecordEntity> records = recordMapper.selectList(
-            new QueryWrapper<ProjectRevenueRecordEntity>()
-                .eq("project_id", projectId)
-                .eq("deleted", 0)
-                .orderByDesc("record_date", "create_time")
-        );
-        return records.stream().map(this::convertToVO).collect(Collectors.toList());
+        List<LedgerVO> ledgers = ledgerService.listByProject(projectId);
+        return ledgers.stream().map(this::convertToVO).collect(Collectors.toList());
     }
 
     @Override
     public RevenueRecordVO detail(Long recordId) {
-        ProjectRevenueRecordEntity record = recordMapper.selectById(recordId);
-        if (record == null || record.getDeleted() == 1) {
-            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "营业记录不存在");
-        }
-        return convertToVO(record);
+        return convertToVO(ledgerService.detail(recordId));
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Long createRecord(CreateRevenueRecordDTO dto) {
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        List<ProjectRevenueRecordItemEntity> itemEntities = new ArrayList<>();
-
-        for (CreateRevenueRecordDTO.RevenueItemDTO item : dto.getItems()) {
-            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-            BigDecimal unitPrice = item.getUnitPrice();
-            BigDecimal totalPrice = qty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
-
-            ProjectRevenueRecordItemEntity entity = new ProjectRevenueRecordItemEntity();
-            entity.setServiceName(item.getServiceName());
-            entity.setWorkerType(item.getWorkerType());
-            entity.setQuantity(item.getQuantity());
-            entity.setUnitPrice(unitPrice);
-            entity.setTotalPrice(totalPrice);
-            entity.setRemark(item.getRemark());
-            itemEntities.add(entity);
-
-            totalAmount = totalAmount.add(totalPrice);
-        }
-
-        ProjectRevenueRecordEntity record = new ProjectRevenueRecordEntity();
-        record.setProjectId(dto.getProjectId());
-        record.setRecordDate(dto.getRecordDate());
-        record.setTotalAmount(totalAmount);
-        record.setRemark(dto.getRemark());
-        recordMapper.insert(record);
-
-        for (ProjectRevenueRecordItemEntity item : itemEntities) {
-            item.setRecordId(record.getId());
-            itemMapper.insert(item);
-            ensureProjectCommonService(record.getProjectId(), item.getServiceName(), item.getWorkerType(), item.getUnitPrice());
-        }
-
-        return record.getId();
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateRecord(Long recordId, UpdateRevenueRecordDTO dto) {
-        ProjectRevenueRecordEntity record = recordMapper.selectById(recordId);
-        if (record == null || record.getDeleted() == 1) {
-            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "营业记录不存在");
-        }
-
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        List<ProjectRevenueRecordItemEntity> itemEntities = new ArrayList<>();
-
-        for (UpdateRevenueRecordDTO.RevenueItemDTO item : dto.getItems()) {
-            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-            BigDecimal unitPrice = item.getUnitPrice();
-            BigDecimal totalPrice = qty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
-
-            ProjectRevenueRecordItemEntity entity = new ProjectRevenueRecordItemEntity();
-            // 修改时重新插入明细，不保留原 id，避免主键冲突或历史数据干扰
-            entity.setId(null);
-            entity.setRecordId(recordId);
-            entity.setServiceName(item.getServiceName());
-            entity.setWorkerType(item.getWorkerType());
-            entity.setQuantity(item.getQuantity());
-            entity.setUnitPrice(unitPrice);
-            entity.setTotalPrice(totalPrice);
-            entity.setRemark(item.getRemark());
-            itemEntities.add(entity);
-
-            totalAmount = totalAmount.add(totalPrice);
-        }
-
-        // 使用 UpdateWrapper 更新，避免 version 乐观锁冲突
-        recordMapper.update(null, new UpdateWrapper<ProjectRevenueRecordEntity>()
-                .eq("id", recordId)
-                .set("record_date", dto.getRecordDate())
-                .set("total_amount", totalAmount)
-                .set("remark", dto.getRemark()));
-
-        // 删除旧明细，重新插入
-        itemMapper.delete(
-            new QueryWrapper<ProjectRevenueRecordItemEntity>().eq("record_id", recordId)
-        );
-        for (ProjectRevenueRecordItemEntity item : itemEntities) {
-            item.setRecordId(recordId);
-            itemMapper.insert(item);
-            ensureProjectCommonService(record.getProjectId(), item.getServiceName(), item.getWorkerType(), item.getUnitPrice());
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteRecord(Long recordId) {
-        ProjectRevenueRecordEntity record = recordMapper.selectById(recordId);
-        if (record == null || record.getDeleted() == 1) {
-            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "营业记录不存在");
-        }
-        recordMapper.deleteById(recordId);
-    }
-
-    @Override
-    public void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate, String format, HttpServletResponse response) throws IOException {
+    public void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate,
+                              String format, HttpServletResponse response) throws IOException {
         ProjectEntity project = projectMapper.selectById(projectId);
         String projectName = project == null ? "" : project.getProjectName();
 
-        List<ProjectRevenueRecordEntity> entities = recordMapper.selectList(
-            new QueryWrapper<ProjectRevenueRecordEntity>()
-                .eq("project_id", projectId)
-                .between("record_date", startDate, endDate)
-                .eq("deleted", 0)
-                .orderByAsc("record_date")
-        );
-        List<RevenueRecordVO> records = entities.stream().map(this::convertToVO).collect(Collectors.toList());
+        List<LedgerVO> ledgers = ledgerService.listByProjectAndDateRange(projectId, startDate, endDate);
+        List<RevenueRecordVO> records = ledgers.stream().map(this::convertToVO).collect(Collectors.toList());
 
         boolean isExcel = "excel".equalsIgnoreCase(format);
         String title = startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "~"
@@ -326,41 +205,21 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         projectCommonServiceMapper.deleteById(id);
     }
 
-    private void ensureProjectCommonService(Long projectId, String serviceName, Integer workerType, BigDecimal unitPrice) {
-        if (serviceName == null || serviceName.trim().isEmpty()) {
-            return;
-        }
-        long count = projectCommonServiceMapper.selectCount(
-            new QueryWrapper<ProjectCommonServiceEntity>()
-                .eq("project_id", projectId)
-                .eq("service_name", serviceName.trim())
-                .eq("deleted", 0)
-        );
-        if (count == 0) {
-            ProjectCommonServiceEntity entity = new ProjectCommonServiceEntity();
-            entity.setProjectId(projectId);
-            entity.setServiceName(serviceName.trim());
-            entity.setWorkerType(workerType);
-            entity.setUnitPrice(unitPrice == null ? BigDecimal.ZERO : unitPrice);
-            projectCommonServiceMapper.insert(entity);
-        }
-    }
-
-    private RevenueRecordVO convertToVO(ProjectRevenueRecordEntity record) {
+    private RevenueRecordVO convertToVO(LedgerVO ledger) {
         RevenueRecordVO vo = new RevenueRecordVO();
-        vo.setId(record.getId());
-        vo.setProjectId(record.getProjectId());
-        vo.setRecordDate(record.getRecordDate());
-        vo.setTotalAmount(record.getTotalAmount());
-        vo.setRemark(record.getRemark());
-        vo.setCreateTime(record.getCreateTime());
-
-        List<ProjectRevenueRecordItemEntity> items = itemMapper.selectByRecordId(record.getId());
-        vo.setItems(items.stream().map(this::convertItemToVO).collect(Collectors.toList()));
+        vo.setId(ledger.getId());
+        vo.setProjectId(ledger.getProjectId());
+        vo.setRecordDate(ledger.getRecordDate());
+        vo.setTotalAmount(ledger.getTotalAmount());
+        vo.setRemark(null);
+        vo.setCreateTime(ledger.getCreateTime());
+        if (ledger.getItems() != null) {
+            vo.setItems(ledger.getItems().stream().map(this::convertItemToVO).collect(Collectors.toList()));
+        }
         return vo;
     }
 
-    private RevenueRecordVO.RevenueRecordItemVO convertItemToVO(ProjectRevenueRecordItemEntity item) {
+    private RevenueRecordVO.RevenueRecordItemVO convertItemToVO(LedgerVO.LedgerItemVO item) {
         RevenueRecordVO.RevenueRecordItemVO vo = new RevenueRecordVO.RevenueRecordItemVO();
         vo.setId(item.getId());
         vo.setServiceName(item.getServiceName());
@@ -373,7 +232,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         vo.setQuantity(item.getQuantity());
         vo.setUnitPrice(item.getUnitPrice());
         vo.setTotalPrice(item.getTotalPrice());
-        vo.setRemark(item.getRemark());
+        vo.setRemark(null);
         return vo;
     }
 }

@@ -493,6 +493,50 @@ export async function deleteProjectRevenueRecord(recordId: number) {
   return res.data;
 }
 
+export interface LedgerItem {
+  serviceName: string;
+  workerType?: number | null;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface LedgerPayload {
+  projectId: number;
+  recordDate: string;
+  items: LedgerItem[];
+}
+
+export async function getLedgers(params: {
+  projectId?: number;
+  startDate?: string;
+  endDate?: string;
+  pageNum?: number;
+  pageSize?: number;
+}) {
+  const res = await api.get('/admin/ledgers', { params });
+  return res.data;
+}
+
+export async function getLedgerDetail(id: number) {
+  const res = await api.get(`/admin/ledgers/${id}`);
+  return res.data;
+}
+
+export async function createLedger(data: LedgerPayload) {
+  const res = await api.post('/admin/ledgers', data);
+  return res.data;
+}
+
+export async function updateLedger(id: number, data: LedgerPayload) {
+  const res = await api.put(`/admin/ledgers/${id}`, data);
+  return res.data;
+}
+
+export async function deleteLedger(id: number) {
+  const res = await api.delete(`/admin/ledgers/${id}`);
+  return res.data;
+}
+
 export async function getProjectCommonServices(projectId: number) {
   const res = await api.get(`/admin/projects/${projectId}/common-services`);
   return res.data;

@@ -1,14 +1,11 @@
 package com.green.module.project.controller;
 
 import com.green.common.result.ApiResult;
-import com.green.module.project.dto.CreateRevenueRecordDTO;
-import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.service.ProjectRevenueService;
 import com.green.module.project.vo.RevenueRecordVO;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 项目营业记录与常用服务名称控制器
+ * 项目营业记录（台账投影）与常用服务名称控制器
  */
 @RestController
 @RequestMapping("/api/admin/projects")
@@ -38,28 +35,6 @@ public class ProjectRevenueController {
     @GetMapping("/revenue-records/{recordId}")
     public ApiResult<RevenueRecordVO> detailRecord(@PathVariable Long recordId) {
         return ApiResult.success(projectRevenueService.detail(recordId));
-    }
-
-    @PostMapping("/{projectId}/revenue-records")
-    public ApiResult<Long> createRecord(
-            @PathVariable Long projectId,
-            @Valid @RequestBody CreateRevenueRecordDTO dto) {
-        dto.setProjectId(projectId);
-        return ApiResult.success(projectRevenueService.createRecord(dto));
-    }
-
-    @PutMapping("/revenue-records/{recordId}")
-    public ApiResult<Void> updateRecord(
-            @PathVariable Long recordId,
-            @Valid @RequestBody UpdateRevenueRecordDTO dto) {
-        projectRevenueService.updateRecord(recordId, dto);
-        return ApiResult.success("修改成功");
-    }
-
-    @DeleteMapping("/revenue-records/{recordId}")
-    public ApiResult<Void> deleteRecord(@PathVariable Long recordId) {
-        projectRevenueService.deleteRecord(recordId);
-        return ApiResult.success("删除成功");
     }
 
     @GetMapping("/{projectId}/revenue-records/export")
