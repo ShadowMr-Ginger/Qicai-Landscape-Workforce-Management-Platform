@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `project_revenue_record_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目营业记录明细表';
 
 -- 3.1 已有营业记录明细表允许 worker_type 为空（兼容历史迁移）
+SET @dbname = DATABASE();
 SET @tablename = 'project_revenue_record_items';
 SET @columnname = 'worker_type';
 SET @modifyWorkerTypeSql = (
