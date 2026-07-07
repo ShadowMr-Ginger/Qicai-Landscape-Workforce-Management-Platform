@@ -39,6 +39,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 // 允许携带凭证（如 Cookie、Authorization Header）
                 .allowCredentials(true)
+                // 暴露响应头，供前端读取文件名
+                .exposedHeaders("Content-Disposition")
                 // 预检请求缓存时间（秒）
                 .maxAge(3600);
     }

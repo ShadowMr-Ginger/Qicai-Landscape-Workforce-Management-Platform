@@ -104,8 +104,10 @@ public class RevenueRecordExportUtil {
     /**
      * 导出 Excel
      */
-    public static void exportExcel(List<RevenueRecordVO> records, OutputStream out) throws IOException {
+    public static void exportExcel(List<RevenueRecordVO> records, String projectName,
+                                   LocalDate startDate, LocalDate endDate, OutputStream out) throws IOException {
         List<RevenueRecordVO> sorted = sortByDate(records);
+        String title = buildTitle(startDate, endDate, projectName);
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("营业记录");
             // 设置列宽（单位：1/256 字符宽度）
@@ -116,13 +118,22 @@ public class RevenueRecordExportUtil {
             sheet.setColumnWidth(4, 12 * 256);
             sheet.setColumnWidth(5, 18 * 256);
 
+            CellStyle titleStyle = createExcelTitleStyle(wb);
             CellStyle headerStyle = createExcelHeaderStyle(wb);
             CellStyle dataStyle = createExcelDataStyle(wb);
             CellStyle totalStyle = createExcelTotalStyle(wb);
             CellStyle moneyStyle = createExcelMoneyStyle(wb, dataStyle);
 
+            // 标题行（合并所有列）
+            Row titleRow = sheet.createRow(0);
+            titleRow.setHeightInPoints(28.35f);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue(title);
+            titleCell.setCellStyle(titleStyle);
+            sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, HEADERS.length - 1));
+
             // 表头
-            Row headerRow = sheet.createRow(0);
+            Row headerRow = sheet.createRow(1);
             headerRow.setHeightInPoints(28.35f); // 1cm
             for (int i = 0; i < HEADERS.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -131,7 +142,7 @@ public class RevenueRecordExportUtil {
             }
 
             BigDecimal totalAmount = BigDecimal.ZERO;
-            int rowIdx = 1;
+            int rowIdx = 2;
 
             for (RevenueRecordVO record : sorted) {
                 if (record.getItems() == null) continue;
@@ -335,6 +346,17 @@ public class RevenueRecordExportUtil {
     }
 
     // ==================== Excel 辅助方法 ====================
+
+    private static CellStyle createExcelTitleStyle(Workbook wb) {
+        CellStyle style = wb.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setBold(true);
+        font.setFontHeightInPoints((short) 14);
+        style.setFont(font);
+        return style;
+    }
 
     private static CellStyle createExcelHeaderStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();

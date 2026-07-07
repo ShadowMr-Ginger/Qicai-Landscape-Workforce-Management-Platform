@@ -517,11 +517,28 @@ export default function ProjectsPage() {
           ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
+
+      // 从后端响应头提取文件名
+      const disposition = (res.headers["content-disposition"] as string | undefined) || "";
+      let fileName = "";
+      const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match) {
+        fileName = decodeURIComponent(utf8Match[1]);
+      } else {
+        const asciiMatch = disposition.match(/filename="([^"]+)"/i);
+        if (asciiMatch) {
+          fileName = decodeURIComponent(asciiMatch[1]);
+        }
+      }
+      if (!fileName) {
+        const ext = exportForm.format === "excel" ? "xlsx" : "docx";
+        fileName = `营业记录_${selectedProject.projectName}_${exportForm.startDate}_${exportForm.endDate}.${ext}`;
+      }
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const ext = exportForm.format === "excel" ? "xlsx" : "docx";
-      a.download = `营业记录_${selectedProject.projectName}_${exportForm.startDate}_${exportForm.endDate}.${ext}`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       a.remove();

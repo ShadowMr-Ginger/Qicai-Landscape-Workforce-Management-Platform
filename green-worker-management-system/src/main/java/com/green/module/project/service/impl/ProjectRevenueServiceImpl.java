@@ -190,7 +190,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
 
         try (OutputStream out = response.getOutputStream()) {
             if (isExcel) {
-                RevenueRecordExportUtil.exportExcel(records, out);
+                RevenueRecordExportUtil.exportExcel(records, projectName, startDate, endDate, out);
             } else {
                 RevenueRecordExportUtil.exportWord(records, projectName, startDate, endDate, out);
             }
