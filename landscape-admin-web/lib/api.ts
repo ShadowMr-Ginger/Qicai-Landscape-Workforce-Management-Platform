@@ -484,12 +484,12 @@ export async function createProjectRevenueRecord(id: number, data: Record<string
 }
 
 export async function updateProjectRevenueRecord(recordId: number, data: Record<string, unknown>) {
-  const res = await api.put(`/admin/revenue-records/${recordId}`, data);
+  const res = await api.put(`/admin/projects/revenue-records/${recordId}`, data);
   return res.data;
 }
 
 export async function deleteProjectRevenueRecord(recordId: number) {
-  const res = await api.delete(`/admin/revenue-records/${recordId}`);
+  const res = await api.delete(`/admin/projects/revenue-records/${recordId}`);
   return res.data;
 }
 
