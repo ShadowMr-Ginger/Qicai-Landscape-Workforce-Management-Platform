@@ -6,9 +6,11 @@ import com.green.common.result.ResultCodeEnum;
 import com.green.module.project.dto.CreateRevenueRecordDTO;
 import com.green.module.project.dto.UpdateRevenueRecordDTO;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectEntity;
 import com.green.module.project.entity.ProjectRevenueRecordEntity;
 import com.green.module.project.entity.ProjectRevenueRecordItemEntity;
 import com.green.module.project.mapper.CommonServiceNameMapper;
+import com.green.module.project.mapper.ProjectMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordItemMapper;
 import com.green.module.project.mapper.ProjectRevenueRecordMapper;
 import com.green.module.project.service.ProjectRevenueService;
@@ -41,6 +43,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
     private final ProjectRevenueRecordMapper recordMapper;
     private final ProjectRevenueRecordItemMapper itemMapper;
     private final CommonServiceNameMapper commonServiceNameMapper;
+    private final ProjectMapper projectMapper;
 
     @Override
     public List<RevenueRecordVO> listByProject(Long projectId) {
@@ -157,6 +160,9 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
 
     @Override
     public void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate, String format, HttpServletResponse response) throws IOException {
+        ProjectEntity project = projectMapper.selectById(projectId);
+        String projectName = project == null ? "" : project.getProjectName();
+
         List<ProjectRevenueRecordEntity> entities = recordMapper.selectList(
             new QueryWrapper<ProjectRevenueRecordEntity>()
                 .eq("project_id", projectId)
@@ -178,7 +184,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             if (isExcel) {
                 RevenueRecordExportUtil.exportExcel(records, out);
             } else {
-                RevenueRecordExportUtil.exportWord(records, out);
+                RevenueRecordExportUtil.exportWord(records, projectName, startDate, endDate, out);
             }
             out.flush();
         }

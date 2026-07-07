@@ -4,9 +4,16 @@ import com.green.module.project.vo.RevenueRecordVO;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDecimalNumber;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVerticalJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,8 +32,8 @@ public class RevenueRecordExportUtil {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy年M月d日");
     private static final String[] HEADERS = {"日期", "服务名称", "数量", "单价", "金额", "备注"};
 
-    // Word 每页数据行数（表头、页计、总计另行计算）
-    private static final int WORD_ROWS_PER_PAGE = 20;
+    // Word 每页数据行数（标题、表头、页计、总计另行计算）
+    private static final int WORD_ROWS_PER_PAGE = 18;
     // 行高：1cm = 567 twips
     private static final int ROW_HEIGHT_TWIPS = 567;
     // 列宽（DXA）
@@ -35,10 +42,13 @@ public class RevenueRecordExportUtil {
     /**
      * 导出 Word
      */
-    public static void exportWord(List<RevenueRecordVO> records, OutputStream out) throws IOException {
+    public static void exportWord(List<RevenueRecordVO> records, String projectName,
+                                  LocalDate startDate, LocalDate endDate, OutputStream out) throws IOException {
         List<RevenueRecordVO> sorted = sortByDate(records);
+        String title = buildTitle(startDate, endDate, projectName);
         try (XWPFDocument doc = new XWPFDocument()) {
-            XWPFTable currentTable = createWordTable(doc);
+            setPageMargins(doc);
+            XWPFTable currentTable = createWordTable(doc, title);
             int currentPageRows = 0;
             BigDecimal pageAmount = BigDecimal.ZERO;
             BigDecimal totalAmount = BigDecimal.ZERO;
@@ -51,7 +61,7 @@ public class RevenueRecordExportUtil {
                 if (currentPageRows > 0 && currentPageRows + recordRows > WORD_ROWS_PER_PAGE) {
                     addPageTotalRow(currentTable, pageAmount);
                     addPageBreak(doc);
-                    currentTable = createWordTable(doc);
+                    currentTable = createWordTable(doc, title);
                     currentPageRows = 0;
                     pageAmount = BigDecimal.ZERO;
                 }
@@ -185,25 +195,37 @@ public class RevenueRecordExportUtil {
 
     // ==================== Word 辅助方法 ====================
 
-    private static XWPFTable createWordTable(XWPFDocument doc) {
-        XWPFTable table = doc.createTable(1, HEADERS.length);
+    private static XWPFTable createWordTable(XWPFDocument doc, String title) {
+        XWPFTable table = doc.createTable(2, HEADERS.length);
         setTableWidth(table);
 
-        // 设置表头
-        XWPFTableRow headerRow = table.getRow(0);
+        // 标题行：合并所有单元格
+        XWPFTableRow titleRow = table.getRow(0);
+        setRowHeight(titleRow);
+        XWPFTableCell titleCell = titleRow.getCell(0);
+        if (HEADERS.length > 1) {
+            // 第一个单元格 gridSpan 覆盖所有列
+            CTTcPr titleTcPr = titleCell.getCTTc().isSetTcPr() ? titleCell.getCTTc().getTcPr() : titleCell.getCTTc().addNewTcPr();
+            CTDecimalNumber gridSpan = titleTcPr.isSetGridSpan() ? titleTcPr.getGridSpan() : titleTcPr.addNewGridSpan();
+            gridSpan.setVal(BigInteger.valueOf(HEADERS.length));
+            // 其余单元格标记为合并延续
+            for (int i = 1; i < HEADERS.length; i++) {
+                XWPFTableCell cell = titleRow.getCell(i);
+                CTTcPr cp = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
+                CTHMerge hm = cp.isSetHMerge() ? cp.getHMerge() : cp.addNewHMerge();
+                hm.setVal(STMerge.CONTINUE);
+            }
+        }
+        setCellWidth(titleCell, 11600);
+        setCellText(titleCell, title, true, 14, "黑体");
+
+        // 表头行：黑体、字号稍大、加粗
+        XWPFTableRow headerRow = table.getRow(1);
         setRowHeight(headerRow);
         for (int i = 0; i < HEADERS.length; i++) {
             XWPFTableCell cell = headerRow.getCell(i);
             setCellWidth(cell, WORD_COL_WIDTHS[i]);
-            setCellText(cell, HEADERS[i]);
-            // 表头加粗居中
-            for (XWPFParagraph p : cell.getParagraphs()) {
-                p.setAlignment(ParagraphAlignment.CENTER);
-                for (XWPFRun r : p.getRuns()) {
-                    r.setBold(true);
-                    r.setFontSize(10);
-                }
-            }
+            setCellText(cell, HEADERS[i], true, 12, "黑体");
         }
         return table;
     }
@@ -212,37 +234,22 @@ public class RevenueRecordExportUtil {
         XWPFTableRow row = table.createRow();
         setRowHeight(row);
         setCellText(row.getCell(0), "");
-        setCellText(row.getCell(1), "页计");
+        setCellText(row.getCell(1), "页计", true, 10, "宋体");
         setCellText(row.getCell(2), "");
         setCellText(row.getCell(3), "");
-        setCellText(row.getCell(4), formatAmount(pageAmount));
+        setCellText(row.getCell(4), formatAmount(pageAmount), true, 10, "宋体");
         setCellText(row.getCell(5), "");
-        for (int i = 0; i < HEADERS.length; i++) {
-            XWPFParagraph p = row.getCell(i).getParagraphs().get(0);
-            p.setAlignment(i == 1 || i == 4 ? ParagraphAlignment.CENTER : ParagraphAlignment.LEFT);
-            for (XWPFRun r : p.getRuns()) {
-                r.setBold(true);
-            }
-        }
     }
 
     private static void addTotalRow(XWPFTable table, BigDecimal totalAmount) {
         XWPFTableRow row = table.createRow();
         setRowHeight(row);
         setCellText(row.getCell(0), "");
-        setCellText(row.getCell(1), "总计");
+        setCellText(row.getCell(1), "总计", true, 11, "宋体");
         setCellText(row.getCell(2), "");
         setCellText(row.getCell(3), "");
-        setCellText(row.getCell(4), formatAmount(totalAmount));
+        setCellText(row.getCell(4), formatAmount(totalAmount), true, 11, "宋体");
         setCellText(row.getCell(5), "");
-        for (int i = 0; i < HEADERS.length; i++) {
-            XWPFParagraph p = row.getCell(i).getParagraphs().get(0);
-            p.setAlignment(i == 1 || i == 4 ? ParagraphAlignment.CENTER : ParagraphAlignment.LEFT);
-            for (XWPFRun r : p.getRuns()) {
-                r.setBold(true);
-                r.setFontSize(11);
-            }
-        }
     }
 
     private static void addEmptyRow(XWPFTable table) {
@@ -279,13 +286,48 @@ public class RevenueRecordExportUtil {
     }
 
     private static void setCellText(XWPFTableCell cell, String text) {
-        cell.removeParagraph(0);
-        XWPFParagraph p = cell.addParagraph();
+        setCellText(cell, text, false, 10, "宋体");
+    }
+
+    private static void setCellText(XWPFTableCell cell, String text, boolean bold, int fontSize, String fontFamily) {
+        XWPFParagraph p;
+        if (cell.getParagraphs().isEmpty()) {
+            p = cell.addParagraph();
+        } else {
+            p = cell.getParagraphs().get(0);
+            for (int i = p.getRuns().size() - 1; i >= 0; i--) {
+                p.removeRun(i);
+            }
+        }
         p.setAlignment(ParagraphAlignment.CENTER);
         XWPFRun run = p.createRun();
         run.setText(text == null ? "" : text);
-        run.setFontSize(10);
-        run.setFontFamily("宋体");
+        run.setFontSize(fontSize);
+        run.setFontFamily(fontFamily);
+        run.setBold(bold);
+
+        // 垂直居中
+        CTTcPr tcPr = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
+        CTVerticalJc vAlign = tcPr.isSetVAlign() ? tcPr.getVAlign() : tcPr.addNewVAlign();
+        vAlign.setVal(STVerticalJc.CENTER);
+    }
+
+    private static void setPageMargins(XWPFDocument doc) {
+        CTSectPr sectPr = doc.getDocument().getBody().isSetSectPr()
+                ? doc.getDocument().getBody().getSectPr()
+                : doc.getDocument().getBody().addNewSectPr();
+        CTPageMar pageMar = sectPr.isSetPgMar() ? sectPr.getPgMar() : sectPr.addNewPgMar();
+        // 上下 2.5cm，左右 2cm（1cm ≈ 567 twips）
+        pageMar.setTop(BigInteger.valueOf(1417));
+        pageMar.setBottom(BigInteger.valueOf(1417));
+        pageMar.setLeft(BigInteger.valueOf(1134));
+        pageMar.setRight(BigInteger.valueOf(1134));
+    }
+
+    private static String buildTitle(LocalDate startDate, LocalDate endDate, String projectName) {
+        String start = startDate == null ? "" : startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        String end = endDate == null ? "" : endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        return start + "~" + end + " - " + (projectName == null ? "" : projectName) + " - 绿化用工";
     }
 
     // ==================== Excel 辅助方法 ====================
