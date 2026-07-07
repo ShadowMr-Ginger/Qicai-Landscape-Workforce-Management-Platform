@@ -100,6 +100,7 @@ interface RevenueRecord {
 interface ServiceNameItem {
   id: number;
   serviceName: string;
+  basePrice?: number;
   isSystem: number;
 }
 
@@ -1388,7 +1389,13 @@ export default function ProjectsPage() {
                 value={serviceNames.some((s) => s.serviceName === serviceItemForm.serviceName) ? serviceItemForm.serviceName : ""}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val) handleServiceItemFieldChange("serviceName", val);
+                  if (val) {
+                    handleServiceItemFieldChange("serviceName", val);
+                    const selected = serviceNames.find((s) => s.serviceName === val);
+                    if (selected?.basePrice !== undefined) {
+                      handleServiceItemFieldChange("unitPrice", selected.basePrice);
+                    }
+                  }
                 }}
               >
                 <option value="">选择常用服务</option>

@@ -8,6 +8,7 @@ import com.green.module.project.vo.RevenueRecordVO;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,7 +31,9 @@ public interface ProjectRevenueService {
 
     List<CommonServiceNameEntity> listCommonServiceNames();
 
-    Long createCommonServiceName(String serviceName);
+    Long createCommonServiceName(String serviceName, BigDecimal basePrice);
+
+    void updateCommonServiceName(Long id, String serviceName, BigDecimal basePrice);
 
     void deleteCommonServiceName(Long id);
 }

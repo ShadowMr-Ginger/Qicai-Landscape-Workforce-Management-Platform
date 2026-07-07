@@ -213,15 +213,40 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createCommonServiceName(String serviceName) {
+    public Long createCommonServiceName(String serviceName, BigDecimal basePrice) {
         if (serviceName == null || serviceName.trim().isEmpty()) {
             throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "服务名称不能为空");
         }
+        if (basePrice != null && basePrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "基础价格不能为负数");
+        }
         CommonServiceNameEntity entity = new CommonServiceNameEntity();
         entity.setServiceName(serviceName.trim());
+        entity.setBasePrice(basePrice);
         entity.setIsSystem(0);
         commonServiceNameMapper.insert(entity);
         return entity.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateCommonServiceName(Long id, String serviceName, BigDecimal basePrice) {
+        CommonServiceNameEntity entity = commonServiceNameMapper.selectById(id);
+        if (entity == null || entity.getDeleted() == 1) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "服务名称不存在");
+        }
+        if (entity.getIsSystem() != null && entity.getIsSystem() == 1) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "系统预设服务名称不可修改");
+        }
+        if (serviceName == null || serviceName.trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "服务名称不能为空");
+        }
+        if (basePrice != null && basePrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "基础价格不能为负数");
+        }
+        entity.setServiceName(serviceName.trim());
+        entity.setBasePrice(basePrice);
+        commonServiceNameMapper.updateById(entity);
     }
 
     @Override

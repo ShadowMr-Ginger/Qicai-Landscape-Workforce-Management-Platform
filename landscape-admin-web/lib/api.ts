@@ -506,8 +506,13 @@ export async function getCommonServiceNames() {
   return res.data;
 }
 
-export async function createCommonServiceName(serviceName: string) {
-  const res = await api.post('/admin/projects/common-service-names', null, { params: { serviceName } });
+export async function createCommonServiceName(serviceName: string, basePrice?: number) {
+  const res = await api.post('/admin/projects/common-service-names', null, { params: { serviceName, basePrice } });
+  return res.data;
+}
+
+export async function updateCommonServiceName(id: number, serviceName: string, basePrice?: number) {
+  const res = await api.put(`/admin/projects/common-service-names/${id}`, null, { params: { serviceName, basePrice } });
   return res.data;
 }
 

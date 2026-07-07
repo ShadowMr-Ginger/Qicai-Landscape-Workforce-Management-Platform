@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -76,8 +77,19 @@ public class ProjectRevenueController {
     }
 
     @PostMapping("/common-service-names")
-    public ApiResult<Long> createCommonServiceName(@RequestParam String serviceName) {
-        return ApiResult.success(projectRevenueService.createCommonServiceName(serviceName));
+    public ApiResult<Long> createCommonServiceName(
+            @RequestParam String serviceName,
+            @RequestParam(required = false) BigDecimal basePrice) {
+        return ApiResult.success(projectRevenueService.createCommonServiceName(serviceName, basePrice));
+    }
+
+    @PutMapping("/common-service-names/{id}")
+    public ApiResult<Void> updateCommonServiceName(
+            @PathVariable Long id,
+            @RequestParam String serviceName,
+            @RequestParam(required = false) BigDecimal basePrice) {
+        projectRevenueService.updateCommonServiceName(id, serviceName, basePrice);
+        return ApiResult.success("修改成功");
     }
 
     @DeleteMapping("/common-service-names/{id}")

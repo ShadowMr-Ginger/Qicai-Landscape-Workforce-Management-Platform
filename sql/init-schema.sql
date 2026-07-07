@@ -126,6 +126,7 @@ CREATE TABLE `project_revenue_record_items` (
 CREATE TABLE `common_service_names` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `service_name` VARCHAR(100) NOT NULL COMMENT '服务名称',
+    `base_price` DECIMAL(10,2) DEFAULT NULL COMMENT '基础价格(元)',
     `is_system` TINYINT NOT NULL DEFAULT 0 COMMENT '是否系统预设: 0-否, 1-是',
     `create_by` BIGINT DEFAULT NULL COMMENT '创建人ID',
     `update_by` BIGINT DEFAULT NULL COMMENT '更新人ID',
