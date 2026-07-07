@@ -29,6 +29,7 @@ import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -173,7 +174,10 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         List<RevenueRecordVO> records = entities.stream().map(this::convertToVO).collect(Collectors.toList());
 
         boolean isExcel = "excel".equalsIgnoreCase(format);
-        String filename = URLEncoder.encode("营业记录_" + startDate + "_" + endDate + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
+        String title = startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "~"
+                + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " - "
+                + projectName + " - 绿化用工";
+        String filename = URLEncoder.encode(title + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
                 .replaceAll("\\+", "%20");
         response.setContentType(isExcel
                 ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

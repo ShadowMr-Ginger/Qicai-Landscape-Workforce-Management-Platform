@@ -5,13 +5,12 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDecimalNumber;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVerticalJc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 
@@ -36,8 +35,10 @@ public class RevenueRecordExportUtil {
     private static final int WORD_ROWS_PER_PAGE = 18;
     // 行高：1cm = 567 twips
     private static final int ROW_HEIGHT_TWIPS = 567;
-    // 列宽（DXA）
-    private static final int[] WORD_COL_WIDTHS = {1800, 3600, 1200, 1400, 1400, 2200};
+    // A4 宽度 11906 dxa，左右边距各 2cm（1134 dxa），可用宽度约 9638 dxa
+    private static final int WORD_TABLE_WIDTH = 9638;
+    // 列宽（DXA），按比例缩放以适应页面
+    private static final int[] WORD_COL_WIDTHS = {1495, 2990, 997, 1163, 1163, 1830};
 
     /**
      * 导出 Word
@@ -202,21 +203,16 @@ public class RevenueRecordExportUtil {
         // 标题行：合并所有单元格
         XWPFTableRow titleRow = table.getRow(0);
         setRowHeight(titleRow);
-        XWPFTableCell titleCell = titleRow.getCell(0);
-        if (HEADERS.length > 1) {
-            // 第一个单元格 gridSpan 覆盖所有列
-            CTTcPr titleTcPr = titleCell.getCTTc().isSetTcPr() ? titleCell.getCTTc().getTcPr() : titleCell.getCTTc().addNewTcPr();
-            CTDecimalNumber gridSpan = titleTcPr.isSetGridSpan() ? titleTcPr.getGridSpan() : titleTcPr.addNewGridSpan();
-            gridSpan.setVal(BigInteger.valueOf(HEADERS.length));
-            // 其余单元格标记为合并延续
-            for (int i = 1; i < HEADERS.length; i++) {
-                XWPFTableCell cell = titleRow.getCell(i);
-                CTTcPr cp = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
-                CTHMerge hm = cp.isSetHMerge() ? cp.getHMerge() : cp.addNewHMerge();
-                hm.setVal(STMerge.CONTINUE);
-            }
+        // 物理移除多余单元格，只保留第一个，再设置 gridSpan
+        CTRow titleCtr = titleRow.getCtRow();
+        while (titleCtr.sizeOfTcArray() > 1) {
+            titleCtr.removeTc(titleCtr.sizeOfTcArray() - 1);
         }
-        setCellWidth(titleCell, 11600);
+        XWPFTableCell titleCell = titleRow.getCell(0);
+        CTTcPr titleTcPr = titleCell.getCTTc().isSetTcPr() ? titleCell.getCTTc().getTcPr() : titleCell.getCTTc().addNewTcPr();
+        CTDecimalNumber gridSpan = titleTcPr.isSetGridSpan() ? titleTcPr.getGridSpan() : titleTcPr.addNewGridSpan();
+        gridSpan.setVal(BigInteger.valueOf(HEADERS.length));
+        setCellWidth(titleCell, WORD_TABLE_WIDTH);
         setCellText(titleCell, title, true, 14, "黑体");
 
         // 表头行：黑体、字号稍大、加粗
@@ -271,7 +267,7 @@ public class RevenueRecordExportUtil {
                 ? table.getCTTbl().getTblPr().getTblW()
                 : table.getCTTbl().addNewTblPr().addNewTblW();
         tblWidth.setType(STTblWidth.DXA);
-        tblWidth.setW(BigInteger.valueOf(11600)); // A4 可用宽度约 11600 dxa
+        tblWidth.setW(BigInteger.valueOf(WORD_TABLE_WIDTH));
     }
 
     private static void setCellWidth(XWPFTableCell cell, int widthDxa) {
