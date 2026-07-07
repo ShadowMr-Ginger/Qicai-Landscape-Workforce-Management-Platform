@@ -8,6 +8,7 @@ import {
   Users,
   UserCircle,
   ClipboardCheck,
+  BookText,
   Wallet,
   Building2,
   Settings,
@@ -61,10 +62,10 @@ const navItems: NavItem[] = [
     children: [
       { title: "考勤审核", href: "/batches" },
       { title: "考勤记录", href: "/attendance-records" },
-      { title: "记录台账", href: "/ledgers" },
       { title: "作业类型", href: "/work-types" },
     ],
   },
+  { title: "记录台账", href: "/ledgers", icon: BookText },
   { title: "工资结算", href: "/wages", icon: Wallet },
   {
     title: "项目管理",
