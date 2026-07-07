@@ -1,5 +1,7 @@
 package com.green.module.project.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -16,6 +18,7 @@ public class ProjectRevenueRecordItemEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /** 主键ID */
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /** 所属营业记录ID */

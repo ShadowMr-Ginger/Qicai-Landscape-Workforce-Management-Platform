@@ -1,6 +1,7 @@
 package com.green.module.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.green.common.exception.BusinessException;
 import com.green.common.result.ResultCodeEnum;
 import com.green.module.project.dto.CreateRevenueRecordDTO;
@@ -135,10 +136,12 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             totalAmount = totalAmount.add(totalPrice);
         }
 
-        record.setRecordDate(dto.getRecordDate());
-        record.setTotalAmount(totalAmount);
-        record.setRemark(dto.getRemark());
-        recordMapper.updateById(record);
+        // 使用 UpdateWrapper 更新，避免 version 乐观锁冲突
+        recordMapper.update(null, new UpdateWrapper<ProjectRevenueRecordEntity>()
+                .eq("id", recordId)
+                .set("record_date", dto.getRecordDate())
+                .set("total_amount", totalAmount)
+                .set("remark", dto.getRemark()));
 
         // 删除旧明细，重新插入
         itemMapper.delete(
