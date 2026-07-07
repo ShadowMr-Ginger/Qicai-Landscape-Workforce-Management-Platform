@@ -5,9 +5,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDecimalNumber;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVerticalJc;
@@ -203,17 +204,24 @@ public class RevenueRecordExportUtil {
         // 标题行：合并所有单元格
         XWPFTableRow titleRow = table.getRow(0);
         setRowHeight(titleRow);
-        // 物理移除多余单元格，只保留第一个，再设置 gridSpan
-        CTRow titleCtr = titleRow.getCtRow();
-        while (titleCtr.sizeOfTcArray() > 1) {
-            titleCtr.removeTc(titleCtr.sizeOfTcArray() - 1);
+        for (int i = 0; i < HEADERS.length; i++) {
+            XWPFTableCell cell = titleRow.getCell(i);
+            CTTcPr tcPr = cell.getCTTc().isSetTcPr() ? cell.getCTTc().getTcPr() : cell.getCTTc().addNewTcPr();
+            if (i == 0) {
+                // 第一个单元格：设置 gridSpan 覆盖所有列，并标记合并起点
+                CTDecimalNumber gridSpan = tcPr.isSetGridSpan() ? tcPr.getGridSpan() : tcPr.addNewGridSpan();
+                gridSpan.setVal(BigInteger.valueOf(HEADERS.length));
+                CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
+                hMerge.setVal(STMerge.RESTART);
+                setCellWidth(cell, WORD_TABLE_WIDTH);
+                setCellText(cell, title, true, 14, "黑体");
+            } else {
+                // 其余单元格：标记为合并延续，清空段落避免显示空边框
+                CTHMerge hMerge = tcPr.isSetHMerge() ? tcPr.getHMerge() : tcPr.addNewHMerge();
+                hMerge.setVal(STMerge.CONTINUE);
+                cell.removeParagraph(0);
+            }
         }
-        XWPFTableCell titleCell = titleRow.getCell(0);
-        CTTcPr titleTcPr = titleCell.getCTTc().isSetTcPr() ? titleCell.getCTTc().getTcPr() : titleCell.getCTTc().addNewTcPr();
-        CTDecimalNumber gridSpan = titleTcPr.isSetGridSpan() ? titleTcPr.getGridSpan() : titleTcPr.addNewGridSpan();
-        gridSpan.setVal(BigInteger.valueOf(HEADERS.length));
-        setCellWidth(titleCell, WORD_TABLE_WIDTH);
-        setCellText(titleCell, title, true, 14, "黑体");
 
         // 表头行：黑体、字号稍大、加粗
         XWPFTableRow headerRow = table.getRow(1);

@@ -177,12 +177,16 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         String title = startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "~"
                 + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " - "
                 + projectName + " - 绿化用工";
-        String filename = URLEncoder.encode(title + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+        String encodedName = URLEncoder.encode(title + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20")
+                .replace("%7E", "~")
+                .replace("%2D", "-")
+                .replace("%5F", "_")
+                .replace("%2E", ".");
         response.setContentType(isExcel
                 ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 : "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedName + "\"; filename*=UTF-8''" + encodedName);
 
         try (OutputStream out = response.getOutputStream()) {
             if (isExcel) {
