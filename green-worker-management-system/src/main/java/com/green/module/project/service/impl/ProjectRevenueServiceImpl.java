@@ -121,7 +121,8 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             BigDecimal totalPrice = qty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
 
             ProjectRevenueRecordItemEntity entity = new ProjectRevenueRecordItemEntity();
-            entity.setId(item.getId());
+            // 修改时重新插入明细，不保留原 id，避免主键冲突或历史数据干扰
+            entity.setId(null);
             entity.setRecordId(recordId);
             entity.setServiceName(item.getServiceName());
             entity.setWorkerType(item.getWorkerType());
