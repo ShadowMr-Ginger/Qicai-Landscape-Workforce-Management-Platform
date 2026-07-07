@@ -1,6 +1,6 @@
-# 交接文档：绿化工人管理系统 — 后续待完成任务
+# 交接文档：绿化工人管理系统
 
-> 生成时间：2026-06-08
+> 生成时间：2026-07-08  
 > 本文件用于新对话快速接手项目，不需要回顾全部历史。
 
 ---
@@ -10,157 +10,84 @@
 | 项目 | 路径 | 技术栈 |
 |---|---|---|
 | 管理后台 Web | `landscape-admin-web/` | Next.js 16 + TypeScript + Tailwind CSS v4 + shadcn/ui |
-| 后端服务 | `green-worker-management-system/` | Spring Boot 3.2.5 + MyBatis-Plus 3.5.6 + MySQL 8 |
+| 后端服务 | `green-worker-management-system/` | Spring Boot 3.2.5 + MyBatis-Plus + Java 17 + MySQL 8 |
 | 司机/管理员小程序 | `green-driver-weapp/miniprogram/` | 微信原生 + TypeScript |
 
-运行端口：
-- 后端：8080
-- Web 管理后台：3000
+运行端口（远程服务器）：
+- 后端：8081
+- Web 管理后台：3001
+
+远程服务器：
+- IP：`47.109.68.155`
+- SSH 指令：
+  ```bash
+  ssh -i /c/Users/Ginger-Hsu/Desktop/GingerHsu.pem root@47.109.68.155
+  ```
+- 项目部署目录：`/home/deploy/qicai`
 
 ---
 
-## 二、当前已完成（无需重复做）
+## 二、部署/推送说明（重要）
 
-### 1. 司机考勤记录（批次审核）
-- Web 端 `batches/page.tsx` 详情弹窗已增加黄色背景的司机考勤卡片
-- 小程序管理员端 `batch-review-detail` 已增加司机考勤区块
-- 后端 `AttendanceServiceImpl` 已增加 `buildDefaultDriverRecord`、`createDriverRecordForBatch`、`calculateDriverOvertimeWage` 等辅助方法
-- 后端 `DriverAttendanceRecordVO` 已增加 `baseDailySalary`、`overtimeHourlyRate`
-- 数据库迁移已应用：`worker_attendance_records.batch_id` 可空、新增 `driver_id` 列
+1. **所有代码修改都在本地仓库完成**，提交并推送到 GitHub 后，由 **GitHub Actions CI/CD** 自动更新远程服务器上的软件。
+2. 本地网络直连 GitHub 经常超时，当前可用的推送方式是 **经服务器做 SOCKS 隧道**：
+   ```bash
+   # 1. 建立隧道（后台运行）
+   ssh -i /c/Users/Ginger-Hsu/Desktop/GingerHsu.pem -N -D 127.0.0.1:1080 root@47.109.68.155
 
-### 2. 小程序管理员端工人考勤编辑
-- `green-driver-weapp/miniprogram/pages/admin/batch-review-detail/index.ts`
-- 已支持点击工人卡片打开底部编辑面板
-- 已支持修改：出勤类型（全天/半天）、加班时长、日薪、备注
-- 工资会根据出勤类型和加班时长自动重算
+   # 2. 配置 git 走 socks5h 代理（注意是 socks5h，让服务器远程解析 DNS）
+   git config http.proxy socks5h://127.0.0.1:1080
+   git config https.proxy socks5h://127.0.0.1:1080
 
-### 3. 深色模式 + 系统设置页面
-- 已新增 `theme-store.ts` + `ThemeProvider`
-- Header 右上角可切换浅色/深色/跟随系统
-- 全站主要颜色已替换为语义化 CSS 变量，支持 `.dark`
-- 系统设置页面 (`/settings`) 已完成：外观切换、账号信息、修改密码 UI、系统信息、退出登录
+   # 3. 推送
+   git push origin main
 
----
-
-## 三、明确下一步要修改的任务
-
-### 任务 A：小程序管理员端 — 编辑工人考勤时，增加「工地项目」和「作业类型」选择
-
-**背景**：
-- 小程序端 `batch-review-detail` 当前编辑工人时，只有出勤类型、加班时长、日薪、备注。
-- 管理后台 Web 端可以修改工人的 `projectId`（工地项目）和 `workTypeId`（作业类型）。
-- 小程序端也需要支持这两项修改。
-
-**涉及文件**：
-- `green-driver-weapp/miniprogram/pages/admin/batch-review-detail/index.ts`
-- `green-driver-weapp/miniprogram/pages/admin/batch-review-detail/index.wxml`
-- `green-driver-weapp/miniprogram/pages/admin/batch-review-detail/index.scss`
-
-**关键信息**：
-1. 批次详情接口 `/admin/attendance/batches/{id}` 返回的 `workerRecords` 中，每个工人已有：
-   - `projectId` / `projectName`
-   - `workTypeId` / `workTypeName`
-2. 需要额外调用接口获取可选列表：
-   - 项目列表：`getAllProjects()`（在 `miniprogram/utils/api.ts` 中可能未导出，需要确认）
-   - 作业类型列表：`getWorkTypeList()`（同样在 api.ts 中确认）
-3. `ReviewBatchDTO.WorkerRecordUpdateItem` 后端接收字段包含 `projectId` 和 `workTypeId`，payload 中直接传入即可。
-4. 当前 `onApprove` 的 payload 已经包含了 `projectId` 和 `workTypeId`，所以只需要在前端编辑面板中增加这两个字段的选择即可。
-
-**建议实现方式**：
-- 在 `loadDetail` 中同时拉取项目列表和作业类型列表，存入 data
-- 编辑面板增加两个 picker：
-  - 工地项目 picker：`range="{{projectOptions}}" range-key="projectName"`，选中后设置 `editingWorker.projectId`
-  - 作业类型 picker：`range="{{workTypeOptions}}" range-key="typeName"`，选中后设置 `editingWorker.workTypeId`
-- 注意：picker 的 `value` 是数组下标（Number），需要转成对应的 `id`
+   # 4. 清理代理配置
+   git config --unset http.proxy
+   git config --unset https.proxy
+   ```
+3. 远程服务器仓库 `/home/deploy/qicai` 目前存在本地未提交的部署产物；本次为推送临时 stash 了一份，如需要可登录服务器后手动处理。
 
 ---
 
-### 任务 B：Web 管理端 + 小程序端 — 司机考勤卡片增加「日薪」编辑字段
+## 三、当前已完成（无需重复做）
 
-**背景**：
-- 当前两端司机考勤审核时，都只能修改「加班时长」和「备注」。
-- 用户要求：日薪也应该可修改。初始提交考勤时，司机日薪 = 司机基础薪资 (`baseDailySalary`)，但在审核批次内应该允许调整。
+### 1. 项目内常用服务
+- 新增表 `project_common_services`，按项目隔离常用服务。
+- 后端：`ProjectCommonServiceEntity`、`Mapper`、`Service`、`Controller` 已完成；保存营业记录时会自动把新服务名称写入项目常用服务。
+- 前端：项目详情弹窗内左侧显示项目常用服务面板；新增/编辑使用右侧 Sheet；可基于全局常用服务作为模板。
+- 营业记录服务项下拉使用项目自身常用服务，单价/类型自动填充。
 
-**涉及文件**：
-- Web 端：`landscape-admin-web/app/(dashboard)/batches/page.tsx`
-- 小程序端：`green-driver-weapp/miniprogram/pages/admin/batch-review-detail/index.ts` + `index.wxml` + `index.scss`
-- 后端：`green-worker-management-system/src/main/java/com/green/module/attendance/service/impl/AttendanceServiceImpl.java`
+### 2. 营业记录导出
+- 后端支持 Word / Excel 导出（POI），包含标题、分页小计、合计、行高、边距等。
+- 前端导出对话框，文件名在客户端生成：`yyyy.mm.dd~yyyy.mm.dd - 项目名称 - 绿化用工`。
 
-**关键信息**：
+### 3. 全局常用服务基础单价
+- 表 `common_service_names` 增加 `base_price`。
+- 管理页面支持新增/编辑基础单价。
 
-1. **Web 端当前代码位置**：
-   - 搜索 `detailDriverRecord` 可定位司机卡片 JSX
-   - 当前司机卡片有：出勤（只读）、加班时长（可编辑）、日薪（只读）、加班工资（只读）、备注（可编辑）
-   - 需要把「日薪」改为可编辑 Input
-   - `recalcDriverWages(record)` 当前基于 `baseDailySalary` 和 `overtimeHourlyRate` 重算
-   - 当日薪被用户手动修改后，应使用用户输入的日薪 + `overtimeHourlyRate * overtimeHours` 重新计算 `totalWage`
-   - 类似工人卡片的日薪编辑逻辑已经存在，可以直接参考
+### 4. 工人类型支持"未选择/空"
+- 数据库 `worker_type` 改为可空；前端下拉增加空白选项，保存为 `null`。
 
-2. **小程序端当前代码位置**：
-   - `index.ts` 中 `onDriverOvertimeChange` 已经会重算司机工资
-   - 需要新增 `onDriverDailyWageChange(e)` 方法
-   - 需要修改 `driver-item` 区块，把日薪从只读文本改为 `input type="digit"`
-   - 重算逻辑：
-     ```ts
-     const dailyWage = parseFloat(e.detail.value) || 0
-     const overtimeWage = editingDriverRecord.overtimeWage || 0
-     const totalWage = Math.round((dailyWage + overtimeWage) * 100) / 100
-     ```
-
-3. **后端逻辑检查**：
-   - `ReviewBatchDTO.DriverRecordUpdateItem` 当前字段：
-     ```java
-     @NotNull private Long recordId;
-     private BigDecimal overtimeHours;
-     private String remark;
-     ```
-   - **注意：这里缺少 `dailyWage` 字段！**
-   - 需要扩展 DTO，增加 `dailyWage` 字段
-   - `AttendanceServiceImpl.reviewBatch()` 中，更新司机记录的逻辑：
-     ```java
-     if (driverItem.getOvertimeHours() != null) {
-         driverRec.setOvertimeHours(driverItem.getOvertimeHours());
-     }
-     if (driverItem.getRemark() != null) {
-         driverRec.setRemark(driverItem.getRemark());
-     }
-     // 此处需要增加 dailyWage 处理
-     if (driverItem.getDailyWage() != null) {
-         driverRec.setDailyWage(driverItem.getDailyWage());
-     }
-     // 然后基于新的 dailyWage + 重算后的 overtimeWage 更新 totalWage
-     ```
-   - 当前后端在 `reviewBatch` 里会重新根据 `driver.getBaseDailySalary()` 覆盖 `dailyWage`，这个逻辑需要调整：如果前端传了 `dailyWage`，优先使用前端值；否则才回退到基础薪资。
-
-4. **Web 端 payload**：
-   - `handleReview` 中的 `driverRecord` payload 当前只传：
-     ```ts
-     payload.driverRecord = {
-       recordId: detailDriverRecord.id,
-       overtimeHours: detailDriverRecord.overtimeHours,
-       remark: detailDriverRecord.remark,
-     }
-   - 需要增加 `dailyWage: detailDriverRecord.dailyWage`
-
-5. **小程序端 payload**：
-   - `onApprove` 中的 `driverRecord` payload 当前只传 `recordId`、`overtimeHours`、`remark`
-   - 需要增加 `dailyWage`
+### 5. 营业记录更新/删除稳定性
+- 前端路径修正为 `/admin/projects/revenue-records/{id}`。
+- 更新时子表先删后插，避免主键冲突；主表使用 `UpdateWrapper` 避免乐观锁失败。
 
 ---
 
-## 四、修改清单（Checklist）
+## 四、下一步任务：记录台账
 
-- [ ] 后端 DTO：`ReviewBatchDTO.DriverRecordUpdateItem` 增加 `dailyWage` 字段
-- [ ] 后端 Service：`AttendanceServiceImpl.reviewBatch()` 处理司机 `dailyWage`，优先使用前端传入值
-- [ ] Web 管理端：`batches/page.tsx` 司机卡片中日薪改为可编辑
-- [ ] Web 管理端：`batches/page.tsx` `handleReview` payload 增加 `dailyWage`
-- [ ] 小程序端：`batch-review-detail/index.ts` 新增 `onDriverDailyWageChange`
-- [ ] 小程序端：`batch-review-detail/index.wxml` 司机区块增加日薪输入
-- [ ] 小程序端：`batch-review-detail/index.ts` `onApprove` payload 增加 `dailyWage`
-- [ ] 小程序端：`batch-review-detail/index.ts` 拉取项目/作业类型列表
-- [ ] 小程序端：`batch-review-detail/index.wxml` 编辑面板增加项目和作业类型 picker
-- [ ] 验证 `mvn compile`、`npx tsc`、`npm run build` 均通过
-- [ ] 验证后端重启后功能正常
+**目标**：新增一个「记录台账」大功能模块。
+
+**当前状态**：需求尚未细化，需要与用户确认以下关键点后再开始实现：
+1. 台账记录的具体业务对象是什么？（例如：项目收支台账、工人工资台账、设备/材料台账、还是综合经营台账？）
+2. 需要哪些字段？（日期、项目、类型、金额、经手人、凭证、备注等）
+3. 与现有模块（项目、营业记录、考勤、工资）的数据关联方式。
+4. 需要的查询/筛选/导出能力。
+5. 前端入口位置（独立菜单 `/ledger` 还是放在现有项目详情内？）。
+6. 权限要求。
+
+**建议先确认需求后再进行表设计、后端 API 和前端页面开发。**
 
 ---
 
@@ -168,28 +95,32 @@
 
 ```bash
 # 后端编译
-cd green-worker-management-system && mvn compile -q
+cd green-worker-management-system && mvn compile -DskipTests -q
 
 # 后端重启（项目根目录）
 bash restart-backend.sh
 
-# Web 编译
+# Web 编译/构建
 cd landscape-admin-web && npm run build
 
 # 小程序 TS 编译
 cd green-driver-weapp/miniprogram && npx tsc
 
-# 小程序 SCSS 编译（单文件）
-cd green-driver-weapp/miniprogram
-npx sass --style=expanded --no-source-map pages/admin/batch-review-detail/index.scss pages/admin/batch-review-detail/index.wxss
+# 推送（经服务器 SOCKS 隧道）
+ssh -i /c/Users/Ginger-Hsu/Desktop/GingerHsu.pem -N -D 127.0.0.1:1080 root@47.109.68.155 &
+git config http.proxy socks5h://127.0.0.1:1080
+git config https.proxy socks5h://127.0.0.1:1080
+git push origin main
+git config --unset http.proxy
+git config --unset https.proxy
 ```
 
 ---
 
 ## 六、注意事项
 
-1. **数据库**：`worker_attendance_records` 的 `driver_id` 列和 `batch_id` 可空已经通过 `sql/migrate-driver-record.sql` 应用，不需要重复执行。
-2. **主题/深色模式**：全站颜色已替换为语义化变量，新增页面/组件请继续使用 `bg-card`、`text-foreground`、`border-border` 等，避免写死 `bg-gray-*`。
-3. **批次备注策略**：批次级备注只进入司机考勤记录，工人记录保留各自的 per-worker remark。
-4. **司机考勤设计**：司机始终 `attendanceType = 2`（全天），没有 `projectId` 和 `workTypeId`。
-5. **微信小程序 picker 注意**：`range` 绑定对象数组时需要用 `range-key` 指定显示字段，`value` 返回的是数组下标字符串，需要手动转成对应 id。
+1. **数据库迁移**：新表/字段统一放在 `sql/` 目录，部署时由 CI/CD 自动执行；手写迁移请遵循既有命名规范。
+2. **Git 推送**：优先尝试直连 `git push origin main`，超时后立即切到服务器 SOCKS 隧道（`socks5h://`）。
+3. **前端组件**：新增页面继续使用 Tailwind 语义化类名和 shadcn/ui 组件；注意 `.ts` 文件在小程序端不会被自动编译。
+4. **后端规范**：逻辑删除字段统一为 `deleted`；版本控制字段为 `version`；实体继承 `BaseEntity`。
+5. **远程服务器**：如需手动查看日志/重启服务，先 SSH 登录再操作；部署目录为 `/home/deploy/qicai`。
