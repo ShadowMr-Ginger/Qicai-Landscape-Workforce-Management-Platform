@@ -518,22 +518,9 @@ export default function ProjectsPage() {
           : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
 
-      // 从后端响应头提取文件名
-      const disposition = (res.headers["content-disposition"] as string | undefined) || "";
-      let fileName = "";
-      const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
-      if (utf8Match) {
-        fileName = decodeURIComponent(utf8Match[1]);
-      } else {
-        const asciiMatch = disposition.match(/filename="([^"]+)"/i);
-        if (asciiMatch) {
-          fileName = decodeURIComponent(asciiMatch[1]);
-        }
-      }
-      if (!fileName) {
-        const ext = exportForm.format === "excel" ? "xlsx" : "docx";
-        fileName = `营业记录_${selectedProject.projectName}_${exportForm.startDate}_${exportForm.endDate}.${ext}`;
-      }
+      // 前端按标题格式生成文件名，避免依赖后端响应头
+      const ext = exportForm.format === "excel" ? "xlsx" : "docx";
+      const fileName = `${exportForm.startDate.replace(/-/g, ".")}~${exportForm.endDate.replace(/-/g, ".")} - ${selectedProject.projectName} - 绿化用工.${ext}`;
 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
