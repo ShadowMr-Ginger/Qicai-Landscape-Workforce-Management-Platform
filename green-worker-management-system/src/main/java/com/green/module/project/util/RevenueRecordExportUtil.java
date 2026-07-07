@@ -177,7 +177,7 @@ public class RevenueRecordExportUtil {
 
             Cell totalAmountCell = totalRow.createCell(4);
             totalAmountCell.setCellValue(totalAmount.doubleValue());
-            totalAmountCell.setCellStyle(totalStyle);
+            totalAmountCell.setCellStyle(createExcelMoneyStyle(wb, totalStyle));
 
             wb.write(out);
         }
@@ -337,6 +337,8 @@ public class RevenueRecordExportUtil {
         style.setDataFormat(wb.createDataFormat().getFormat("0.00"));
         return style;
     }
+
+
 
     // ==================== 通用辅助方法 ====================
 
