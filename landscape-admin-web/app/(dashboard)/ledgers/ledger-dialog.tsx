@@ -689,7 +689,7 @@ export default function LedgerDialog({
                 className="rounded-lg"
                 placeholder="选填，如工作地点等"
               />
-              {remarkDropdownOpen && remarkFilter.trim() && (
+              {remarkDropdownOpen && (
                 <div
                   ref={remarkDropdownRef}
                   className="absolute z-50 left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
@@ -698,7 +698,7 @@ export default function LedgerDialog({
                     r.remarkName.toLowerCase().includes(remarkFilter.trim().toLowerCase())
                   ).length === 0 ? (
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      无匹配备注
+                      {remarkFilter.trim() ? "无匹配备注" : "暂无常用备注"}
                     </div>
                   ) : (
                     projectCommonRemarks
