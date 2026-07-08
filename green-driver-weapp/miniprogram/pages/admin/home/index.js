@@ -11,6 +11,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../../utils/api");
 const auth_1 = require("../../../utils/auth");
+function getTodayChina() {
+    const now = new Date();
+    const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    return chinaTime.toISOString().split('T')[0];
+}
 Page({
     data: {
         userInfo: null,
@@ -24,8 +29,7 @@ Page({
         loading: false,
     },
     onLoad() {
-        const now = new Date();
-        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const todayStr = getTodayChina();
         this.setData({ todayDate: todayStr });
         this.loadUserInfo();
         this.loadStats();
@@ -85,10 +89,12 @@ Page({
         wx.switchTab({ url: '/pages/admin/batch-review/index' });
     },
     goWorkerRecords() {
-        wx.navigateTo({ url: '/pages/admin/worker-records/index' });
+        const today = getTodayChina();
+        wx.navigateTo({ url: `/pages/admin/worker-records/index?dateFrom=${today}&dateTo=${today}` });
     },
     goDriverRecords() {
-        wx.navigateTo({ url: '/pages/admin/driver-records/index' });
+        const today = getTodayChina();
+        wx.navigateTo({ url: `/pages/admin/driver-records/index?dateFrom=${today}&dateTo=${today}` });
     },
     goAttendanceRecords() {
         wx.switchTab({ url: '/pages/admin/attendance-records/index' });

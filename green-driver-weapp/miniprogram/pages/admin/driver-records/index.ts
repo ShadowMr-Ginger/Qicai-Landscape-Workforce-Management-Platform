@@ -9,7 +9,10 @@ Page({
     dateTo: '',
   },
 
-  onLoad() {
+  onLoad(options: any) {
+    const dateFrom = options.dateFrom || ''
+    const dateTo = options.dateTo || ''
+    this.setData({ dateFrom, dateTo })
     this.loadRecords()
   },
 

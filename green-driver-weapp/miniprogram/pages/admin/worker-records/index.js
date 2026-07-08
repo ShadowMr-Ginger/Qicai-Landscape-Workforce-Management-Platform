@@ -18,7 +18,10 @@ Page({
         dateFrom: '',
         dateTo: '',
     },
-    onLoad() {
+    onLoad(options) {
+        const dateFrom = options.dateFrom || '';
+        const dateTo = options.dateTo || '';
+        this.setData({ dateFrom, dateTo });
         this.loadRecords();
     },
     onPullDownRefresh() {

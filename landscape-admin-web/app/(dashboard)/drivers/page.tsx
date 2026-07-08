@@ -123,13 +123,24 @@ export default function DriversPage() {
     overtimeHourlyRate: "",
   });
 
-  const fetchDrivers = async (page = pageNum) => {
+  const fetchDrivers = async (
+    page = pageNum,
+    overrides: Partial<{
+      keyword: string;
+      gender: string;
+      showResigned: boolean;
+    }> = {}
+  ) => {
+    const filterKeyword = overrides.keyword ?? keyword;
+    const filterGender = overrides.gender ?? gender;
+    const filterShowResigned = overrides.showResigned ?? showResigned;
+
     setLoading(true);
     try {
       const res = await getDriverList({
-        keyword,
-        gender: gender || undefined,
-        isActive: showResigned ? 0 : 1,
+        keyword: filterKeyword,
+        gender: filterGender || undefined,
+        isActive: filterShowResigned ? 0 : 1,
         pageNum: page,
         pageSize,
       });
@@ -142,9 +153,9 @@ export default function DriversPage() {
       } else {
         setDrivers(
           mockDrivers.filter((d) => {
-            if (showResigned ? d.isActive === 1 : d.isActive === 0) return false;
-            if (keyword && !d.realName.includes(keyword)) return false;
-            if (gender && d.genderText !== (gender === "1" ? "男" : "女")) return false;
+            if (filterShowResigned ? d.isActive === 1 : d.isActive === 0) return false;
+            if (filterKeyword && !d.realName.includes(filterKeyword)) return false;
+            if (filterGender && d.genderText !== (filterGender === "1" ? "男" : "女")) return false;
             return true;
           })
         );
@@ -152,9 +163,9 @@ export default function DriversPage() {
     } catch {
       setDrivers(
         mockDrivers.filter((d) => {
-          if (showResigned ? d.isActive === 1 : d.isActive === 0) return false;
-          if (keyword && !d.realName.includes(keyword)) return false;
-          if (gender && d.genderText !== (gender === "1" ? "男" : "女")) return false;
+          if (filterShowResigned ? d.isActive === 1 : d.isActive === 0) return false;
+          if (filterKeyword && !d.realName.includes(filterKeyword)) return false;
+          if (filterGender && d.genderText !== (filterGender === "1" ? "男" : "女")) return false;
           return true;
         })
       );
@@ -177,7 +188,10 @@ export default function DriversPage() {
     setKeyword("");
     setGender("");
     setPageNum(1);
-    fetchDrivers(1);
+    fetchDrivers(1, {
+      keyword: "",
+      gender: "",
+    });
   };
 
   const openEdit = async (driver: DriverItem) => {

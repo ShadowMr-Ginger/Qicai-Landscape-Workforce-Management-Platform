@@ -149,15 +149,30 @@ export default function WorkersPage() {
     };
   };
 
-  const fetchWorkers = async (page = pageNum) => {
+  const fetchWorkers = async (
+    page = pageNum,
+    overrides: Partial<{
+      keyword: string;
+      gender: string;
+      isSkilled: string;
+      groupId: string;
+      showResigned: boolean;
+    }> = {}
+  ) => {
+    const filterKeyword = overrides.keyword ?? keyword;
+    const filterGender = overrides.gender ?? gender;
+    const filterIsSkilled = overrides.isSkilled ?? isSkilled;
+    const filterGroupId = overrides.groupId ?? groupId;
+    const filterShowResigned = overrides.showResigned ?? showResigned;
+
     setLoading(true);
     try {
       const res = await getWorkerList({
-        keyword,
-        gender: gender || undefined,
-        isSkilledWorker: isSkilled || undefined,
-        groupId: groupId || undefined,
-        isEmployed: showResigned ? 0 : 1,
+        keyword: filterKeyword,
+        gender: filterGender || undefined,
+        isSkilledWorker: filterIsSkilled || undefined,
+        groupId: filterGroupId || undefined,
+        isEmployed: filterShowResigned ? 0 : 1,
         pageNum: page,
         pageSize,
       });
@@ -171,10 +186,10 @@ export default function WorkersPage() {
         // 后端返回异常状态码，fallback 模拟数据
         setWorkers(
           mockWorkers.filter((w) => {
-            if (showResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
-            if (keyword && !w.name.includes(keyword)) return false;
-            if (gender && w.genderText !== (gender === "1" ? "男" : "女")) return false;
-            if (isSkilled && w.isSkilledWorkerText !== (isSkilled === "1" ? "是" : "否")) return false;
+            if (filterShowResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
+            if (filterKeyword && !w.name.includes(filterKeyword)) return false;
+            if (filterGender && w.genderText !== (filterGender === "1" ? "男" : "女")) return false;
+            if (filterIsSkilled && w.isSkilledWorkerText !== (filterIsSkilled === "1" ? "是" : "否")) return false;
             return true;
           })
         );
@@ -183,10 +198,10 @@ export default function WorkersPage() {
       // 网络错误/后端宕机，fallback 模拟数据
       setWorkers(
         mockWorkers.filter((w) => {
-          if (showResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
-          if (keyword && !w.name.includes(keyword)) return false;
-          if (gender && w.genderText !== (gender === "1" ? "男" : "女")) return false;
-          if (isSkilled && w.isSkilledWorkerText !== (isSkilled === "1" ? "是" : "否")) return false;
+          if (filterShowResigned ? w.isEmployed === 1 : w.isEmployed === 0) return false;
+          if (filterKeyword && !w.name.includes(filterKeyword)) return false;
+          if (filterGender && w.genderText !== (filterGender === "1" ? "男" : "女")) return false;
+          if (filterIsSkilled && w.isSkilledWorkerText !== (filterIsSkilled === "1" ? "是" : "否")) return false;
           return true;
         })
       );
@@ -231,7 +246,12 @@ export default function WorkersPage() {
     setIsSkilled("");
     setGroupId("");
     setPageNum(1);
-    fetchWorkers(1);
+    fetchWorkers(1, {
+      keyword: "",
+      gender: "",
+      isSkilled: "",
+      groupId: "",
+    });
   };
 
   const openEdit = async (worker: WorkerItem) => {

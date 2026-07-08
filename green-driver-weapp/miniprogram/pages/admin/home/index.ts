@@ -2,6 +2,12 @@ import { getAdminDashboardStats, getCurrentUser } from '../../../utils/api'
 import { getUserInfo } from '../../../utils/auth'
 import { BATCH_STATUS_TEXT } from '../../../utils/constants'
 
+function getTodayChina(): string {
+  const now = new Date()
+  const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+  return chinaTime.toISOString().split('T')[0]
+}
+
 Page({
   data: {
     userInfo: null as any,
@@ -16,8 +22,7 @@ Page({
   },
 
   onLoad() {
-    const now = new Date()
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const todayStr = getTodayChina()
     this.setData({ todayDate: todayStr })
     this.loadUserInfo()
     this.loadStats()
@@ -76,11 +81,13 @@ Page({
   },
 
   goWorkerRecords() {
-    wx.navigateTo({ url: '/pages/admin/worker-records/index' })
+    const today = getTodayChina()
+    wx.navigateTo({ url: `/pages/admin/worker-records/index?dateFrom=${today}&dateTo=${today}` })
   },
 
   goDriverRecords() {
-    wx.navigateTo({ url: '/pages/admin/driver-records/index' })
+    const today = getTodayChina()
+    wx.navigateTo({ url: `/pages/admin/driver-records/index?dateFrom=${today}&dateTo=${today}` })
   },
 
   goAttendanceRecords() {

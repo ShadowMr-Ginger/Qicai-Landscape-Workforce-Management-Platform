@@ -105,16 +105,29 @@ export default function DriverRecordsPage() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
 
-  const fetchRecords = async (page = pageNum) => {
+  const fetchRecords = async (
+    page = pageNum,
+    overrides: Partial<{
+      driverName: string;
+      isSettled: string;
+      dateFrom: string;
+      dateTo: string;
+    }> = {}
+  ) => {
+    const filterDriverName = overrides.driverName ?? driverName;
+    const filterIsSettled = overrides.isSettled ?? isSettled;
+    const filterDateFrom = overrides.dateFrom ?? dateFrom;
+    const filterDateTo = overrides.dateTo ?? dateTo;
+
     setLoading(true);
     try {
       const res = await getDriverAttendanceRecords({
         pageNum: page,
         pageSize,
-        driverName: driverName || undefined,
-        isSettled: isSettled || undefined,
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
+        driverName: filterDriverName || undefined,
+        isSettled: filterIsSettled || undefined,
+        dateFrom: filterDateFrom || undefined,
+        dateTo: filterDateTo || undefined,
       });
       if (res.code === 200 && res.data?.records) {
         setRecords(res.data.records);
@@ -140,12 +153,19 @@ export default function DriverRecordsPage() {
   }, []);
 
   const handleReset = () => {
+    const resetDateFrom = getWeekAgo();
+    const resetDateTo = getToday();
     setDriverName("");
     setIsSettled("");
-    setDateFrom(getWeekAgo());
-    setDateTo(getToday());
+    setDateFrom(resetDateFrom);
+    setDateTo(resetDateTo);
     setPageNum(1);
-    fetchRecords(1);
+    fetchRecords(1, {
+      driverName: "",
+      isSettled: "",
+      dateFrom: resetDateFrom,
+      dateTo: resetDateTo,
+    });
   };
 
   const openDetail = async (id: number) => {

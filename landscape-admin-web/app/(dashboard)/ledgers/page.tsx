@@ -104,16 +104,27 @@ export default function LedgersPage() {
     }
   };
 
-  const fetchRecords = async (currentPage = page) => {
+  const fetchRecords = async (
+    currentPage = page,
+    overrides: Partial<{
+      projectId: string;
+      dateFrom: string;
+      dateTo: string;
+    }> = {}
+  ) => {
+    const filterProjectId = overrides.projectId ?? projectId;
+    const filterDateFrom = overrides.dateFrom ?? dateFrom;
+    const filterDateTo = overrides.dateTo ?? dateTo;
+
     try {
       setLoading(true);
       const params: any = {
         pageNum: currentPage,
         pageSize,
       };
-      if (projectId) params.projectId = Number(projectId);
-      if (dateFrom) params.startDate = dateFrom;
-      if (dateTo) params.endDate = dateTo;
+      if (filterProjectId) params.projectId = Number(filterProjectId);
+      if (filterDateFrom) params.startDate = filterDateFrom;
+      if (filterDateTo) params.endDate = filterDateTo;
       const res = await getLedgers(params);
       if (res.code === 200 && res.data) {
         setRecords(res.data.records || []);
@@ -134,11 +145,17 @@ export default function LedgersPage() {
   };
 
   const handleReset = () => {
+    const resetDateFrom = getMonthAgo();
+    const resetDateTo = getToday();
     setProjectId("");
-    setDateFrom(getMonthAgo());
-    setDateTo(getToday());
+    setDateFrom(resetDateFrom);
+    setDateTo(resetDateTo);
     setPage(1);
-    fetchRecords(1);
+    fetchRecords(1, {
+      projectId: "",
+      dateFrom: resetDateFrom,
+      dateTo: resetDateTo,
+    });
   };
 
   const handlePageChange = (newPage: number) => {
