@@ -45,6 +45,7 @@ interface LedgerItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  remark: string;
   sortOrder: number;
 }
 
@@ -87,6 +88,8 @@ export default function LedgersPage() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState<LedgerRecord | null>(null);
+
+  const [manageMode, setManageMode] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -189,19 +192,46 @@ export default function LedgersPage() {
     setDetailOpen(true);
   };
 
+  const formatLedgerContent = (items: LedgerItem[]): string => {
+    if (!items || items.length === 0) return "-";
+    const first = items[0];
+    const typeText = first.workerType === null
+      ? "未选择"
+      : first.workerType === 2
+      ? "女工"
+      : "男工";
+    let text = `${first.serviceName}·${typeText}${first.quantity}人`;
+    if (first.remark) {
+      text += `·${first.remark}`;
+    }
+    if (items.length > 1) {
+      text += `等${items.length}条记录`;
+    }
+    return text;
+  };
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">记录台账</h2>
-        <Button
-          className="rounded-lg bg-green-600 hover:bg-green-700"
-          onClick={openCreate}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          新增台账记录
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={manageMode ? "secondary" : "outline"}
+            className="rounded-lg"
+            onClick={() => setManageMode(!manageMode)}
+          >
+            {manageMode ? "退出管理" : "管理"}
+          </Button>
+          <Button
+            className="rounded-lg bg-green-600 hover:bg-green-700"
+            onClick={openCreate}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            新增台账记录
+          </Button>
+        </div>
       </div>
 
       {/* 筛选块 */}
@@ -271,6 +301,7 @@ export default function LedgersPage() {
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-36">日期</TableHead>
                 <TableHead>项目</TableHead>
+                <TableHead>内容</TableHead>
                 <TableHead className="w-28 text-center">用工记录数</TableHead>
                 <TableHead className="w-32 text-right">总金额</TableHead>
                 <TableHead className="w-40 text-center">操作</TableHead>
@@ -279,7 +310,7 @@ export default function LedgersPage() {
             <TableBody>
               {records.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     暂无台账记录
                   </TableCell>
                 </TableRow>
@@ -288,6 +319,9 @@ export default function LedgersPage() {
                   <TableRow key={record.id}>
                     <TableCell>{record.recordDate}</TableCell>
                     <TableCell>{record.projectName}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                      {formatLedgerContent(record.items)}
+                    </TableCell>
                     <TableCell className="text-center">{record.items?.length || 0}</TableCell>
                     <TableCell className="text-right font-medium">
                       ¥{record.totalAmount.toFixed(2)}
@@ -303,24 +337,28 @@ export default function LedgersPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          onClick={() => openEdit(record)}
-                          title="编辑"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDelete(record)}
-                          title="删除"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        {manageMode && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => openEdit(record)}
+                              title="编辑"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDelete(record)}
+                              title="删除"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -389,6 +427,11 @@ export default function LedgersPage() {
                     {item.workerType === null ? "" : `${item.workerTypeText} · `}
                     {item.quantity} × ¥{item.unitPrice.toFixed(2)}
                   </div>
+                  {item.remark && (
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      备注：{item.remark}
+                    </div>
+                  )}
                 </div>
                 <div className="text-sm font-bold">¥{item.totalPrice.toFixed(2)}</div>
               </div>

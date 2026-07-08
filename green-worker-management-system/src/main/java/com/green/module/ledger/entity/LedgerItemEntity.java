@@ -41,6 +41,9 @@ public class LedgerItemEntity implements Serializable {
     /** 总价(元) */
     private BigDecimal totalPrice;
 
+    /** 备注 */
+    private String remark;
+
     /** 显示顺序 */
     private Integer sortOrder;
 

@@ -14,7 +14,7 @@ import java.util.List;
 @Mapper
 public interface LedgerItemMapper extends BaseMapper<LedgerItemEntity> {
 
-    @Select("SELECT id, ledger_id, service_name, worker_type, quantity, unit_price, total_price, sort_order, create_time, update_time " +
+    @Select("SELECT id, ledger_id, service_name, worker_type, quantity, unit_price, total_price, remark, sort_order, create_time, update_time " +
             "FROM ledger_items WHERE ledger_id = #{ledgerId} AND deleted = 0 ORDER BY sort_order ASC, id ASC")
     List<LedgerItemEntity> selectByLedgerId(@Param("ledgerId") Long ledgerId);
 }

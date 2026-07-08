@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `ledger_items` (
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '数量',
     `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '单价(元)',
     `total_price` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总价(元)',
+    `remark` VARCHAR(255) DEFAULT NULL COMMENT '备注',
     `sort_order` INT NOT NULL DEFAULT 0 COMMENT '显示顺序',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -42,3 +43,23 @@ CREATE TABLE IF NOT EXISTS `ledger_items` (
     KEY `idx_ledger_id` (`ledger_id`),
     KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='台账用工记录明细表';
+
+-- 4. 兼容已有 ledger_items 表：补充 remark 字段
+SET @dbname = DATABASE();
+SET @tablename = 'ledger_items';
+SET @columnname = 'remark';
+SET @addRemarkSql = (
+    SELECT IF(
+        (
+            SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = @dbname
+              AND TABLE_NAME = @tablename
+              AND COLUMN_NAME = @columnname
+        ) > 0,
+        'SELECT 1;',
+        "ALTER TABLE `ledger_items` ADD COLUMN `remark` VARCHAR(255) DEFAULT NULL COMMENT '备注' AFTER `total_price`;"
+    )
+);
+PREPARE stmt FROM @addRemarkSql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

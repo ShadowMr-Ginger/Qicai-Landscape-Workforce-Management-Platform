@@ -120,6 +120,7 @@ public class LedgerServiceImpl implements LedgerService {
             entity.setQuantity(item.getQuantity());
             entity.setUnitPrice(item.getUnitPrice());
             entity.setTotalPrice(totalPrice);
+            entity.setRemark(item.getRemark());
             entity.setSortOrder(sortOrder++);
             itemEntities.add(entity);
             totalAmount = totalAmount.add(totalPrice);
@@ -163,6 +164,7 @@ public class LedgerServiceImpl implements LedgerService {
             entity.setQuantity(item.getQuantity());
             entity.setUnitPrice(item.getUnitPrice());
             entity.setTotalPrice(totalPrice);
+            entity.setRemark(item.getRemark());
             entity.setSortOrder(sortOrder++);
             itemEntities.add(entity);
             totalAmount = totalAmount.add(totalPrice);
@@ -258,6 +260,7 @@ public class LedgerServiceImpl implements LedgerService {
         vo.setQuantity(item.getQuantity());
         vo.setUnitPrice(item.getUnitPrice());
         vo.setTotalPrice(item.getTotalPrice());
+        vo.setRemark(item.getRemark());
         vo.setSortOrder(item.getSortOrder());
         return vo;
     }

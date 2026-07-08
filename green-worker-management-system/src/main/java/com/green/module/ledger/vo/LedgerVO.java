@@ -48,6 +48,8 @@ public class LedgerVO {
 
         private BigDecimal totalPrice;
 
+        private String remark;
+
         private Integer sortOrder;
     }
 }

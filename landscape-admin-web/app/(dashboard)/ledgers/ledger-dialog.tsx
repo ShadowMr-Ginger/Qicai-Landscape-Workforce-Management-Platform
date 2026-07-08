@@ -45,6 +45,7 @@ interface LedgerItemForm {
   workerType: number | null;
   unitPrice: number;
   quantity: number;
+  remark: string;
 }
 
 interface LedgerDialogProps {
@@ -94,6 +95,7 @@ export default function LedgerDialog({
     workerType: null,
     unitPrice: 0,
     quantity: 1,
+    remark: "",
   });
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -155,6 +157,7 @@ export default function LedgerDialog({
             workerType: it.workerType,
             unitPrice: it.unitPrice,
             quantity: it.quantity,
+            remark: it.remark || "",
           }))
         );
         const project = projects.find((p) => p.id === data.projectId);
@@ -203,7 +206,7 @@ export default function LedgerDialog({
 
   const openAddItem = () => {
     setEditingItemIndex(null);
-    setItemForm({ serviceName: "", workerType: null, unitPrice: 0, quantity: 1 });
+    setItemForm({ serviceName: "", workerType: null, unitPrice: 0, quantity: 1, remark: "" });
     setItemSheetOpen(true);
   };
 
@@ -249,6 +252,7 @@ export default function LedgerDialog({
       workerType: itemForm.workerType,
       unitPrice: itemForm.unitPrice,
       quantity: itemForm.quantity,
+      remark: itemForm.remark.trim(),
     };
     if (editingItemIndex !== null) {
       setItems((prev) =>
@@ -309,6 +313,7 @@ export default function LedgerDialog({
         workerType: it.workerType,
         quantity: it.quantity,
         unitPrice: it.unitPrice,
+        remark: it.remark,
       })),
     };
     try {
@@ -474,6 +479,11 @@ export default function LedgerDialog({
                             = ¥{calcTotalPrice(item.quantity, item.unitPrice).toFixed(2)}
                           </span>
                         </div>
+                        {item.remark && (
+                          <div className="text-xs text-muted-foreground truncate">
+                            备注：{item.remark}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-0.5 shrink-0">
                         <Button
@@ -626,6 +636,18 @@ export default function LedgerDialog({
                   ¥{calcTotalPrice(itemForm.quantity, itemForm.unitPrice).toFixed(2)}
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>备注</Label>
+              <Input
+                value={itemForm.remark}
+                onChange={(e) =>
+                  handleItemFieldChange("remark", e.target.value)
+                }
+                className="rounded-lg"
+                placeholder="选填，如工作地点等"
+              />
             </div>
           </div>
           <SheetFooter className="px-6">

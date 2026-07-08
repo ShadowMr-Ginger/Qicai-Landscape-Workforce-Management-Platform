@@ -234,6 +234,25 @@ export default function ProjectsPage() {
 
   // 日历状态
   const chinaNow = new Date(new Date().getTime() + 8 * 60 * 60 * 1000);
+
+  const formatRevenueContent = (items: RevenueItem[]): string => {
+    if (!items || items.length === 0) return "-";
+    const first = items[0];
+    const typeText = first.workerType === null
+      ? "未选择"
+      : first.workerType === 2
+      ? "女工"
+      : "男工";
+    let text = `${first.serviceName}·${typeText}${first.quantity}人`;
+    if (first.remark) {
+      text += `·${first.remark}`;
+    }
+    if (items.length > 1) {
+      text += `等${items.length}条记录`;
+    }
+    return text;
+  };
+
   const [calYear, setCalYear] = useState(chinaNow.getFullYear());
   const [calMonth, setCalMonth] = useState(chinaNow.getMonth() + 1);
   const [calDays, setCalDays] = useState<CalendarDay[]>([]);
@@ -1290,8 +1309,8 @@ export default function ProjectsPage() {
                     >
                       <div className="space-y-0.5 min-w-0">
                         <div className="text-sm font-medium">{record.recordDate}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {record.items.length} 项服务 · {record.remark || "无备注"}
+                        <div className="text-xs text-muted-foreground truncate">
+                          {formatRevenueContent(record.items)}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

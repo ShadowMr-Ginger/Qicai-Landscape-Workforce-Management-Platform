@@ -498,6 +498,7 @@ export interface LedgerItem {
   workerType?: number | null;
   quantity: number;
   unitPrice: number;
+  remark?: string;
 }
 
 export interface LedgerPayload {

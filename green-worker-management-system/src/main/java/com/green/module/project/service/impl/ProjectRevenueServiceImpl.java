@@ -232,7 +232,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
         vo.setQuantity(item.getQuantity());
         vo.setUnitPrice(item.getUnitPrice());
         vo.setTotalPrice(item.getTotalPrice());
-        vo.setRemark(null);
+        vo.setRemark(item.getRemark());
         return vo;
     }
 }

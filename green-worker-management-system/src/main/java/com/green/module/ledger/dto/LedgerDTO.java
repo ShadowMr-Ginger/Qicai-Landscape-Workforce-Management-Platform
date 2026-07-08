@@ -45,5 +45,8 @@ public class LedgerDTO {
         @NotNull(message = "单价不能为空")
         @Min(value = 0, message = "单价不能为负数")
         private BigDecimal unitPrice;
+
+        /** 备注 */
+        private String remark;
     }
 }
