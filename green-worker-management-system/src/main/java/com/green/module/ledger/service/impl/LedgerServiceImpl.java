@@ -11,8 +11,10 @@ import com.green.module.ledger.mapper.LedgerItemMapper;
 import com.green.module.ledger.mapper.LedgerMapper;
 import com.green.module.ledger.service.LedgerService;
 import com.green.module.ledger.vo.LedgerVO;
+import com.green.module.project.entity.ProjectCommonRemarkEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.entity.ProjectEntity;
+import com.green.module.project.mapper.ProjectCommonRemarkMapper;
 import com.green.module.project.mapper.ProjectCommonServiceMapper;
 import com.green.module.project.mapper.ProjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class LedgerServiceImpl implements LedgerService {
     private final LedgerItemMapper ledgerItemMapper;
     private final ProjectMapper projectMapper;
     private final ProjectCommonServiceMapper projectCommonServiceMapper;
+    private final ProjectCommonRemarkMapper projectCommonRemarkMapper;
 
     @Override
     public Page<LedgerVO> pageList(Long projectId, LocalDate startDate, LocalDate endDate,
@@ -137,6 +140,7 @@ public class LedgerServiceImpl implements LedgerService {
             ledgerItemMapper.insert(item);
             ensureProjectCommonService(ledger.getProjectId(), item.getServiceName(),
                     item.getWorkerType(), item.getUnitPrice());
+            ensureProjectCommonRemark(ledger.getProjectId(), item.getRemark());
         }
 
         return ledger.getId();
@@ -184,6 +188,7 @@ public class LedgerServiceImpl implements LedgerService {
             ledgerItemMapper.insert(item);
             ensureProjectCommonService(ledger.getProjectId(), item.getServiceName(),
                     item.getWorkerType(), item.getUnitPrice());
+            ensureProjectCommonRemark(ledger.getProjectId(), item.getRemark());
         }
     }
 
@@ -204,6 +209,24 @@ public class LedgerServiceImpl implements LedgerService {
         ProjectEntity project = projectMapper.selectById(projectId);
         if (project == null || project.getDeleted() == 1) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目不存在");
+        }
+    }
+
+    private void ensureProjectCommonRemark(Long projectId, String remarkName) {
+        if (!StringUtils.hasText(remarkName)) {
+            return;
+        }
+        long count = projectCommonRemarkMapper.selectCount(
+                new QueryWrapper<ProjectCommonRemarkEntity>()
+                        .eq("project_id", projectId)
+                        .eq("remark_name", remarkName.trim())
+                        .eq("deleted", 0)
+        );
+        if (count == 0) {
+            ProjectCommonRemarkEntity entity = new ProjectCommonRemarkEntity();
+            entity.setProjectId(projectId);
+            entity.setRemarkName(remarkName.trim());
+            projectCommonRemarkMapper.insert(entity);
         }
     }
 

@@ -33,6 +33,7 @@ import {
   updateLedger,
   getLedgerDetail,
   getProjectCommonServices,
+  getProjectCommonRemarks,
 } from "@/lib/api";
 
 interface ProjectOption {
@@ -87,6 +88,13 @@ export default function LedgerDialog({
   const [projectCommonServices, setProjectCommonServices] = useState<
     { id: number; serviceName: string; workerType: number | null; unitPrice: number }[]
   >([]);
+  const [projectCommonRemarks, setProjectCommonRemarks] = useState<
+    { id: number; remarkName: string }[]
+  >([]);
+  const [remarkFilter, setRemarkFilter] = useState("");
+  const [remarkDropdownOpen, setRemarkDropdownOpen] = useState(false);
+  const remarkInputRef = useRef<HTMLInputElement>(null);
+  const remarkDropdownRef = useRef<HTMLDivElement>(null);
 
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
@@ -101,6 +109,13 @@ export default function LedgerDialog({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
+  // 打开用工记录面板时同步备注筛选
+  useEffect(() => {
+    if (itemSheetOpen) {
+      setRemarkFilter(itemForm.remark);
+    }
+  }, [itemSheetOpen, itemForm.remark]);
+
   // 点击外部关闭项目下拉
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -111,6 +126,14 @@ export default function LedgerDialog({
         !projectInputRef.current.contains(e.target as Node)
       ) {
         setProjectDropdownOpen(false);
+      }
+      if (
+        remarkDropdownRef.current &&
+        !remarkDropdownRef.current.contains(e.target as Node) &&
+        remarkInputRef.current &&
+        !remarkInputRef.current.contains(e.target as Node)
+      ) {
+        setRemarkDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -133,12 +156,14 @@ export default function LedgerDialog({
     }
   }, [open, editingId]);
 
-  // 锁定后加载项目常用服务
+  // 锁定后加载项目常用服务和常用备注
   useEffect(() => {
     if (locked && projectId) {
       fetchProjectCommonServices(projectId);
+      fetchProjectCommonRemarks(projectId);
     } else {
       setProjectCommonServices([]);
+      setProjectCommonRemarks([]);
     }
   }, [locked, projectId]);
 
@@ -177,6 +202,17 @@ export default function LedgerDialog({
       const res = await getProjectCommonServices(pid);
       if (res.code === 200 && res.data) {
         setProjectCommonServices(res.data);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const fetchProjectCommonRemarks = async (pid: number) => {
+    try {
+      const res = await getProjectCommonRemarks(pid);
+      if (res.code === 200 && res.data) {
+        setProjectCommonRemarks(res.data);
       }
     } catch {
       // ignore
@@ -638,16 +674,53 @@ export default function LedgerDialog({
               </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 relative">
               <Label>备注</Label>
               <Input
+                ref={remarkInputRef}
                 value={itemForm.remark}
-                onChange={(e) =>
-                  handleItemFieldChange("remark", e.target.value)
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setRemarkFilter(val);
+                  handleItemFieldChange("remark", val);
+                  setRemarkDropdownOpen(true);
+                }}
+                onFocus={() => setRemarkDropdownOpen(true)}
                 className="rounded-lg"
                 placeholder="选填，如工作地点等"
               />
+              {remarkDropdownOpen && remarkFilter.trim() && (
+                <div
+                  ref={remarkDropdownRef}
+                  className="absolute z-50 left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
+                >
+                  {projectCommonRemarks.filter((r) =>
+                    r.remarkName.toLowerCase().includes(remarkFilter.trim().toLowerCase())
+                  ).length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      无匹配备注
+                    </div>
+                  ) : (
+                    projectCommonRemarks
+                      .filter((r) =>
+                        r.remarkName.toLowerCase().includes(remarkFilter.trim().toLowerCase())
+                      )
+                      .map((r) => (
+                        <div
+                          key={r.id}
+                          className="px-3 py-2 text-sm hover:bg-muted cursor-pointer"
+                          onClick={() => {
+                            setRemarkFilter(r.remarkName);
+                            handleItemFieldChange("remark", r.remarkName);
+                            setRemarkDropdownOpen(false);
+                          }}
+                        >
+                          {r.remarkName}
+                        </div>
+                      ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <SheetFooter className="px-6">

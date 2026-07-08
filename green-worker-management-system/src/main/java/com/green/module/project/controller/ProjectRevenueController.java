@@ -2,6 +2,7 @@ package com.green.module.project.controller;
 
 import com.green.common.result.ApiResult;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonRemarkEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.service.ProjectRevenueService;
 import com.green.module.project.vo.RevenueRecordVO;
@@ -101,6 +102,32 @@ public class ProjectRevenueController {
     @DeleteMapping("/common-services/{id}")
     public ApiResult<Void> deleteProjectCommonService(@PathVariable Long id) {
         projectRevenueService.deleteProjectCommonService(id);
+        return ApiResult.success("删除成功");
+    }
+
+    @GetMapping("/{projectId}/common-remarks")
+    public ApiResult<List<ProjectCommonRemarkEntity>> listProjectCommonRemarks(@PathVariable Long projectId) {
+        return ApiResult.success(projectRevenueService.listProjectCommonRemarks(projectId));
+    }
+
+    @PostMapping("/{projectId}/common-remarks")
+    public ApiResult<Long> createProjectCommonRemark(
+            @PathVariable Long projectId,
+            @RequestParam String remarkName) {
+        return ApiResult.success(projectRevenueService.createProjectCommonRemark(projectId, remarkName));
+    }
+
+    @PutMapping("/common-remarks/{id}")
+    public ApiResult<Void> updateProjectCommonRemark(
+            @PathVariable Long id,
+            @RequestParam String remarkName) {
+        projectRevenueService.updateProjectCommonRemark(id, remarkName);
+        return ApiResult.success("修改成功");
+    }
+
+    @DeleteMapping("/common-remarks/{id}")
+    public ApiResult<Void> deleteProjectCommonRemark(@PathVariable Long id) {
+        projectRevenueService.deleteProjectCommonRemark(id);
         return ApiResult.success("删除成功");
     }
 }

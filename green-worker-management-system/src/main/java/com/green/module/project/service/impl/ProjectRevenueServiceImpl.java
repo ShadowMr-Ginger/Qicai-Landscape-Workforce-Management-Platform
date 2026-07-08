@@ -6,9 +6,11 @@ import com.green.common.result.ResultCodeEnum;
 import com.green.module.ledger.service.LedgerService;
 import com.green.module.ledger.vo.LedgerVO;
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonRemarkEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.entity.ProjectEntity;
 import com.green.module.project.mapper.CommonServiceNameMapper;
+import com.green.module.project.mapper.ProjectCommonRemarkMapper;
 import com.green.module.project.mapper.ProjectCommonServiceMapper;
 import com.green.module.project.mapper.ProjectMapper;
 import com.green.module.project.service.ProjectRevenueService;
@@ -18,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,6 +42,7 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
     private final LedgerService ledgerService;
     private final CommonServiceNameMapper commonServiceNameMapper;
     private final ProjectCommonServiceMapper projectCommonServiceMapper;
+    private final ProjectCommonRemarkMapper projectCommonRemarkMapper;
     private final ProjectMapper projectMapper;
 
     @Override
@@ -203,6 +207,75 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目内常用服务不存在");
         }
         projectCommonServiceMapper.deleteById(id);
+    }
+
+    // ==================== 项目内常用备注 ====================
+
+    @Override
+    public List<ProjectCommonRemarkEntity> listProjectCommonRemarks(Long projectId) {
+        return projectCommonRemarkMapper.selectList(
+            new QueryWrapper<ProjectCommonRemarkEntity>()
+                .eq("project_id", projectId)
+                .eq("deleted", 0)
+                .orderByAsc("remark_name")
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createProjectCommonRemark(Long projectId, String remarkName) {
+        if (remarkName == null || remarkName.trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "备注名称不能为空");
+        }
+        ProjectCommonRemarkEntity entity = new ProjectCommonRemarkEntity();
+        entity.setProjectId(projectId);
+        entity.setRemarkName(remarkName.trim());
+        projectCommonRemarkMapper.insert(entity);
+        return entity.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateProjectCommonRemark(Long id, String remarkName) {
+        ProjectCommonRemarkEntity entity = projectCommonRemarkMapper.selectById(id);
+        if (entity == null || entity.getDeleted() == 1) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目内常用备注不存在");
+        }
+        if (remarkName == null || remarkName.trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.BAD_REQUEST, "备注名称不能为空");
+        }
+        entity.setRemarkName(remarkName.trim());
+        projectCommonRemarkMapper.updateById(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteProjectCommonRemark(Long id) {
+        ProjectCommonRemarkEntity entity = projectCommonRemarkMapper.selectById(id);
+        if (entity == null || entity.getDeleted() == 1) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "项目内常用备注不存在");
+        }
+        projectCommonRemarkMapper.deleteById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void ensureProjectCommonRemark(Long projectId, String remarkName) {
+        if (!StringUtils.hasText(remarkName)) {
+            return;
+        }
+        long count = projectCommonRemarkMapper.selectCount(
+                new QueryWrapper<ProjectCommonRemarkEntity>()
+                        .eq("project_id", projectId)
+                        .eq("remark_name", remarkName.trim())
+                        .eq("deleted", 0)
+        );
+        if (count == 0) {
+            ProjectCommonRemarkEntity entity = new ProjectCommonRemarkEntity();
+            entity.setProjectId(projectId);
+            entity.setRemarkName(remarkName.trim());
+            projectCommonRemarkMapper.insert(entity);
+        }
     }
 
     private RevenueRecordVO convertToVO(LedgerVO ledger) {

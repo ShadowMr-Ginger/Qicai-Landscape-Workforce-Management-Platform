@@ -1,6 +1,7 @@
 package com.green.module.project.service;
 
 import com.green.module.project.entity.CommonServiceNameEntity;
+import com.green.module.project.entity.ProjectCommonRemarkEntity;
 import com.green.module.project.entity.ProjectCommonServiceEntity;
 import com.green.module.project.vo.RevenueRecordVO;
 
@@ -37,4 +38,14 @@ public interface ProjectRevenueService {
     void updateProjectCommonService(Long id, String serviceName, Integer workerType, BigDecimal unitPrice);
 
     void deleteProjectCommonService(Long id);
+
+    List<ProjectCommonRemarkEntity> listProjectCommonRemarks(Long projectId);
+
+    Long createProjectCommonRemark(Long projectId, String remarkName);
+
+    void updateProjectCommonRemark(Long id, String remarkName);
+
+    void deleteProjectCommonRemark(Long id);
+
+    void ensureProjectCommonRemark(Long projectId, String remarkName);
 }

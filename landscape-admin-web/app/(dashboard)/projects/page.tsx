@@ -17,6 +17,7 @@ import {
   Eye,
   Download,
   Wrench,
+  MessageSquare,
 } from "lucide-react";
 import {
   Dialog,
@@ -55,6 +56,10 @@ import {
   createProjectCommonService,
   updateProjectCommonService,
   deleteProjectCommonService,
+  getProjectCommonRemarks,
+  createProjectCommonRemark,
+  updateProjectCommonRemark,
+  deleteProjectCommonRemark,
   exportProjectRevenueRecords,
 } from "@/lib/api";
 
@@ -114,6 +119,12 @@ interface ProjectCommonService {
   serviceName: string;
   workerType: number | null;
   unitPrice: number;
+}
+
+interface ProjectCommonRemark {
+  id: number;
+  projectId: number;
+  remarkName: string;
 }
 
 interface CalendarDay {
@@ -227,6 +238,14 @@ export default function ProjectsPage() {
     serviceName: "",
     workerType: null as number | null,
     unitPrice: 0,
+  });
+
+  // 项目内常用备注
+  const [projectCommonRemarks, setProjectCommonRemarks] = useState<ProjectCommonRemark[]>([]);
+  const [projectCommonRemarkSheetOpen, setProjectCommonRemarkSheetOpen] = useState(false);
+  const [editingProjectCommonRemark, setEditingProjectCommonRemark] = useState<ProjectCommonRemark | null>(null);
+  const [projectCommonRemarkForm, setProjectCommonRemarkForm] = useState({
+    remarkName: "",
   });
 
   // 常用服务名称
@@ -393,10 +412,11 @@ export default function ProjectsPage() {
     setSelectedProject(item);
     setDetailOpen(true);
     try {
-      const [statsRes, recordsRes, servicesRes] = await Promise.all([
+      const [statsRes, recordsRes, servicesRes, remarksRes] = await Promise.all([
         getProjectDetailStats(item.id),
         getProjectRevenueRecords(item.id),
         getProjectCommonServices(item.id),
+        getProjectCommonRemarks(item.id),
       ]);
       if (statsRes.code === 200 && statsRes.data) {
         setDetailStats(statsRes.data);
@@ -406,6 +426,9 @@ export default function ProjectsPage() {
       }
       if (servicesRes.code === 200 && servicesRes.data) {
         setProjectCommonServices(servicesRes.data);
+      }
+      if (remarksRes.code === 200 && remarksRes.data) {
+        setProjectCommonRemarks(remarksRes.data);
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "加载项目详情失败"));
@@ -650,6 +673,59 @@ export default function ProjectsPage() {
       const res = await getProjectCommonServices(selectedProject.id);
       if (res.code === 200 && res.data) {
         setProjectCommonServices(res.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, "删除失败"));
+    }
+  };
+
+  // ===== 项目内常用备注 =====
+  const openAddProjectCommonRemark = () => {
+    setEditingProjectCommonRemark(null);
+    setProjectCommonRemarkForm({ remarkName: "" });
+    setProjectCommonRemarkSheetOpen(true);
+  };
+
+  const openEditProjectCommonRemark = (remark: ProjectCommonRemark) => {
+    setEditingProjectCommonRemark(remark);
+    setProjectCommonRemarkForm({ remarkName: remark.remarkName });
+    setProjectCommonRemarkSheetOpen(true);
+  };
+
+  const handleSaveProjectCommonRemark = async () => {
+    if (!selectedProject) return;
+    if (!projectCommonRemarkForm.remarkName.trim()) {
+      toast.error("请输入备注内容");
+      return;
+    }
+    try {
+      const remarkName = projectCommonRemarkForm.remarkName.trim();
+      if (editingProjectCommonRemark) {
+        await updateProjectCommonRemark(editingProjectCommonRemark.id, remarkName);
+        toast.success("修改成功");
+      } else {
+        await createProjectCommonRemark(selectedProject.id, remarkName);
+        toast.success("新增成功");
+      }
+      setProjectCommonRemarkSheetOpen(false);
+      const res = await getProjectCommonRemarks(selectedProject.id);
+      if (res.code === 200 && res.data) {
+        setProjectCommonRemarks(res.data);
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err, editingProjectCommonRemark ? "修改失败" : "新增失败"));
+    }
+  };
+
+  const handleDeleteProjectCommonRemark = async (remark: ProjectCommonRemark) => {
+    if (!selectedProject) return;
+    if (!confirm(`确定删除项目内常用备注「${remark.remarkName}」吗？`)) return;
+    try {
+      await deleteProjectCommonRemark(remark.id);
+      toast.success("删除成功");
+      const res = await getProjectCommonRemarks(selectedProject.id);
+      if (res.code === 200 && res.data) {
+        setProjectCommonRemarks(res.data);
       }
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "删除失败"));
@@ -1194,67 +1270,125 @@ export default function ProjectsPage() {
           showCloseButton={false}
           className="bg-transparent border-0 shadow-none ring-0 rounded-none p-0 max-w-none sm:max-w-none w-auto flex flex-col lg:flex-row items-start justify-center gap-4 overflow-visible"
         >
-          {/* 左侧：项目内常用服务 */}
-          <div className="w-full lg:w-72 rounded-2xl bg-popover p-4 shadow-lg ring-1 ring-foreground/10 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b">
-              <div className="text-sm font-semibold flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-green-600" />
-                项目内常用服务
+          {/* 左侧：项目内常用服务 & 常用备注 */}
+          <div className="w-full lg:w-72 flex flex-col gap-4">
+            {/* 项目内常用服务 */}
+            <div className="rounded-2xl bg-popover p-4 shadow-lg ring-1 ring-foreground/10 max-h-[50vh] overflow-y-auto">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-green-600" />
+                  项目内常用服务
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
+                  onClick={openAddProjectCommonService}
+                  title="新增项目内常用服务"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
-                onClick={openAddProjectCommonService}
-                title="新增项目内常用服务"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            {projectCommonServices.length === 0 ? (
-              <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
-                暂无常用服务
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {projectCommonServices.map((service) => (
-                  <div
-                    key={service.id}
-                    className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="space-y-0.5 min-w-0">
-                      <div className="text-sm font-medium truncate">{service.serviceName}</div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 rounded">
-                          {service.workerType === null ? "未选择" : service.workerType === 2 ? "女工" : "男工"}
-                        </Badge>
-                        <span>¥{service.unitPrice.toFixed(2)}</span>
+              {projectCommonServices.length === 0 ? (
+                <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
+                  暂无常用服务
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {projectCommonServices.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="text-sm font-medium truncate">{service.serviceName}</div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 rounded">
+                            {service.workerType === null ? "未选择" : service.workerType === 2 ? "女工" : "男工"}
+                          </Badge>
+                          <span>¥{service.unitPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => openEditProjectCommonService(service)}
+                          title="编辑"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteProjectCommonService(service)}
+                          title="删除"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-0.5 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => openEditProjectCommonService(service)}
-                        title="编辑"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeleteProjectCommonService(service)}
-                        title="删除"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 项目内常用备注 */}
+            <div className="rounded-2xl bg-popover p-4 shadow-lg ring-1 ring-foreground/10 max-h-[35vh] overflow-y-auto">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-green-600" />
+                  项目内常用备注
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="w-7 h-7 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50"
+                  onClick={openAddProjectCommonRemark}
+                  title="新增项目内常用备注"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
-            )}
+              {projectCommonRemarks.length === 0 ? (
+                <div className="text-center py-6 text-xs text-muted-foreground bg-muted/30 rounded-xl">
+                  暂无常用备注
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {projectCommonRemarks.map((remark) => (
+                    <div
+                      key={remark.id}
+                      className="flex items-center justify-between rounded-xl border border-border p-2.5 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="text-sm truncate">{remark.remarkName}</div>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => openEditProjectCommonRemark(remark)}
+                          title="编辑"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteProjectCommonRemark(remark)}
+                          title="删除"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 右侧：项目详情 */}
@@ -1599,6 +1733,32 @@ export default function ProjectsPage() {
           <SheetFooter className="px-6">
             <Button variant="outline" className="rounded-lg" onClick={() => setProjectCommonServiceSheetOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleSaveProjectCommonService}>保存</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      {/* ===== 项目内常用备注编辑侧滑窗口 ===== */}
+      <Sheet open={projectCommonRemarkSheetOpen} onOpenChange={setProjectCommonRemarkSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md rounded-l-2xl">
+          <SheetHeader className="px-6">
+            <SheetTitle className="text-lg">
+              {editingProjectCommonRemark ? "编辑项目内常用备注" : "新增项目内常用备注"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 py-4 px-6">
+            <div className="space-y-1.5">
+              <Label>备注内容 <span className="text-red-500">*</span></Label>
+              <Input
+                value={projectCommonRemarkForm.remarkName}
+                onChange={(e) => setProjectCommonRemarkForm({ ...projectCommonRemarkForm, remarkName: e.target.value })}
+                className="rounded-lg"
+                placeholder="备注内容"
+              />
+            </div>
+          </div>
+          <SheetFooter className="px-6">
+            <Button variant="outline" className="rounded-lg" onClick={() => setProjectCommonRemarkSheetOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleSaveProjectCommonRemark}>保存</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

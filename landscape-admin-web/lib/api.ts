@@ -564,6 +564,26 @@ export async function deleteProjectCommonService(id: number) {
   return res.data;
 }
 
+export async function getProjectCommonRemarks(projectId: number) {
+  const res = await api.get(`/admin/projects/${projectId}/common-remarks`);
+  return res.data;
+}
+
+export async function createProjectCommonRemark(projectId: number, remarkName: string) {
+  const res = await api.post(`/admin/projects/${projectId}/common-remarks`, null, { params: { remarkName } });
+  return res.data;
+}
+
+export async function updateProjectCommonRemark(id: number, remarkName: string) {
+  const res = await api.put(`/admin/projects/common-remarks/${id}`, null, { params: { remarkName } });
+  return res.data;
+}
+
+export async function deleteProjectCommonRemark(id: number) {
+  const res = await api.delete(`/admin/projects/common-remarks/${id}`);
+  return res.data;
+}
+
 export async function exportProjectRevenueRecords(id: number, params: { startDate: string; endDate: string; format: string }) {
   const res = await api.get(`/admin/projects/${id}/revenue-records/export`, {
     params,
