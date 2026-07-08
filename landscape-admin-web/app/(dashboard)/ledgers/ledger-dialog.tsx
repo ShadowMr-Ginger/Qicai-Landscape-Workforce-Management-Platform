@@ -109,12 +109,18 @@ export default function LedgerDialog({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // 打开用工记录面板时同步备注筛选
+  const [serviceFilter, setServiceFilter] = useState("");
+  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false);
+  const serviceInputRef = useRef<HTMLInputElement>(null);
+  const serviceDropdownRef = useRef<HTMLDivElement>(null);
+
+  // 打开用工记录面板时同步筛选
   useEffect(() => {
     if (itemSheetOpen) {
       setRemarkFilter(itemForm.remark);
+      setServiceFilter(itemForm.serviceName);
     }
-  }, [itemSheetOpen, itemForm.remark]);
+  }, [itemSheetOpen, itemForm.remark, itemForm.serviceName]);
 
   // 点击外部关闭项目下拉
   useEffect(() => {
@@ -134,6 +140,14 @@ export default function LedgerDialog({
         !remarkInputRef.current.contains(e.target as Node)
       ) {
         setRemarkDropdownOpen(false);
+      }
+      if (
+        serviceDropdownRef.current &&
+        !serviceDropdownRef.current.contains(e.target as Node) &&
+        serviceInputRef.current &&
+        !serviceInputRef.current.contains(e.target as Node)
+      ) {
+        setServiceDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -577,47 +591,55 @@ export default function LedgerDialog({
             </SheetTitle>
           </SheetHeader>
           <div className="space-y-4 py-4 px-6">
-            <div className="space-y-1.5">
-              <Label>项目常用服务</Label>
-              <select
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
-                value=""
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val) {
-                    const selected = projectCommonServices.find(
-                      (s) => s.serviceName === val
-                    );
-                    if (selected) {
-                      setItemForm((prev) => ({
-                        ...prev,
-                        serviceName: selected.serviceName,
-                        workerType: selected.workerType,
-                        unitPrice: selected.unitPrice,
-                      }));
-                    }
-                  }
-                }}
-              >
-                <option value="">选择项目常用服务</option>
-                {projectCommonServices.map((s) => (
-                  <option key={s.id} value={s.serviceName}>
-                    {s.serviceName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 relative">
               <Label>服务名称 <span className="text-red-500">*</span></Label>
               <Input
+                ref={serviceInputRef}
                 value={itemForm.serviceName}
-                onChange={(e) =>
-                  handleItemFieldChange("serviceName", e.target.value)
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setServiceFilter(val);
+                  handleItemFieldChange("serviceName", val);
+                  setServiceDropdownOpen(true);
+                }}
+                onFocus={() => setServiceDropdownOpen(true)}
                 className="rounded-lg"
                 placeholder="服务名称"
               />
+              {serviceDropdownOpen && (
+                <div
+                  ref={serviceDropdownRef}
+                  className="absolute z-50 left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-popover shadow-lg"
+                >
+                  {projectCommonServices.filter((s) =>
+                    s.serviceName.toLowerCase().includes(serviceFilter.trim().toLowerCase())
+                  ).length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      {serviceFilter.trim() ? "无匹配服务" : "暂无常用服务"}
+                    </div>
+                  ) : (
+                    projectCommonServices
+                      .filter((s) =>
+                        s.serviceName.toLowerCase().includes(serviceFilter.trim().toLowerCase())
+                      )
+                      .map((s) => (
+                        <div
+                          key={s.id}
+                          className="px-3 py-2 text-sm hover:bg-muted cursor-pointer"
+                          onClick={() => {
+                            setServiceFilter(s.serviceName);
+                            handleItemFieldChange("serviceName", s.serviceName);
+                            handleItemFieldChange("workerType", s.workerType);
+                            handleItemFieldChange("unitPrice", s.unitPrice);
+                            setServiceDropdownOpen(false);
+                          }}
+                        >
+                          {s.serviceName}
+                        </div>
+                      ))
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
