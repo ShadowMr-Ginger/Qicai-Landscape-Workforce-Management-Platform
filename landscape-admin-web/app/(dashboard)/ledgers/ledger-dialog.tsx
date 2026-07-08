@@ -9,6 +9,7 @@ import {
   GripVertical,
   Lock,
   LockOpen,
+  X,
 } from "lucide-react";
 import {
   Dialog,
@@ -282,6 +283,16 @@ export default function LedgerDialog({
       }
       return next;
     });
+  };
+
+  const clearServiceName = () => {
+    setServiceFilter("");
+    handleItemFieldChange("serviceName", "");
+  };
+
+  const clearRemark = () => {
+    setRemarkFilter("");
+    handleItemFieldChange("remark", "");
   };
 
   const saveItem = () => {
@@ -593,19 +604,30 @@ export default function LedgerDialog({
           <div className="space-y-4 py-4 px-6">
             <div className="space-y-1.5 relative">
               <Label>服务名称 <span className="text-red-500">*</span></Label>
-              <Input
-                ref={serviceInputRef}
-                value={itemForm.serviceName}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setServiceFilter(val);
-                  handleItemFieldChange("serviceName", val);
-                  setServiceDropdownOpen(true);
-                }}
-                onFocus={() => setServiceDropdownOpen(true)}
-                className="rounded-lg"
-                placeholder="服务名称"
-              />
+              <div className="relative">
+                <Input
+                  ref={serviceInputRef}
+                  value={itemForm.serviceName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setServiceFilter(val);
+                    handleItemFieldChange("serviceName", val);
+                    setServiceDropdownOpen(true);
+                  }}
+                  onFocus={() => setServiceDropdownOpen(true)}
+                  className="rounded-lg pr-9"
+                  placeholder="服务名称"
+                />
+                {itemForm.serviceName && (
+                  <button
+                    type="button"
+                    onClick={clearServiceName}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
               {serviceDropdownOpen && (
                 <div
                   ref={serviceDropdownRef}
@@ -698,19 +720,30 @@ export default function LedgerDialog({
 
             <div className="space-y-1.5 relative">
               <Label>备注</Label>
-              <Input
-                ref={remarkInputRef}
-                value={itemForm.remark}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setRemarkFilter(val);
-                  handleItemFieldChange("remark", val);
-                  setRemarkDropdownOpen(true);
-                }}
-                onFocus={() => setRemarkDropdownOpen(true)}
-                className="rounded-lg"
-                placeholder="选填，如工作地点等"
-              />
+              <div className="relative">
+                <Input
+                  ref={remarkInputRef}
+                  value={itemForm.remark}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setRemarkFilter(val);
+                    handleItemFieldChange("remark", val);
+                    setRemarkDropdownOpen(true);
+                  }}
+                  onFocus={() => setRemarkDropdownOpen(true)}
+                  className="rounded-lg pr-9"
+                  placeholder="选填，如工作地点等"
+                />
+                {itemForm.remark && (
+                  <button
+                    type="button"
+                    onClick={clearRemark}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
               {remarkDropdownOpen && (
                 <div
                   ref={remarkDropdownRef}
