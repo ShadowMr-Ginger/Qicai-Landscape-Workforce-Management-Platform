@@ -86,7 +86,6 @@
             <text class="batch-project-arrow">›</text>
           </view>
         </picker>
-        <view class="batch-project-btn" bindtap="applyBatchDate">应用</view>
       </view>
 
       <!-- 批量设置项目 -->
@@ -98,7 +97,6 @@
             <text class="batch-project-arrow">›</text>
           </view>
         </picker>
-        <view class="batch-project-btn" bindtap="applyBatchProject">应用</view>
       </view>
 
       <view class="worker-list">

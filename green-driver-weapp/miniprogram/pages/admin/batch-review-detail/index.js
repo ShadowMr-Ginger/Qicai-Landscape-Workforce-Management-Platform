@@ -184,13 +184,19 @@ Page({
             });
         }
     },
-    // 批量设置项目选择变化
+    // 批量设置项目选择变化（确定后立即生效）
     onBatchProjectChange(e) {
-        this.setData({ batchProjectIndex: parseInt(e.detail.value) });
+        const idx = parseInt(e.detail.value);
+        this.setData({ batchProjectIndex: idx }, () => {
+            this.applyBatchProject();
+        });
     },
-    // 批量设置考勤日期选择变化
+    // 批量设置考勤日期选择变化（确定后立即生效）
     onBatchDateChange(e) {
-        this.setData({ batchAttendanceDate: e.detail.value });
+        const date = e.detail.value;
+        this.setData({ batchAttendanceDate: date }, () => {
+            this.applyBatchDate();
+        });
     },
     // 应用批量考勤日期设置
     applyBatchDate() {
