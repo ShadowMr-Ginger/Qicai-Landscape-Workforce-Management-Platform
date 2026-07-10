@@ -26,7 +26,10 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadWorkers().finally(() => wx.stopPullDownRefresh())
+    this.loadWorkers().then(
+      () => wx.stopPullDownRefresh(),
+      () => wx.stopPullDownRefresh()
+    )
   },
 
   async loadGroups() {

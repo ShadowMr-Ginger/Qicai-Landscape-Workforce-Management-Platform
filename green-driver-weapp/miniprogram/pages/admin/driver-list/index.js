@@ -27,7 +27,7 @@ Page({
         this.loadDrivers();
     },
     onPullDownRefresh() {
-        this.loadDrivers().finally(() => wx.stopPullDownRefresh());
+        this.loadDrivers().then(() => wx.stopPullDownRefresh(), () => wx.stopPullDownRefresh());
     },
     loadDrivers() {
         return __awaiter(this, void 0, void 0, function* () {

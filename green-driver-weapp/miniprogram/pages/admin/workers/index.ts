@@ -1,4 +1,5 @@
 Page({
+  data: {},
   goWorkerList() {
     wx.navigateTo({ url: '/pages/admin/worker-list/index' })
   },

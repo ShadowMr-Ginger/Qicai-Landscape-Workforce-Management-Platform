@@ -33,7 +33,7 @@ Page({
         this.loadWorkers();
     },
     onPullDownRefresh() {
-        this.loadWorkers().finally(() => wx.stopPullDownRefresh());
+        this.loadWorkers().then(() => wx.stopPullDownRefresh(), () => wx.stopPullDownRefresh());
     },
     loadGroups() {
         return __awaiter(this, void 0, void 0, function* () {

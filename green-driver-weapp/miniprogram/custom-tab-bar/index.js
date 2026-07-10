@@ -29,18 +29,29 @@ Component({
     methods: {
         updateTabBar() {
             // 1. 优先从 app.globalData 获取用户类型（最可靠）
-            const app = getApp();
             let isAdmin = this.data.isAdmin;
-            if (app && app.globalData) {
-                if (app.globalData.userType === 'admin') {
-                    isAdmin = true;
-                }
-                else if (app.globalData.userType === 'driver') {
-                    isAdmin = false;
+            try {
+                const app = getApp();
+                if (app && app.globalData) {
+                    if (app.globalData.userType === 'admin') {
+                        isAdmin = true;
+                    }
+                    else if (app.globalData.userType === 'driver') {
+                        isAdmin = false;
+                    }
                 }
             }
+            catch (e) {
+                // app 可能尚未初始化
+            }
             // 2. 兜底：通过当前页面路径判断
-            const pages = getCurrentPages();
+            let pages = [];
+            try {
+                pages = getCurrentPages() || [];
+            }
+            catch (e) {
+                pages = [];
+            }
             if (pages.length > 0) {
                 const currentPage = pages[pages.length - 1];
                 let route = '';
@@ -66,6 +77,8 @@ Component({
             let selected = 0;
             if (pages.length > 0) {
                 const currentPage = pages[pages.length - 1];
+                if (!currentPage)
+                    return;
                 let route = '';
                 try {
                     route = currentPage.route || '';
