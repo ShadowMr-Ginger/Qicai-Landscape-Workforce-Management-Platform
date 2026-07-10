@@ -9,14 +9,14 @@
       <text class="search-btn" bindtap="doSearch">搜索</text>
     </view>
     <view class="filter-row">
-      <picker mode="selector" range="{{['全部性别','男','女']}}" value="{{gender === '1' ? 1 : gender === '2' ? 2 : 0}}" bindchange="onGenderChange">
-        <view class="filter-picker">{{gender === '1' ? '男' : gender === '2' ? '女' : '全部性别'}} ▼</view>
+      <picker mode="selector" range="{{['性别','男','女']}}" value="{{gender === '1' ? 1 : gender === '2' ? 2 : 0}}" bindchange="onGenderChange">
+        <view class="filter-picker">{{gender === '1' ? '男' : gender === '2' ? '女' : '性别'}} ▼</view>
       </picker>
-      <picker mode="selector" range="{{['是否技术工','否','是']}}" value="{{isSkilled === '1' ? 2 : isSkilled === '0' ? 1 : 0}}" bindchange="onIsSkilledChange">
-        <view class="filter-picker">{{isSkilled === '1' ? '是' : isSkilled === '0' ? '否' : '是否技术工'}} ▼</view>
+      <picker mode="selector" range="{{['技术工','否','是']}}" value="{{isSkilled === '1' ? 2 : isSkilled === '0' ? 1 : 0}}" bindchange="onIsSkilledChange">
+        <view class="filter-picker">{{isSkilled === '1' ? '是' : isSkilled === '0' ? '否' : '技术工'}} ▼</view>
       </picker>
-      <picker mode="selector" range="{{groups}}" range-key="name" value="{{groupIndex}}" bindchange="onGroupChange">
-        <view class="filter-picker">{{groupName || '全部组别'}} ▼</view>
+      <picker mode="selector" range="{{groups}}" range-key="groupName" value="{{groupIndex}}" bindchange="onGroupChange">
+        <view class="filter-picker">{{groupName || '组别'}} ▼</view>
       </picker>
       <text class="reset-btn" bindtap="resetFilter">重置</text>
     </view>

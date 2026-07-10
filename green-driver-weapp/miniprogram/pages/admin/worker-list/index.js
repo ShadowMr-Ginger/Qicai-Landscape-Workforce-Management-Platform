@@ -96,7 +96,7 @@ Page({
         this.setData({
             groupIndex: index,
             groupId: group ? String(group.id) : '',
-            groupName: group ? group.name : '',
+            groupName: group ? group.groupName : '',
         });
         this.loadWorkers();
     },

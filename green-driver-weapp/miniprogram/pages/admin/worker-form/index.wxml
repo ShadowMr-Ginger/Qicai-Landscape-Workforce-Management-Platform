@@ -30,7 +30,7 @@
     </view>
     <view class="form-item">
       <text class="form-label required">组别</text>
-      <picker mode="selector" range="{{groupOptions}}" range-key="name" value="{{groupIndex}}" bindchange="onGroupChange">
+      <picker mode="selector" range="{{groupOptions}}" range-key="groupName" value="{{groupIndex}}" bindchange="onGroupChange">
         <view class="form-picker {{groupName ? '' : 'placeholder'}}">{{groupName || '请选择组别'}}</view>
       </picker>
     </view>

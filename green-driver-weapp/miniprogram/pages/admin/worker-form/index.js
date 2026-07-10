@@ -83,7 +83,7 @@ Page({
     setGroupIndex(groupId) {
         const id = String(groupId);
         const index = this.data.groupOptions.findIndex((g) => String(g.id) === id);
-        const name = index >= 0 ? this.data.groupOptions[index].name : '';
+        const name = index >= 0 ? this.data.groupOptions[index].groupName : '';
         this.setData({ groupIndex: index >= 0 ? index : 0, groupName: name });
     },
     loadDetail(id) {
@@ -138,7 +138,7 @@ Page({
         if (group) {
             this.setData({
                 groupIndex: index,
-                groupName: group.name,
+                groupName: group.groupName,
                 form: Object.assign(Object.assign({}, this.data.form), { groupId: String(group.id) }),
             });
         }
