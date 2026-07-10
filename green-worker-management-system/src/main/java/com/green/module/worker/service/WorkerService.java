@@ -57,6 +57,15 @@ public interface WorkerService {
     void resign(Long id);
 
     /**
+     * 恢复工人在职
+     *
+     * <p>将工人状态更新为在职（isEmployed = 1），不删除数据。</p>
+     *
+     * @param id 工人ID
+     */
+    void restore(Long id);
+
+    /**
      * 删除工人
      *
      * <p>物理删除工人，同时级联删除关联的考勤记录。</p>

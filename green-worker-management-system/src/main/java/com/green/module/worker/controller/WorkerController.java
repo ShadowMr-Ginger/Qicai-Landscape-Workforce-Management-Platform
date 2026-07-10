@@ -101,6 +101,20 @@ public class WorkerController {
     }
 
     /**
+     * 恢复工人在职
+     *
+     * @param id 工人ID
+     * @return 操作成功
+     */
+    @PutMapping("/{id}/restore")
+    public ApiResult<Void> restore(@PathVariable Long id, HttpServletRequest request) {
+        workerService.restore(id);
+        systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "UPDATE",
+                "工人管理", "恢复工人在职(ID=" + id + ")", "SUCCESS", request);
+        return ApiResult.success("已恢复为在职状态");
+    }
+
+    /**
      * 查询工人关联考勤记录数
      *
      * @param id 工人ID

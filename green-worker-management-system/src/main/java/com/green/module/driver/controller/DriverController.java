@@ -110,6 +110,15 @@ public class DriverController {
         return ApiResult.success("已设置为离职状态");
     }
 
+    @PutMapping("/api/admin/drivers/{id}/restore")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResult<Void> restore(@PathVariable Long id, HttpServletRequest request) {
+        driverService.restore(id);
+        systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "UPDATE",
+                "司机管理", "恢复司机在职(ID=" + id + ")", "SUCCESS", request);
+        return ApiResult.success("已恢复为在职状态");
+    }
+
     @GetMapping("/api/admin/drivers/{id}/attendance-count")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResult<Integer> attendanceCount(@PathVariable Long id) {

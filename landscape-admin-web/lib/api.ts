@@ -108,6 +108,11 @@ export async function resignWorker(id: number) {
   return res.data;
 }
 
+export async function restoreWorker(id: number) {
+  const res = await api.put(`/admin/workers/${id}/restore`);
+  return res.data;
+}
+
 export async function deleteWorker(id: number) {
   const res = await api.delete(`/admin/workers/${id}`);
   return res.data;
@@ -184,6 +189,11 @@ export async function updateDriver(id: number, data: Record<string, unknown>) {
 
 export async function resignDriver(id: number) {
   const res = await api.put(`/admin/drivers/${id}/resign`);
+  return res.data;
+}
+
+export async function restoreDriver(id: number) {
+  const res = await api.put(`/admin/drivers/${id}/restore`);
   return res.data;
 }
 

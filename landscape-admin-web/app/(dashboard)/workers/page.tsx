@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, deleteWorker, getGroupList, getWorkerAttendanceCount } from "@/lib/api";
+import { createWorker, getWorkerList, getWorkerDetail, updateWorker, resignWorker, restoreWorker, deleteWorker, getGroupList, getWorkerAttendanceCount } from "@/lib/api";
 
 interface WorkerItem {
   id: number;
@@ -97,6 +97,7 @@ export default function WorkersPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [resignOpen, setResignOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<WorkerItem | null>(null);
   const [workerDetail, setWorkerDetail] = useState<WorkerDetail | null>(null);
@@ -397,6 +398,23 @@ export default function WorkersPage() {
     }
   };
 
+  const openRestore = (worker: WorkerItem) => {
+    setSelectedWorker(worker);
+    setRestoreOpen(true);
+  };
+
+  const handleRestore = async () => {
+    if (!selectedWorker) return;
+    try {
+      await restoreWorker(selectedWorker.id);
+      toast.success(`已将 ${selectedWorker.name} 恢复为在职状态`);
+      setRestoreOpen(false);
+      await fetchWorkers();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "恢复在职操作失败");
+    }
+  };
+
   const openDelete = async (worker: WorkerItem) => {
     setSelectedWorker(worker);
     try {
@@ -476,15 +494,17 @@ export default function WorkersPage() {
             </>
           ) : (
             <>
-              <Button
-                variant="default"
-                size="sm"
-                className="rounded-lg bg-blue-600 hover:bg-blue-700"
-                onClick={() => setCreateOpen(true)}
-              >
-                <Users className="w-4 h-4 mr-1" />
-                新增工人
-              </Button>
+              {!showResigned && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-700"
+                  onClick={() => setCreateOpen(true)}
+                >
+                  <Users className="w-4 h-4 mr-1" />
+                  新增工人
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -654,17 +674,30 @@ export default function WorkersPage() {
                             </Button>
                           )}
                           {showResigned && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDelete(worker);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-8 h-8 rounded-lg text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/30 dark:bg-green-950/30"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openRestore(worker);
+                                }}
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 dark:bg-red-950/30"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDelete(worker);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
                           )}
                         </div>
                       </TableCell>
@@ -934,6 +967,27 @@ export default function WorkersPage() {
           <DialogFooter>
             <Button variant="outline" className="rounded-lg" onClick={() => setResignOpen(false)}>取消</Button>
             <Button className="rounded-lg bg-orange-600 hover:bg-orange-700" onClick={handleResign}>确认离职</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 恢复在职确认 */}
+      <Dialog open={restoreOpen} onOpenChange={setRestoreOpen}>
+        <DialogContent className="rounded-2xl max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <UserCheck className="w-5 h-5" />
+              确认恢复在职
+            </DialogTitle>
+            <DialogDescription>
+              确定要将工人 <strong>{selectedWorker?.name}</strong> 恢复为在职状态吗？
+              <br />
+              恢复后该工人将重新显示在在职工人列表中。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-lg" onClick={() => setRestoreOpen(false)}>取消</Button>
+            <Button className="rounded-lg bg-green-600 hover:bg-green-700" onClick={handleRestore}>确认恢复</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

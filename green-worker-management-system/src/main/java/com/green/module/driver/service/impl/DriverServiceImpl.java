@@ -194,6 +194,21 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void restore(Long id) {
+        DriverEntity entity = driverMapper.selectById(id);
+        if (entity == null) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "司机不存在");
+        }
+        if (entity.getIsActive() != null && entity.getIsActive() == 1) {
+            throw new BusinessException(ResultCodeEnum.BUSINESS_ERROR, "该司机已在职");
+        }
+        entity.setIsActive(1);
+        driverMapper.updateById(entity);
+        log.info("司机恢复在职成功: driverId={}", id);
+    }
+
+    @Override
     public int countDriverAttendance(Long id) {
         LambdaQueryWrapper<com.green.module.attendance.entity.DriverAttendanceRecordEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(com.green.module.attendance.entity.DriverAttendanceRecordEntity::getDriverId, id);

@@ -154,6 +154,21 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void restore(Long id) {
+        WorkerEntity entity = workerMapper.selectById(id);
+        if (entity == null) {
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "工人不存在");
+        }
+        if (entity.getIsEmployed() != null && entity.getIsEmployed() == 1) {
+            throw new BusinessException(ResultCodeEnum.BUSINESS_ERROR, "该工人已在职");
+        }
+        entity.setIsEmployed(1);
+        workerMapper.updateById(entity);
+        log.info("工人恢复在职成功: workerId={}", id);
+    }
+
+    @Override
     public int countWorkerAttendance(Long id) {
         LambdaQueryWrapper<com.green.module.attendance.entity.WorkerAttendanceRecordEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(com.green.module.attendance.entity.WorkerAttendanceRecordEntity::getWorkerId, id);
