@@ -49,11 +49,11 @@
           <text class="menu-name">司机列表</text>
         </view>
         <view class="menu-card" bindtap="goWorkerRecords">
-          <text class="menu-icon">👷</text>
+          <text class="menu-icon">📝</text>
           <text class="menu-name">工人记录</text>
         </view>
         <view class="menu-card" bindtap="goDriverRecords">
-          <text class="menu-icon">🚚</text>
+          <text class="menu-icon">📋</text>
           <text class="menu-name">司机记录</text>
         </view>
       </view>
