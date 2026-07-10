@@ -1,0 +1,55 @@
+<view class="driver-list-page">
+  <view class="filter-bar">
+    <view class="filter-header">
+      <text class="filter-title">司机筛选</text>
+      <text class="manage-btn" bindtap="toggleManaging">{{managing ? '完成' : '管理'}}</text>
+    </view>
+    <view class="search-inline">
+      <input class="search-input" placeholder="姓名搜索" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="doSearch" />
+      <text class="search-btn" bindtap="doSearch">搜索</text>
+    </view>
+    <view class="filter-row">
+      <picker mode="selector" range="{{['全部性别','男','女']}}" value="{{gender === '1' ? 1 : gender === '0' ? 2 : 0}}" bindchange="onGenderChange">
+        <view class="filter-picker">{{gender === '1' ? '男' : gender === '0' ? '女' : '全部性别'}} ▼</view>
+      </picker>
+      <text class="reset-btn" bindtap="resetFilter">重置</text>
+    </view>
+  </view>
+
+  <view class="status-bar">
+    <text class="status-text">{{showResigned ? '已离职司机' : '在职司机'}}（{{total}}人）</text>
+    <text class="status-toggle" bindtap="toggleShowResigned">{{showResigned ? '查看在职' : '查看离职'}}</text>
+  </view>
+
+  <view class="driver-list">
+    <view class="driver-card" wx:for="{{drivers}}" wx:key="id">
+      <view class="driver-header">
+        <text class="driver-name">{{item.realName}}</text>
+        <view class="driver-tags">
+          <text class="tag gender">{{item.genderText}}</text>
+          <text class="tag status {{item.isActive === 1 ? 'on' : 'off'}}">{{item.isActive === 1 ? '在职' : '离职'}}</text>
+        </view>
+      </view>
+      <view class="driver-body">
+        <view class="info-row"><text class="info-label">手机</text><text class="info-value">{{item.phone || '-'}}</text></view>
+        <view class="info-row"><text class="info-label">日薪</text><text class="info-value">¥{{item.baseDailySalary}}</text></view>
+        <view class="info-row"><text class="info-label">加班时薪</text><text class="info-value">¥{{item.overtimeHourlyRate}}</text></view>
+      </view>
+      <view class="driver-actions" wx:if="{{managing}}">
+        <view class="action-btn edit" data-id="{{item.id}}" bindtap="goEdit">编辑</view>
+        <view class="action-btn restore" wx:if="{{item.isActive !== 1}}" data-id="{{item.id}}" data-name="{{item.realName}}" bindtap="handleRestore">恢复在职</view>
+        <view class="action-btn resign" wx:if="{{item.isActive === 1}}" data-id="{{item.id}}" data-name="{{item.realName}}" bindtap="handleResign">离职</view>
+        <view class="action-btn reset" data-id="{{item.id}}" data-name="{{item.realName}}" bindtap="handleResetPwd">重置密码</view>
+        <view class="action-btn delete" data-id="{{item.id}}" data-name="{{item.realName}}" bindtap="handleDelete">删除</view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && drivers.length === 0}}">
+      <text>暂无司机</text>
+    </view>
+  </view>
+
+  <view class="fab" wx:if="{{!showResigned}}" bindtap="goCreate">
+    <text>+</text>
+  </view>
+</view>

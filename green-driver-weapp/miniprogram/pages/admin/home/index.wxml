@@ -40,13 +40,13 @@
     <view class="section">
       <text class="section-title">快捷入口</text>
       <view class="menu-grid">
-        <view class="menu-card" bindtap="goBatchReview">
-          <text class="menu-icon">✅</text>
-          <text class="menu-name">考勤审核</text>
+        <view class="menu-card" bindtap="goWorkerList">
+          <text class="menu-icon">👷</text>
+          <text class="menu-name">工人列表</text>
         </view>
-        <view class="menu-card" bindtap="goAttendanceRecords">
-          <text class="menu-icon">📋</text>
-          <text class="menu-name">考勤记录</text>
+        <view class="menu-card" bindtap="goDriverList">
+          <text class="menu-icon">🚚</text>
+          <text class="menu-name">司机列表</text>
         </view>
         <view class="menu-card" bindtap="goWorkerRecords">
           <text class="menu-icon">👷</text>

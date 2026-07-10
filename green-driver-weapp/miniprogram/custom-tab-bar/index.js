@@ -12,6 +12,7 @@ Component({
             { pagePath: '/pages/admin/home/index', text: '首页', icon: '🏠' },
             { pagePath: '/pages/admin/batch-review/index', text: '审核', icon: '✅' },
             { pagePath: '/pages/admin/attendance-records/index', text: '记录', icon: '📊' },
+            { pagePath: '/pages/admin/workers/index', text: '工人', icon: '👷' },
             { pagePath: '/pages/admin/profile/index', text: '我的', icon: '👤' },
         ]
     },

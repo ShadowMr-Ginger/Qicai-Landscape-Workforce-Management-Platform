@@ -1,0 +1,39 @@
+<view class="form-page">
+  <view class="form-card">
+    <view class="form-item">
+      <text class="form-label required">姓名</text>
+      <input class="form-input" placeholder="请输入姓名" value="{{form.name}}" data-field="name" bindinput="onFieldChange" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">性别</text>
+      <picker mode="selector" range="{{['男','女']}}" value="{{form.gender === '1' ? 0 : 1}}" bindchange="onGenderChange">
+        <view class="form-picker">{{form.gender === '1' ? '男' : '女'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label">手机号</text>
+      <input class="form-input" type="number" placeholder="请输入手机号" value="{{form.phone}}" data-field="phone" bindinput="onFieldChange" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">身份证号</text>
+      <input class="form-input" placeholder="请输入身份证号" value="{{form.idCard}}" data-field="idCard" bindinput="onFieldChange" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">基础日薪（元）</text>
+      <input class="form-input" type="digit" placeholder="请输入基础日薪" value="{{form.baseDailySalary}}" data-field="baseDailySalary" bindinput="onFieldChange" />
+    </view>
+    <view class="form-item">
+      <text class="form-label required">加班时薪（元）</text>
+      <input class="form-input" type="digit" placeholder="请输入加班时薪" value="{{form.overtimeHourlyRate}}" data-field="overtimeHourlyRate" bindinput="onFieldChange" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">紧急联系人电话</text>
+      <input class="form-input" type="number" placeholder="请输入紧急联系人电话" value="{{form.emergencyContactPhone}}" data-field="emergencyContactPhone" bindinput="onFieldChange" />
+    </view>
+  </view>
+
+  <view class="form-actions">
+    <view class="btn cancel" bindtap="handleCancel">取消</view>
+    <view class="btn submit" bindtap="handleSave">保存</view>
+  </view>
+</view>

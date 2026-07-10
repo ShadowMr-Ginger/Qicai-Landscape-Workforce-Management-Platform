@@ -306,8 +306,76 @@ export function getAdminWorkers(params?: any) {
   return request(url, { method: 'GET' })
 }
 
-export function getAdminDrivers() {
-  return request('/admin/drivers', { method: 'GET' })
+export function getAdminDrivers(params?: any) {
+  let url = '/admin/drivers'
+  if (params) {
+    const qs = Object.entries(params)
+      .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+      .join('&')
+    if (qs) url += `?${qs}`
+  }
+  return request(url, { method: 'GET' })
+}
+
+export function getWorkerDetail(id: number) {
+  return request(`/admin/workers/${id}`, { method: 'GET' })
+}
+
+export function createWorker(data: any) {
+  return request('/admin/workers', { method: 'POST', data })
+}
+
+export function updateWorker(id: number, data: any) {
+  return request(`/admin/workers/${id}`, { method: 'PUT', data })
+}
+
+export function deleteWorker(id: number) {
+  return request(`/admin/workers/${id}`, { method: 'DELETE' })
+}
+
+export function resignWorker(id: number) {
+  return request(`/admin/workers/${id}/resign`, { method: 'PUT' })
+}
+
+export function restoreWorker(id: number) {
+  return request(`/admin/workers/${id}/restore`, { method: 'PUT' })
+}
+
+export function getWorkerAttendanceCount(id: number) {
+  return request(`/admin/workers/${id}/attendance-count`, { method: 'GET' })
+}
+
+export function getDriverDetail(id: number) {
+  return request(`/admin/drivers/${id}`, { method: 'GET' })
+}
+
+export function createDriver(data: any) {
+  return request('/admin/drivers', { method: 'POST', data })
+}
+
+export function updateDriver(id: number, data: any) {
+  return request(`/admin/drivers/${id}`, { method: 'PUT', data })
+}
+
+export function deleteDriver(id: number) {
+  return request(`/admin/drivers/${id}`, { method: 'DELETE' })
+}
+
+export function resignDriver(id: number) {
+  return request(`/admin/drivers/${id}/resign`, { method: 'PUT' })
+}
+
+export function restoreDriver(id: number) {
+  return request(`/admin/drivers/${id}/restore`, { method: 'PUT' })
+}
+
+export function resetDriverPassword(id: number) {
+  return request('/admin/driver/reset-password', { method: 'POST', data: { driverId: id } })
+}
+
+export function getDriverAttendanceCount(id: number) {
+  return request(`/admin/drivers/${id}/attendance-count`, { method: 'GET' })
 }
 
 export function getAdminProjects() {

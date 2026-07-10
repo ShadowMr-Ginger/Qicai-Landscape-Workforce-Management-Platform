@@ -21,6 +21,11 @@
     "pages/admin/driver-records/index",
     "pages/admin/worker-summary/index",
     "pages/admin/driver-summary/index",
+    "pages/admin/workers/index",
+    "pages/admin/worker-list/index",
+    "pages/admin/driver-list/index",
+    "pages/admin/worker-form/index",
+    "pages/admin/driver-form/index",
     "pages/admin/profile/index"
   ],
   "window": {
@@ -64,6 +69,10 @@
       {
         "pagePath": "pages/admin/attendance-records/index",
         "text": "记录"
+      },
+      {
+        "pagePath": "pages/admin/workers/index",
+        "text": "工人"
       },
       {
         "pagePath": "pages/admin/profile/index",

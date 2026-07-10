@@ -95,6 +95,14 @@ Page({
     wx.switchTab({ url: '/pages/admin/attendance-records/index' })
   },
 
+  goWorkerList() {
+    wx.navigateTo({ url: '/pages/admin/worker-list/index' })
+  },
+
+  goDriverList() {
+    wx.navigateTo({ url: '/pages/admin/driver-list/index' })
+  },
+
   goAnomalies() {
     wx.navigateTo({ url: '/pages/admin/anomalies/index' })
   },

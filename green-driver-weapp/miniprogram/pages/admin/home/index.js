@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../../utils/api");
 const auth_1 = require("../../../utils/auth");
-const getUnresolvedAnomalyCount_1 = api_1.getUnresolvedAnomalyCount;
 function getTodayChina() {
     const now = new Date();
     const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -70,7 +69,7 @@ Page({
             try {
                 const [stats, anomalyStats] = yield Promise.all([
                     (0, api_1.getAdminDashboardStats)(),
-                    (0, getUnresolvedAnomalyCount_1)().catch(() => ({ count: 0 })),
+                    (0, api_1.getUnresolvedAnomalyCount)().catch(() => ({ count: 0 })),
                 ]);
                 this.setData({
                     pendingCount: (stats === null || stats === void 0 ? void 0 : stats.pendingCount) || 0,
@@ -100,6 +99,12 @@ Page({
     },
     goAttendanceRecords() {
         wx.switchTab({ url: '/pages/admin/attendance-records/index' });
+    },
+    goWorkerList() {
+        wx.navigateTo({ url: '/pages/admin/worker-list/index' });
+    },
+    goDriverList() {
+        wx.navigateTo({ url: '/pages/admin/driver-list/index' });
     },
     goAnomalies() {
         wx.navigateTo({ url: '/pages/admin/anomalies/index' });

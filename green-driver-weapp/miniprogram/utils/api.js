@@ -38,6 +38,21 @@ exports.getWorkerCalendar = getWorkerCalendar;
 exports.getDriverCalendar = getDriverCalendar;
 exports.getAdminWorkers = getAdminWorkers;
 exports.getAdminDrivers = getAdminDrivers;
+exports.getWorkerDetail = getWorkerDetail;
+exports.createWorker = createWorker;
+exports.updateWorker = updateWorker;
+exports.deleteWorker = deleteWorker;
+exports.resignWorker = resignWorker;
+exports.restoreWorker = restoreWorker;
+exports.getWorkerAttendanceCount = getWorkerAttendanceCount;
+exports.getDriverDetail = getDriverDetail;
+exports.createDriver = createDriver;
+exports.updateDriver = updateDriver;
+exports.deleteDriver = deleteDriver;
+exports.resignDriver = resignDriver;
+exports.restoreDriver = restoreDriver;
+exports.resetDriverPassword = resetDriverPassword;
+exports.getDriverAttendanceCount = getDriverAttendanceCount;
 exports.getAdminProjects = getAdminProjects;
 exports.getAdminWorkTypes = getAdminWorkTypes;
 exports.getAdminGroups = getAdminGroups;
@@ -305,8 +320,62 @@ function getAdminWorkers(params) {
     }
     return request(url, { method: 'GET' });
 }
-function getAdminDrivers() {
-    return request('/admin/drivers', { method: 'GET' });
+function getAdminDrivers(params) {
+    let url = '/admin/drivers';
+    if (params) {
+        const qs = Object.entries(params)
+            .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+            .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+            .join('&');
+        if (qs)
+            url += `?${qs}`;
+    }
+    return request(url, { method: 'GET' });
+}
+function getWorkerDetail(id) {
+    return request(`/admin/workers/${id}`, { method: 'GET' });
+}
+function createWorker(data) {
+    return request('/admin/workers', { method: 'POST', data });
+}
+function updateWorker(id, data) {
+    return request(`/admin/workers/${id}`, { method: 'PUT', data });
+}
+function deleteWorker(id) {
+    return request(`/admin/workers/${id}`, { method: 'DELETE' });
+}
+function resignWorker(id) {
+    return request(`/admin/workers/${id}/resign`, { method: 'PUT' });
+}
+function restoreWorker(id) {
+    return request(`/admin/workers/${id}/restore`, { method: 'PUT' });
+}
+function getWorkerAttendanceCount(id) {
+    return request(`/admin/workers/${id}/attendance-count`, { method: 'GET' });
+}
+function getDriverDetail(id) {
+    return request(`/admin/drivers/${id}`, { method: 'GET' });
+}
+function createDriver(data) {
+    return request('/admin/drivers', { method: 'POST', data });
+}
+function updateDriver(id, data) {
+    return request(`/admin/drivers/${id}`, { method: 'PUT', data });
+}
+function deleteDriver(id) {
+    return request(`/admin/drivers/${id}`, { method: 'DELETE' });
+}
+function resignDriver(id) {
+    return request(`/admin/drivers/${id}/resign`, { method: 'PUT' });
+}
+function restoreDriver(id) {
+    return request(`/admin/drivers/${id}/restore`, { method: 'PUT' });
+}
+function resetDriverPassword(id) {
+    return request('/admin/driver/reset-password', { method: 'POST', data: { driverId: id } });
+}
+function getDriverAttendanceCount(id) {
+    return request(`/admin/drivers/${id}/attendance-count`, { method: 'GET' });
 }
 function getAdminProjects() {
     return request('/admin/projects/all', { method: 'GET' });

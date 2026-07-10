@@ -1,0 +1,62 @@
+<view class="worker-list-page">
+  <view class="filter-bar">
+    <view class="filter-header">
+      <text class="filter-title">工人筛选</text>
+      <text class="manage-btn" bindtap="toggleManaging">{{managing ? '完成' : '管理'}}</text>
+    </view>
+    <view class="search-inline">
+      <input class="search-input" placeholder="姓名搜索" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="doSearch" />
+      <text class="search-btn" bindtap="doSearch">搜索</text>
+    </view>
+    <view class="filter-row">
+      <picker mode="selector" range="{{['全部性别','男','女']}}" value="{{gender === '1' ? 1 : gender === '2' ? 2 : 0}}" bindchange="onGenderChange">
+        <view class="filter-picker">{{gender === '1' ? '男' : gender === '2' ? '女' : '全部性别'}} ▼</view>
+      </picker>
+      <picker mode="selector" range="{{['是否技术工','否','是']}}" value="{{isSkilled === '1' ? 2 : isSkilled === '0' ? 1 : 0}}" bindchange="onIsSkilledChange">
+        <view class="filter-picker">{{isSkilled === '1' ? '是' : isSkilled === '0' ? '否' : '是否技术工'}} ▼</view>
+      </picker>
+      <picker mode="selector" range="{{groups}}" range-key="name" value="{{groupIndex}}" bindchange="onGroupChange">
+        <view class="filter-picker">{{groupName || '全部组别'}} ▼</view>
+      </picker>
+      <text class="reset-btn" bindtap="resetFilter">重置</text>
+    </view>
+  </view>
+
+  <view class="status-bar">
+    <text class="status-text">{{showResigned ? '已离职工人' : '在职工人'}}（{{total}}人）</text>
+    <text class="status-toggle" bindtap="toggleShowResigned">{{showResigned ? '查看在职' : '查看离职'}}</text>
+  </view>
+
+  <view class="worker-list">
+    <view class="worker-card" wx:for="{{workers}}" wx:key="id">
+      <view class="worker-header">
+        <text class="worker-name">{{item.name}}</text>
+        <view class="worker-tags">
+          <text class="tag gender">{{item.genderText}}</text>
+          <text class="tag skilled {{item.isSkilledWorkerText === '是' ? 'yes' : ''}}">{{item.isSkilledWorkerText}}</text>
+          <text class="tag status {{item.isEmployed === 1 ? 'on' : 'off'}}">{{item.isEmployed === 1 ? '在职' : '离职'}}</text>
+        </view>
+      </view>
+      <view class="worker-body">
+        <view class="info-row"><text class="info-label">手机</text><text class="info-value">{{item.phone || '-'}}</text></view>
+        <view class="info-row"><text class="info-label">组别</text><text class="info-value">{{item.groupName || '-'}}</text></view>
+        <view class="info-row"><text class="info-label">日薪</text><text class="info-value">¥{{item.baseDailySalary}}</text></view>
+        <view class="info-row"><text class="info-label">加班时薪</text><text class="info-value">¥{{item.overtimeHourlyRate}}</text></view>
+      </view>
+      <view class="worker-actions" wx:if="{{managing}}">
+        <view class="action-btn edit" data-id="{{item.id}}" bindtap="goEdit">编辑</view>
+        <view class="action-btn restore" wx:if="{{item.isEmployed !== 1}}" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="handleRestore">恢复在职</view>
+        <view class="action-btn resign" wx:if="{{item.isEmployed === 1}}" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="handleResign">离职</view>
+        <view class="action-btn delete" data-id="{{item.id}}" data-name="{{item.name}}" bindtap="handleDelete">删除</view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && workers.length === 0}}">
+      <text>暂无工人</text>
+    </view>
+  </view>
+
+  <view class="fab" wx:if="{{!showResigned}}" bindtap="goCreate">
+    <text>+</text>
+  </view>
+</view>

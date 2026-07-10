@@ -1,0 +1,12 @@
+<view class="workers-entry-page">
+  <view class="entry-card" bindtap="goWorkerList">
+    <text class="entry-icon">👷</text>
+    <text class="entry-name">工人列表</text>
+    <text class="entry-desc">管理在职工人、离职工人</text>
+  </view>
+  <view class="entry-card" bindtap="goDriverList">
+    <text class="entry-icon">🚚</text>
+    <text class="entry-name">司机列表</text>
+    <text class="entry-desc">管理在职司机、离职司机</text>
+  </view>
+</view>
