@@ -82,6 +82,14 @@
   color: #9ca3af;
 }
 
+.stat-card.red {
+  background: #fef2f2;
+}
+
+.stat-card.red .stat-value {
+  color: #ef4444;
+}
+
 .section {
   background: #ffffff;
   border-radius: 24rpx;

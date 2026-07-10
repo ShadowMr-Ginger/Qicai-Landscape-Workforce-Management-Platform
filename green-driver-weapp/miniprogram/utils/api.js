@@ -41,6 +41,9 @@ exports.getAdminDrivers = getAdminDrivers;
 exports.getAdminProjects = getAdminProjects;
 exports.getAdminWorkTypes = getAdminWorkTypes;
 exports.getAdminGroups = getAdminGroups;
+exports.getUnresolvedAnomalyCount = getUnresolvedAnomalyCount;
+exports.runGlobalAnomalyCheck = runGlobalAnomalyCheck;
+exports.getAnomalyList = getAnomalyList;
 const constants_1 = require("./constants");
 /**
  * 统一请求封装
@@ -313,4 +316,23 @@ function getAdminWorkTypes() {
 }
 function getAdminGroups() {
     return request('/admin/groups', { method: 'GET' });
+}
+// 异常检测
+function getUnresolvedAnomalyCount() {
+    return request('/admin/anomalies/stats/unresolved', { method: 'GET' });
+}
+function runGlobalAnomalyCheck() {
+    return request('/admin/anomalies/global-check', { method: 'POST' });
+}
+function getAnomalyList(params) {
+    let url = '/admin/anomalies';
+    if (params) {
+        const qs = Object.entries(params)
+            .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+            .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+            .join('&');
+        if (qs)
+            url += `?${qs}`;
+    }
+    return request(url, { method: 'GET' });
 }

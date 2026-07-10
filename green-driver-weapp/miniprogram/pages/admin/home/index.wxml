@@ -19,20 +19,20 @@
         <text class="stat-value">{{pendingCount}}</text>
         <text class="stat-label">待审核批次</text>
       </view>
-      <view class="stat-card blue" bindtap="goWorkerRecords">
-        <text class="stat-icon">👷</text>
-        <text class="stat-value">{{todayWorkerRecords}}</text>
-        <text class="stat-label">今日工人考勤</text>
+      <view class="stat-card red" bindtap="goAnomalies">
+        <text class="stat-icon">⚠️</text>
+        <text class="stat-value">{{anomalyCount}}</text>
+        <text class="stat-label">异常检测</text>
       </view>
       <view class="stat-card purple" bindtap="goDriverRecords">
         <text class="stat-icon">🚚</text>
         <text class="stat-value">{{todayDriverRecords}}</text>
         <text class="stat-label">今日司机考勤</text>
       </view>
-      <view class="stat-card green" bindtap="goAttendanceRecords">
-        <text class="stat-icon">📊</text>
-        <text class="stat-value">{{totalWorkers + totalDrivers}}</text>
-        <text class="stat-label">人员总数</text>
+      <view class="stat-card blue" bindtap="goWorkerRecords">
+        <text class="stat-icon">👷</text>
+        <text class="stat-value">{{todayWorkerRecords}}</text>
+        <text class="stat-label">今日工人考勤</text>
       </view>
     </view>
 

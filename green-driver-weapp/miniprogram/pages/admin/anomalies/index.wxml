@@ -1,0 +1,36 @@
+<view class="anomalies-page">
+  <view class="check-header">
+    <text class="check-title">异常检测结果</text>
+    <text class="check-count" wx:if="{{!loading || anomalies.length > 0}}">共 {{total}} 条未处理异常</text>
+  </view>
+
+  <view class="anomaly-list">
+    <view class="anomaly-card" wx:for="{{anomalies}}" wx:key="id">
+      <view class="anomaly-header">
+        <view class="anomaly-tags">
+          <text class="tag type-{{item.type}}">{{item.typeText}}</text>
+          <text class="tag subtype">{{item.subTypeText}}</text>
+        </view>
+        <text class="anomaly-status {{item.status === 0 ? 'unresolved' : 'resolved'}}">{{item.statusText}}</text>
+      </view>
+      <view class="anomaly-title">{{item.title}}</view>
+      <view class="anomaly-desc" wx:if="{{item.description}}">{{item.description}}</view>
+      <view class="anomaly-meta">
+        <text>关联日期：{{item.relatedDate || '-'}}</text>
+        <text>创建时间：{{item.createTime || '-'}}</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && anomalies.length === 0}}">
+      <text class="empty-icon">⚠️</text>
+      <text class="empty-text">暂无异常记录</text>
+    </view>
+  </view>
+
+  <view class="loading-mask" wx:if="{{checking || loading}}">
+    <view class="loading-box">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在检测异常...</text>
+    </view>
+  </view>
+</view>

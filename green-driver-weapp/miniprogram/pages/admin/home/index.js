@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../../../utils/api");
 const auth_1 = require("../../../utils/auth");
+const getUnresolvedAnomalyCount_1 = api_1.getUnresolvedAnomalyCount;
 function getTodayChina() {
     const now = new Date();
     const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -24,8 +25,7 @@ Page({
         pendingCount: 0,
         todayWorkerRecords: 0,
         todayDriverRecords: 0,
-        totalWorkers: 0,
-        totalDrivers: 0,
+        anomalyCount: 0,
         loading: false,
     },
     onLoad() {
@@ -68,13 +68,15 @@ Page({
         return __awaiter(this, void 0, void 0, function* () {
             this.setData({ loading: true });
             try {
-                const stats = yield (0, api_1.getAdminDashboardStats)();
+                const [stats, anomalyStats] = yield Promise.all([
+                    (0, api_1.getAdminDashboardStats)(),
+                    (0, getUnresolvedAnomalyCount_1)().catch(() => ({ count: 0 })),
+                ]);
                 this.setData({
                     pendingCount: (stats === null || stats === void 0 ? void 0 : stats.pendingCount) || 0,
                     todayWorkerRecords: (stats === null || stats === void 0 ? void 0 : stats.todayWorkerRecords) || 0,
                     todayDriverRecords: (stats === null || stats === void 0 ? void 0 : stats.todayDriverRecords) || 0,
-                    totalWorkers: (stats === null || stats === void 0 ? void 0 : stats.totalWorkers) || 0,
-                    totalDrivers: (stats === null || stats === void 0 ? void 0 : stats.totalDrivers) || 0,
+                    anomalyCount: (anomalyStats === null || anomalyStats === void 0 ? void 0 : anomalyStats.count) || 0,
                 });
             }
             catch (err) {
@@ -98,5 +100,8 @@ Page({
     },
     goAttendanceRecords() {
         wx.switchTab({ url: '/pages/admin/attendance-records/index' });
+    },
+    goAnomalies() {
+        wx.navigateTo({ url: '/pages/admin/anomalies/index' });
     },
 });

@@ -321,3 +321,24 @@ export function getAdminWorkTypes() {
 export function getAdminGroups() {
   return request('/admin/groups', { method: 'GET' })
 }
+
+// 异常检测
+export function getUnresolvedAnomalyCount() {
+  return request('/admin/anomalies/stats/unresolved', { method: 'GET' })
+}
+
+export function runGlobalAnomalyCheck() {
+  return request('/admin/anomalies/global-check', { method: 'POST' })
+}
+
+export function getAnomalyList(params?: any) {
+  let url = '/admin/anomalies'
+  if (params) {
+    const qs = Object.entries(params)
+      .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+      .join('&')
+    if (qs) url += `?${qs}`
+  }
+  return request(url, { method: 'GET' })
+}

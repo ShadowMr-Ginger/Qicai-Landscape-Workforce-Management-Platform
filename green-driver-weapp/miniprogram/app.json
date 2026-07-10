@@ -13,6 +13,7 @@
     "pages/admin/change-password/index",
     "pages/admin/wechat-bind/index",
     "pages/admin/home/index",
+    "pages/admin/anomalies/index",
     "pages/admin/batch-review/index",
     "pages/admin/batch-review-detail/index",
     "pages/admin/attendance-records/index",

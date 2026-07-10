@@ -1,4 +1,4 @@
-import { getAdminDashboardStats, getCurrentUser } from '../../../utils/api'
+import { getAdminDashboardStats, getCurrentUser, getUnresolvedAnomalyCount } from '../../../utils/api'
 import { getUserInfo } from '../../../utils/auth'
 import { BATCH_STATUS_TEXT } from '../../../utils/constants'
 
@@ -16,8 +16,7 @@ Page({
     pendingCount: 0,
     todayWorkerRecords: 0,
     todayDriverRecords: 0,
-    totalWorkers: 0,
-    totalDrivers: 0,
+    anomalyCount: 0,
     loading: false,
   },
 
@@ -61,13 +60,15 @@ Page({
   async loadStats() {
     this.setData({ loading: true })
     try {
-      const stats: any = await getAdminDashboardStats()
+      const [stats, anomalyStats] = await Promise.all([
+        getAdminDashboardStats(),
+        getUnresolvedAnomalyCount().catch(() => ({ count: 0 })),
+      ])
       this.setData({
         pendingCount: stats?.pendingCount || 0,
         todayWorkerRecords: stats?.todayWorkerRecords || 0,
         todayDriverRecords: stats?.todayDriverRecords || 0,
-        totalWorkers: stats?.totalWorkers || 0,
-        totalDrivers: stats?.totalDrivers || 0,
+        anomalyCount: anomalyStats?.count || 0,
       })
     } catch (err) {
       console.error('加载统计失败', err)
@@ -92,5 +93,9 @@ Page({
 
   goAttendanceRecords() {
     wx.switchTab({ url: '/pages/admin/attendance-records/index' })
+  },
+
+  goAnomalies() {
+    wx.navigateTo({ url: '/pages/admin/anomalies/index' })
   },
 })
