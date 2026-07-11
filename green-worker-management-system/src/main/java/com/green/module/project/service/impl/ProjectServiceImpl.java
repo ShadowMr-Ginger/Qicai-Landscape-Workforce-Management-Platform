@@ -442,7 +442,7 @@ public class ProjectServiceImpl implements ProjectService {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalPayableWage = totalWorkerWage.add(totalDriverWage);
-        BigDecimal netProfit = totalProfit.subtract(totalPayableWage);
+        BigDecimal netProfit = totalRevenue.subtract(totalPayableWage);
 
         Map<String, Object> result = new HashMap<>();
         result.put("todayRevenue", totalRevenue);
