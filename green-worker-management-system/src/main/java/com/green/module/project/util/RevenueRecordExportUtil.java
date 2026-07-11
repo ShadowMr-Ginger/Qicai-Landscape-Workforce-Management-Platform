@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class RevenueRecordExportUtil {
 
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy年M月d日");
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("M月d日");
     private static final String[] HEADERS = {"日期", "服务名称", "数量", "单价", "金额", "备注"};
 
     // Word 每页数据行数（标题、表头、页计、总计另行计算）
