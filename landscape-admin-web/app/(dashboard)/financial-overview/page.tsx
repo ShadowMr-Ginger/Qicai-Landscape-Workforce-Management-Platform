@@ -181,15 +181,15 @@ function MonthCalendar({
                 <>
                   <span className="text-sm font-semibold text-foreground">{dayIndex + 1}</span>
                   <div className="space-y-0.5 text-[10px] leading-tight">
-                    <p className="text-green-600 dark:text-green-400 truncate">
+                    <p className="text-green-600 dark:text-green-400 break-all">
                       营 {formatMoney(day.revenue)}
                     </p>
-                    <p className="text-orange-600 dark:text-orange-400 truncate">
+                    <p className="text-orange-600 dark:text-orange-400 break-all">
                       工 {formatMoney(day.payableWage)}
                     </p>
                     <p
                       className={cn(
-                        "truncate",
+                        "break-all",
                         day.netProfit >= 0
                           ? "text-blue-600 dark:text-blue-400"
                           : "text-red-600 dark:text-red-400"
@@ -484,7 +484,7 @@ export default function FinancialOverviewPage() {
       </div>
       {/* 月度每日明细弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[66vw] max-w-none max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedMonth ? `${currentYear} 年 ${selectedMonth} 月 每日财务明细` : "每日财务明细"}
