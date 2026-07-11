@@ -84,6 +84,7 @@ const navItems: NavItem[] = [
     children: [
       { title: "月度考勤表导出", href: "/reports/monthly-attendance" },
       { title: "客户对账表导出", href: "/reports/customer-reconciliation" },
+      { title: "台账导出", href: "/reports/ledger-export" },
     ],
   },
   { title: "系统日志", href: "/system-logs", icon: FileText },

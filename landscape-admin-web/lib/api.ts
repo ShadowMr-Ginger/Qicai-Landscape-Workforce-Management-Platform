@@ -556,6 +556,18 @@ export async function deleteLedger(id: number) {
   return res.data;
 }
 
+export async function exportLedgers(params: {
+  startDate: string;
+  endDate: string;
+  format: "word" | "excel";
+}) {
+  const res = await api.get("/admin/ledgers/export", {
+    params,
+    responseType: "blob",
+  });
+  return res;
+}
+
 export async function getProjectCommonServices(projectId: number) {
   const res = await api.get(`/admin/projects/${projectId}/common-services`);
   return res.data;

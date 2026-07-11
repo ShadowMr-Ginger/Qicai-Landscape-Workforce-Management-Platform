@@ -55,4 +55,13 @@ public class LedgerController {
         ledgerService.delete(id);
         return ApiResult.success("删除成功");
     }
+
+    @GetMapping("/export")
+    public void exportLedgers(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "word") String format,
+            jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        ledgerService.exportLedgers(startDate, endDate, format, response);
+    }
 }

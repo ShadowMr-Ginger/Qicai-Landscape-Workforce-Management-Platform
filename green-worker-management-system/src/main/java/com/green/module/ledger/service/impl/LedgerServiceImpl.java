@@ -22,9 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.green.module.ledger.util.LedgerExportUtil;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,6 +101,50 @@ public class LedgerServiceImpl implements LedgerService {
         return ledgerMapper.selectList(wrapper).stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LedgerVO> listByDateRange(LocalDate startDate, LocalDate endDate) {
+        QueryWrapper<LedgerEntity> wrapper = new QueryWrapper<LedgerEntity>()
+                .eq("deleted", 0)
+                .orderByAsc("record_date", "create_time");
+        if (startDate != null) {
+            wrapper.ge("record_date", startDate);
+        }
+        if (endDate != null) {
+            wrapper.le("record_date", endDate);
+        }
+        return ledgerMapper.selectList(wrapper).stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void exportLedgers(LocalDate startDate, LocalDate endDate, String format,
+                              jakarta.servlet.http.HttpServletResponse response) throws IOException {
+        List<LedgerVO> records = listByDateRange(startDate, endDate);
+        boolean isExcel = "excel".equalsIgnoreCase(format);
+        String title = startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "~"
+                + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " - 台账导出";
+        String encodedName = URLEncoder.encode(title + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20")
+                .replace("%7E", "~")
+                .replace("%2D", "-")
+                .replace("%5F", "_")
+                .replace("%2E", ".");
+        response.setContentType(isExcel
+                ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedName + "\"; filename*=UTF-8''" + encodedName);
+
+        try (OutputStream out = response.getOutputStream()) {
+            if (isExcel) {
+                LedgerExportUtil.exportExcel(records, startDate, endDate, out);
+            } else {
+                LedgerExportUtil.exportWord(records, startDate, endDate, out);
+            }
+            out.flush();
+        }
     }
 
     @Override

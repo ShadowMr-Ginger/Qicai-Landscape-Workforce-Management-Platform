@@ -27,6 +27,17 @@ public interface LedgerService {
     java.util.List<LedgerVO> listByProjectAndDateRange(Long projectId, LocalDate startDate, LocalDate endDate);
 
     /**
+     * 查询指定日期范围内的所有台账列表（按日期升序，用于台账导出）
+     */
+    java.util.List<LedgerVO> listByDateRange(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * 导出台账报表
+     */
+    void exportLedgers(LocalDate startDate, LocalDate endDate, String format,
+                       jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException;
+
+    /**
      * 台账详情
      */
     LedgerVO detail(Long id);
