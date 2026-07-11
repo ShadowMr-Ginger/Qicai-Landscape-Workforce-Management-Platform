@@ -501,45 +501,49 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (query.getDriverId() != null) {
             wrapper.eq(WorkerAttendanceRecordEntity::getDriverId, query.getDriverId());
         }
+
+        // 按工人属性（姓名、性别、技术工、组别）在 SQL 层过滤，避免内存过滤导致分页错乱
+        if (StringUtils.hasText(query.getWorkerName()) || query.getGender() != null
+                || query.getIsSkilledWorker() != null || query.getGroupId() != null) {
+            List<Long> workerIds = getFilteredWorkerIds(query);
+            if (workerIds.isEmpty()) {
+                Page<WorkerAttendanceRecordVO> emptyResult = new Page<>(query.getPageNum(), query.getPageSize(), 0);
+                emptyResult.setRecords(Collections.emptyList());
+                return emptyResult;
+            }
+            wrapper.in(WorkerAttendanceRecordEntity::getWorkerId, workerIds);
+        }
+
         wrapper.orderByDesc(WorkerAttendanceRecordEntity::getAttendanceDate);
 
         IPage<WorkerAttendanceRecordEntity> entityPage = workerRecordMapper.selectPage(page, wrapper);
 
-        // 若需要按工人属性筛选（姓名、性别、技术工、组别），先查出符合条件的工人ID
-        Set<Long> filteredWorkerIds = null;
-        if (StringUtils.hasText(query.getWorkerName()) || query.getGender() != null
-                || query.getIsSkilledWorker() != null || query.getGroupId() != null) {
-            LambdaQueryWrapper<WorkerEntity> wWrapper = new LambdaQueryWrapper<>();
-            if (StringUtils.hasText(query.getWorkerName())) {
-                wWrapper.like(WorkerEntity::getName, query.getWorkerName());
-            }
-            if (query.getGender() != null) {
-                wWrapper.eq(WorkerEntity::getGender, query.getGender());
-            }
-            if (query.getIsSkilledWorker() != null) {
-                wWrapper.eq(WorkerEntity::getIsSkilledWorker, query.getIsSkilledWorker());
-            }
-            if (query.getGroupId() != null) {
-                wWrapper.eq(WorkerEntity::getGroupId, query.getGroupId());
-            }
-            filteredWorkerIds = workerMapper.selectList(wWrapper).stream()
-                    .map(WorkerEntity::getId).collect(Collectors.toSet());
-        }
-
-        // 过滤记录
-        final Set<Long> workerIdSet = filteredWorkerIds;
-        List<WorkerAttendanceRecordEntity> filteredRecords = entityPage.getRecords().stream().filter(r -> {
-            if (workerIdSet != null && !workerIdSet.contains(r.getWorkerId())) return false;
-            return true;
-        }).collect(Collectors.toList());
-
-        List<WorkerAttendanceRecordVO> voList = filteredRecords.stream()
+        List<WorkerAttendanceRecordVO> voList = entityPage.getRecords().stream()
                 .map(this::convertWorkerRecord)
                 .collect(Collectors.toList());
 
         Page<WorkerAttendanceRecordVO> result = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
         result.setRecords(voList);
         return result;
+    }
+
+    private List<Long> getFilteredWorkerIds(WorkerRecordQuery query) {
+        LambdaQueryWrapper<WorkerEntity> wWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(query.getWorkerName())) {
+            wWrapper.like(WorkerEntity::getName, query.getWorkerName());
+        }
+        if (query.getGender() != null) {
+            wWrapper.eq(WorkerEntity::getGender, query.getGender());
+        }
+        if (query.getIsSkilledWorker() != null) {
+            wWrapper.eq(WorkerEntity::getIsSkilledWorker, query.getIsSkilledWorker());
+        }
+        if (query.getGroupId() != null) {
+            wWrapper.eq(WorkerEntity::getGroupId, query.getGroupId());
+        }
+        return workerMapper.selectList(wWrapper).stream()
+                .map(WorkerEntity::getId)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -681,25 +685,27 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (query.getDateTo() != null) {
             wrapper.le(DriverAttendanceRecordEntity::getAttendanceDate, query.getDateTo());
         }
+
+        // 按司机姓名在 SQL 层过滤，避免内存过滤导致分页错乱
+        if (StringUtils.hasText(query.getDriverName())) {
+            LambdaQueryWrapper<DriverEntity> dWrapper = new LambdaQueryWrapper<>();
+            dWrapper.like(DriverEntity::getRealName, query.getDriverName());
+            List<Long> driverIds = driverMapper.selectList(dWrapper).stream()
+                    .map(DriverEntity::getId)
+                    .collect(Collectors.toList());
+            if (driverIds.isEmpty()) {
+                Page<DriverAttendanceRecordVO> emptyResult = new Page<>(query.getPageNum(), query.getPageSize(), 0);
+                emptyResult.setRecords(Collections.emptyList());
+                return emptyResult;
+            }
+            wrapper.in(DriverAttendanceRecordEntity::getDriverId, driverIds);
+        }
+
         wrapper.orderByDesc(DriverAttendanceRecordEntity::getAttendanceDate);
 
         IPage<DriverAttendanceRecordEntity> entityPage = driverRecordMapper.selectPage(page, wrapper);
 
-        // 若需要按司机姓名筛选
-        Set<Long> filteredDriverIds = null;
-        if (StringUtils.hasText(query.getDriverName())) {
-            LambdaQueryWrapper<DriverEntity> dWrapper = new LambdaQueryWrapper<>();
-            dWrapper.like(DriverEntity::getRealName, query.getDriverName());
-            filteredDriverIds = driverMapper.selectList(dWrapper).stream()
-                    .map(DriverEntity::getId).collect(Collectors.toSet());
-        }
-
-        final Set<Long> finalFilteredDriverIds = filteredDriverIds;
-        List<DriverAttendanceRecordEntity> filteredRecords = entityPage.getRecords().stream()
-                .filter(r -> finalFilteredDriverIds == null || finalFilteredDriverIds.contains(r.getDriverId()))
-                .collect(Collectors.toList());
-
-        List<DriverAttendanceRecordVO> voList = filteredRecords.stream()
+        List<DriverAttendanceRecordVO> voList = entityPage.getRecords().stream()
                 .map(this::convertDriverRecord)
                 .collect(Collectors.toList());
 
