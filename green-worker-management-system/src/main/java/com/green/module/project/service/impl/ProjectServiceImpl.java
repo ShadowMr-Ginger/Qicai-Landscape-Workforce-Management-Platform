@@ -487,6 +487,75 @@ public class ProjectServiceImpl implements ProjectService {
         return result;
     }
 
+    @Override
+    public Map<String, Object> getFinancialOverviewDaily(Integer year, Integer month) {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+        int targetYear = year == null ? today.getYear() : year;
+        int targetMonth = month == null ? today.getMonthValue() : month;
+        LocalDate start = LocalDate.of(targetYear, targetMonth, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<LedgerEntity> ledgers = ledgerMapper.selectList(
+            new QueryWrapper<LedgerEntity>()
+                .ge("record_date", start)
+                .le("record_date", end)
+        );
+        Map<LocalDate, BigDecimal> revenueMap = ledgers.stream()
+            .filter(l -> l.getRecordDate() != null)
+            .collect(Collectors.groupingBy(
+                LedgerEntity::getRecordDate,
+                Collectors.reducing(BigDecimal.ZERO, LedgerEntity::getTotalAmount, BigDecimal::add)
+            ));
+
+        List<WorkerAttendanceRecordEntity> workerRecords = workerAttendanceRecordMapper.selectList(
+            new QueryWrapper<WorkerAttendanceRecordEntity>()
+                .ge("attendance_date", start)
+                .le("attendance_date", end)
+        );
+        Map<LocalDate, BigDecimal> workerWageMap = workerRecords.stream()
+            .filter(r -> r.getAttendanceDate() != null)
+            .collect(Collectors.groupingBy(
+                WorkerAttendanceRecordEntity::getAttendanceDate,
+                Collectors.reducing(BigDecimal.ZERO, WorkerAttendanceRecordEntity::getTotalWage, BigDecimal::add)
+            ));
+
+        List<DriverAttendanceRecordEntity> driverRecords = driverAttendanceRecordMapper.selectList(
+            new QueryWrapper<DriverAttendanceRecordEntity>()
+                .ge("attendance_date", start)
+                .le("attendance_date", end)
+        );
+        Map<LocalDate, BigDecimal> driverWageMap = driverRecords.stream()
+            .filter(r -> r.getAttendanceDate() != null)
+            .collect(Collectors.groupingBy(
+                DriverAttendanceRecordEntity::getAttendanceDate,
+                Collectors.reducing(BigDecimal.ZERO, DriverAttendanceRecordEntity::getTotalWage, BigDecimal::add)
+            ));
+
+        List<Map<String, Object>> days = new ArrayList<>();
+        for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+            BigDecimal revenue = revenueMap.getOrDefault(d, BigDecimal.ZERO);
+            BigDecimal workerWage = workerWageMap.getOrDefault(d, BigDecimal.ZERO);
+            BigDecimal driverWage = driverWageMap.getOrDefault(d, BigDecimal.ZERO);
+            BigDecimal payableWage = workerWage.add(driverWage);
+            BigDecimal netProfit = revenue.subtract(payableWage);
+
+            Map<String, Object> dayStat = new HashMap<>();
+            dayStat.put("date", d.toString());
+            dayStat.put("revenue", revenue);
+            dayStat.put("workerWage", workerWage);
+            dayStat.put("driverWage", driverWage);
+            dayStat.put("payableWage", payableWage);
+            dayStat.put("netProfit", netProfit);
+            days.add(dayStat);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("year", targetYear);
+        result.put("month", targetMonth);
+        result.put("days", days);
+        return result;
+    }
+
     private Map<String, Object> calcPeriodStats(LocalDate start, LocalDate end) {
         List<LedgerEntity> ledgers = ledgerMapper.selectList(
             new QueryWrapper<LedgerEntity>()

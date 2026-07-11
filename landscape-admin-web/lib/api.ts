@@ -301,6 +301,11 @@ export async function getFinancialOverview() {
   return res.data;
 }
 
+export async function getFinancialOverviewDaily(year: number, month: number) {
+  const res = await api.get('/admin/projects/financial-overview/daily', { params: { year, month } });
+  return res.data;
+}
+
 export async function getWorkerAttendanceRecords(params: Record<string, unknown>) {
   const res = await api.get('/admin/attendance/worker-records', { params });
   return res.data;

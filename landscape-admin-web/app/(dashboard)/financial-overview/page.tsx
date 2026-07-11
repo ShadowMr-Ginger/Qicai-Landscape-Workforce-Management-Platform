@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getFinancialOverview } from "@/lib/api";
+import { getFinancialOverview, getFinancialOverviewDaily } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
   TrendingUp,
@@ -32,6 +39,15 @@ interface PeriodStats {
 
 interface MonthlyStats extends PeriodStats {
   month: number;
+}
+
+interface DailyStat {
+  date: string;
+  revenue: number;
+  workerWage: number;
+  driverWage: number;
+  payableWage: number;
+  netProfit: number;
 }
 
 interface FinancialOverviewData {
@@ -125,6 +141,74 @@ function NetProfitMiniBar({ value, max }: { value: number; max: number }) {
   );
 }
 
+function MonthCalendar({
+  year,
+  month,
+  days,
+}: {
+  year: number;
+  month: number;
+  days: DailyStat[];
+}) {
+  const weekDays = ["一", "二", "三", "四", "五", "六", "日"];
+  const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
+  const offset = (firstDayOfWeek + 6) % 7;
+  const totalCells = offset + days.length;
+  const rows = Math.ceil(totalCells / 7);
+
+  return (
+    <div>
+      <div className="grid grid-cols-7 gap-2 text-center text-xs text-muted-foreground mb-2">
+        {weekDays.map((d) => (
+          <div key={d}>{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {Array.from({ length: rows * 7 }).map((_, i) => {
+          const dayIndex = i - offset;
+          const day = dayIndex >= 0 && dayIndex < days.length ? days[dayIndex] : null;
+          return (
+            <div
+              key={i}
+              className={cn(
+                "min-h-[88px] rounded-xl border p-2 flex flex-col justify-between",
+                day
+                  ? "bg-card hover:bg-muted/40 transition-colors"
+                  : "bg-transparent border-transparent"
+              )}
+            >
+              {day && (
+                <>
+                  <span className="text-sm font-semibold text-foreground">{dayIndex + 1}</span>
+                  <div className="space-y-0.5 text-[10px] leading-tight">
+                    <p className="text-green-600 dark:text-green-400 truncate">
+                      营 {formatMoney(day.revenue)}
+                    </p>
+                    <p className="text-orange-600 dark:text-orange-400 truncate">
+                      工 {formatMoney(day.payableWage)}
+                    </p>
+                    <p
+                      className={cn(
+                        "truncate",
+                        day.netProfit >= 0
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-red-600 dark:text-red-400"
+                      )}
+                    >
+                      净 {formatMoney(day.netProfit)}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+  );
+}
+
 export default function FinancialOverviewPage() {
   const [data, setData] = useState<FinancialOverviewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,6 +228,29 @@ export default function FinancialOverviewPage() {
     data?.monthlyTrend && data.monthlyTrend.length > 0
       ? Math.max(...data.monthlyTrend.map((m) => m.revenue))
       : 0;
+
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [dailyData, setDailyData] = useState<DailyStat[]>([]);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const currentYear = new Date().getFullYear();
+
+  const handleMonthClick = (month: number) => {
+    setSelectedMonth(month);
+    setDialogOpen(true);
+    setDailyLoading(true);
+    getFinancialOverviewDaily(currentYear, month)
+      .then((res) => {
+        if (res.code === 200 && res.data) {
+          setDailyData(res.data.days || []);
+        }
+      })
+      .catch(() => setDailyData([]))
+      .finally(() => setDailyLoading(false));
+  };
+
+  const selectedMonthStats = data?.monthlyTrend?.find((m) => m.month === selectedMonth);
 
   return (
     <div className="space-y-6">
@@ -291,7 +398,11 @@ export default function FinancialOverviewPage() {
                 </TableHeader>
                 <TableBody>
                   {data?.monthlyTrend?.map((item) => (
-                    <TableRow key={item.month}>
+                    <TableRow
+                      key={item.month}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleMonthClick(item.month)}
+                    >
                       <TableCell className="font-medium">{item.month} 月</TableCell>
                       <TableCell>{formatMoney(item.revenue)}</TableCell>
                       <TableCell>{formatMoney(item.payableWage)}</TableCell>
@@ -371,6 +482,80 @@ export default function FinancialOverviewPage() {
           </CardContent>
         </Card>
       </div>
+      {/* 月度每日明细弹窗 */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedMonth ? `${currentYear} 年 ${selectedMonth} 月 每日财务明细` : "每日财务明细"}
+            </DialogTitle>
+            <DialogDescription>
+              点击表格中的月份可查看当月每日营业额、待付工资与净利润。
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedMonthStats && (
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="rounded-xl bg-green-50 dark:bg-green-950/20 p-3">
+                <p className="text-xs text-green-600 dark:text-green-400 mb-1">当月营业额</p>
+                <p className="text-lg font-bold text-foreground">{formatMoney(selectedMonthStats.revenue)}</p>
+              </div>
+              <div className="rounded-xl bg-orange-50 dark:bg-orange-950/20 p-3">
+                <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">当月待付工资</p>
+                <p className="text-lg font-bold text-foreground">{formatMoney(selectedMonthStats.payableWage)}</p>
+              </div>
+              <div className={cn(
+                "rounded-xl p-3",
+                selectedMonthStats.netProfit >= 0
+                  ? "bg-blue-50 dark:bg-blue-950/20"
+                  : "bg-red-50 dark:bg-red-950/20"
+              )}>
+                <p className={cn(
+                  "text-xs mb-1",
+                  selectedMonthStats.netProfit >= 0
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-red-600 dark:text-red-400"
+                )}>
+                  当月净利润
+                </p>
+                <p className="text-lg font-bold text-foreground">{formatMoney(selectedMonthStats.netProfit)}</p>
+              </div>
+            </div>
+          )}
+
+          {dailyLoading ? (
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 28 }).map((_, i) => (
+                <Skeleton key={i} className="h-[88px] rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <>
+              {selectedMonth && (
+                <MonthCalendar
+                  year={currentYear}
+                  month={selectedMonth}
+                  days={dailyData}
+                />
+              )}
+              <div className="flex flex-wrap items-center gap-4 mt-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  营业额
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-orange-500" />
+                  待付工资
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
+                  净利润
+                </span>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

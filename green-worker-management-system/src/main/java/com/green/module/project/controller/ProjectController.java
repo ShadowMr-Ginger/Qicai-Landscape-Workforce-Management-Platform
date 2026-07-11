@@ -105,6 +105,13 @@ public class ProjectController {
         return ApiResult.success(projectService.getFinancialOverview());
     }
 
+    @GetMapping("/financial-overview/daily")
+    public ApiResult<Map<String, Object>> getFinancialOverviewDaily(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ApiResult.success(projectService.getFinancialOverviewDaily(year, month));
+    }
+
     @GetMapping("/{id}/stats")
     public ApiResult<Map<String, Object>> getProjectDetailStats(@PathVariable Long id) {
         return ApiResult.success(projectService.getProjectDetailStats(id));

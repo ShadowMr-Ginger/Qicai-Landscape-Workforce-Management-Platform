@@ -39,6 +39,11 @@ public interface ProjectService {
     Map<String, Object> getFinancialOverview();
 
     /**
+     * 获取指定年月的每日财务明细（营业额、工人工资、司机工资、净利润）
+     */
+    Map<String, Object> getFinancialOverviewDaily(Integer year, Integer month);
+
+    /**
      * 获取项目详情页统计：总工数、今日工数、待发工资累计
      */
     Map<String, Object> getProjectDetailStats(Long projectId);
