@@ -26,7 +26,7 @@ public class SystemConfigController {
     @GetMapping("/{key}")
     public ApiResult<String> getConfig(@PathVariable String key) {
         String value = systemConfigService.getValue(key);
-        return ApiResult.<String>success(value);
+        return ApiResult.success(null, value);
     }
 
     @PutMapping("/{key}")
