@@ -493,8 +493,8 @@ export async function getProjectDetailStats(id: number) {
   return res.data;
 }
 
-export async function getProjectRevenueRecords(id: number) {
-  const res = await api.get(`/admin/projects/${id}/revenue-records`);
+export async function getProjectRevenueRecords(id: number, params?: { startDate?: string; endDate?: string }) {
+  const res = await api.get(`/admin/projects/${id}/revenue-records`, { params });
   return res.data;
 }
 

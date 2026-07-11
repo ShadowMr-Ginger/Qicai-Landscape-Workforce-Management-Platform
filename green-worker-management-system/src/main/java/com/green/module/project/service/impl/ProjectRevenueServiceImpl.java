@@ -52,6 +52,12 @@ public class ProjectRevenueServiceImpl implements ProjectRevenueService {
     }
 
     @Override
+    public List<RevenueRecordVO> listByProject(Long projectId, LocalDate startDate, LocalDate endDate) {
+        List<LedgerVO> ledgers = ledgerService.listByProjectAndDateRange(projectId, startDate, endDate);
+        return ledgers.stream().map(this::convertToVO).collect(Collectors.toList());
+    }
+
+    @Override
     public RevenueRecordVO detail(Long recordId) {
         return convertToVO(ledgerService.detail(recordId));
     }

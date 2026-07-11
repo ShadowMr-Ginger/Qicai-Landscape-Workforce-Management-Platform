@@ -19,6 +19,8 @@ public interface ProjectRevenueService {
 
     List<RevenueRecordVO> listByProject(Long projectId);
 
+    List<RevenueRecordVO> listByProject(Long projectId, LocalDate startDate, LocalDate endDate);
+
     RevenueRecordVO detail(Long recordId);
 
     void exportRecords(Long projectId, LocalDate startDate, LocalDate endDate, String format, HttpServletResponse response) throws IOException;

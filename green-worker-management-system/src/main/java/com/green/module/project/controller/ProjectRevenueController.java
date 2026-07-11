@@ -29,7 +29,13 @@ public class ProjectRevenueController {
     private final ProjectRevenueService projectRevenueService;
 
     @GetMapping("/{projectId}/revenue-records")
-    public ApiResult<List<RevenueRecordVO>> listRecords(@PathVariable Long projectId) {
+    public ApiResult<List<RevenueRecordVO>> listRecords(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            return ApiResult.success(projectRevenueService.listByProject(projectId, startDate, endDate));
+        }
         return ApiResult.success(projectRevenueService.listByProject(projectId));
     }
 
