@@ -1,6 +1,7 @@
 export interface MonthlyReportDay {
   day: number;
   wage: number;
+  totalWage: number;
   overtimeHours: number;
   empty: boolean;
 }

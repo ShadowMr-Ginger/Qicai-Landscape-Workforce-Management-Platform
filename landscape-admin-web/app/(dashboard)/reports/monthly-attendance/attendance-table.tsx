@@ -214,7 +214,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 ? []
                 : [
                     new TextRun({
-                      text: formatWage(day.wage),
+                      text: formatWage(day.totalWage),
                       size: 14,
                       bold: true,
                     }),
@@ -374,7 +374,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
                 <td className="text-center font-bold">合计</td>
                 {report.summary.dailyWages.map((day) => (
                   <td key={day.day} className="text-center font-bold cell-wage">
-                    {!day.empty && <span className="wage-text">{formatWage(day.wage)}</span>}
+                    {!day.empty && <span className="wage-text">{formatWage(day.totalWage)}</span>}
                   </td>
                 ))}
                 <td className="text-center font-bold">{formatNumber(report.summary.attendanceDays)}</td>

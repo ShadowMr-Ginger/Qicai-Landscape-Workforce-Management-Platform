@@ -21,6 +21,11 @@ public class MonthlyReportDayVO {
     private BigDecimal wage;
 
     /**
+     * 当日实际总工资（含加班工资）
+     */
+    private BigDecimal totalWage;
+
+    /**
      * 当日加班时长（小时）
      */
     private BigDecimal overtimeHours;

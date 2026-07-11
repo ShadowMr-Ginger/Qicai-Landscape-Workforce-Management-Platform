@@ -1525,6 +1525,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private <T> List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, T> dayMap,
                                                           java.util.function.Function<T, BigDecimal> wageExtractor,
+                                                          java.util.function.Function<T, BigDecimal> totalWageExtractor,
                                                           java.util.function.Function<T, BigDecimal> overtimeExtractor) {
         List<MonthlyReportDayVO> days = new ArrayList<>();
         LocalDate today = LocalDate.now();
@@ -1537,17 +1538,20 @@ public class AttendanceServiceImpl implements AttendanceService {
                 // 今天之后的日期不显示
                 day.setEmpty(true);
                 day.setWage(BigDecimal.ZERO);
+                day.setTotalWage(BigDecimal.ZERO);
                 day.setOvertimeHours(BigDecimal.ZERO);
             } else {
                 T rec = dayMap.get(d);
                 if (rec != null) {
                     day.setEmpty(false);
                     day.setWage(wageExtractor.apply(rec) != null ? wageExtractor.apply(rec) : BigDecimal.ZERO);
+                    day.setTotalWage(totalWageExtractor.apply(rec) != null ? totalWageExtractor.apply(rec) : BigDecimal.ZERO);
                     BigDecimal ot = overtimeExtractor.apply(rec);
                     day.setOvertimeHours(ot != null ? ot : BigDecimal.ZERO);
                 } else {
                     day.setEmpty(true);
                     day.setWage(BigDecimal.ZERO);
+                    day.setTotalWage(BigDecimal.ZERO);
                     day.setOvertimeHours(BigDecimal.ZERO);
                 }
             }
@@ -1557,11 +1561,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     private List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, WorkerAttendanceRecordEntity> dayMap, boolean isWorker) {
-        return buildDailyWages(ym, dayMap, WorkerAttendanceRecordEntity::getDailyWage, WorkerAttendanceRecordEntity::getOvertimeHours);
+        return buildDailyWages(ym, dayMap, WorkerAttendanceRecordEntity::getDailyWage, WorkerAttendanceRecordEntity::getTotalWage, WorkerAttendanceRecordEntity::getOvertimeHours);
     }
 
     private List<MonthlyReportDayVO> buildDailyWages(YearMonth ym, Map<Integer, DriverAttendanceRecordEntity> dayMap, Object ignored) {
-        return buildDailyWages(ym, dayMap, DriverAttendanceRecordEntity::getDailyWage, DriverAttendanceRecordEntity::getOvertimeHours);
+        return buildDailyWages(ym, dayMap, DriverAttendanceRecordEntity::getDailyWage, DriverAttendanceRecordEntity::getTotalWage, DriverAttendanceRecordEntity::getOvertimeHours);
     }
 
     private BigDecimal calculateAttendanceDays(Collection<WorkerAttendanceRecordEntity> records) {
@@ -1617,12 +1621,13 @@ public class AttendanceServiceImpl implements AttendanceService {
                 BigDecimal dayTotal = BigDecimal.ZERO;
                 for (MonthlyReportRecordVO rec : records) {
                     MonthlyReportDayVO rd = rec.getDailyWages().get(dayNum - 1);
-                    if (!rd.isEmpty() && rd.getWage() != null) {
-                        dayTotal = dayTotal.add(rd.getWage());
+                    if (!rd.isEmpty() && rd.getTotalWage() != null) {
+                        dayTotal = dayTotal.add(rd.getTotalWage());
                     }
                 }
                 day.setEmpty(dayTotal.compareTo(BigDecimal.ZERO) == 0);
                 day.setWage(dayTotal);
+                day.setTotalWage(dayTotal);
                 day.setOvertimeHours(BigDecimal.ZERO);
             }
             summaryDays.add(day);
