@@ -384,9 +384,7 @@ export async function getSystemConfig(key: string) {
 }
 
 export async function updateSystemConfig(key: string, value: string) {
-  const res = await api.put(`/admin/system-configs/${key}`, value, {
-    headers: { 'Content-Type': 'text/plain' }
-  });
+  const res = await api.put(`/admin/system-configs/${key}`, { value });
   return res.data;
 }
 

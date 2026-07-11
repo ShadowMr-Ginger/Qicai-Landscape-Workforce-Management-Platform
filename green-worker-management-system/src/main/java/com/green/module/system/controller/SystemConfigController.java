@@ -6,6 +6,7 @@ import com.green.module.system.service.SystemConfigService;
 import com.green.module.system.service.SystemLogService;
 import com.green.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,8 @@ public class SystemConfigController {
     }
 
     @PutMapping("/{key}")
-    public ApiResult<Void> updateConfig(@PathVariable String key, @RequestBody String value, HttpServletRequest request) {
+    public ApiResult<Void> updateConfig(@PathVariable String key, @RequestBody Map<String, String> body, HttpServletRequest request) {
+        String value = body == null ? null : body.get("value");
         systemConfigService.setValue(key, value);
         systemLogService.logAction(SecurityUtils.getCurrentUserId(), "ADMIN", "UPDATE",
                 "系统配置", "更新配置: " + key + "=" + value, "SUCCESS", request);
