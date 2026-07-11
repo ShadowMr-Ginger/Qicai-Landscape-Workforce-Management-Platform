@@ -484,7 +484,7 @@ export default function FinancialOverviewPage() {
       </div>
       {/* 月度每日明细弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="w-[66vw] max-w-none max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[66vw] max-w-[66vw] sm:max-w-[66vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedMonth ? `${currentYear} 年 ${selectedMonth} 月 每日财务明细` : "每日财务明细"}
