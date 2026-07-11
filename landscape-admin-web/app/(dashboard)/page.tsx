@@ -251,7 +251,7 @@ export default function DashboardPage() {
                   今日净利润
                 </p>
                 <p className="text-3xl font-bold text-foreground">¥{todayNetProfit.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">利润 - 待付工资</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">营业额 - 待付工资</p>
               </div>
               <div className={cn(
                 "w-11 h-11 rounded-xl flex items-center justify-center",

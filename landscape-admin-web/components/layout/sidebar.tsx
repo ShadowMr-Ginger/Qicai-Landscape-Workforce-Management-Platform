@@ -38,7 +38,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: "首页概览", href: "/", icon: LayoutDashboard },
+  {
+    title: "首页概览",
+    icon: LayoutDashboard,
+    children: [
+      { title: "首页", href: "/" },
+      { title: "财务概览", href: "/financial-overview" },
+    ],
+  },
   {
     title: "工人管理",
     icon: Users,
@@ -94,6 +101,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, sidebarCollapsed, toggleSidebar, logout } = useAuthStore();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    "首页概览": pathname === "/" || pathname === "/financial-overview",
     "工人管理": pathname === "/workers" || pathname === "/groups",
     "司机管理": pathname === "/drivers" || pathname === "/drivers/salary-defaults",
     "项目管理": pathname === "/projects" || pathname === "/projects/common-services",

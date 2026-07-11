@@ -100,6 +100,11 @@ public class ProjectController {
         return ApiResult.success(projectService.getTodayStats());
     }
 
+    @GetMapping("/financial-overview")
+    public ApiResult<Map<String, Object>> getFinancialOverview() {
+        return ApiResult.success(projectService.getFinancialOverview());
+    }
+
     @GetMapping("/{id}/stats")
     public ApiResult<Map<String, Object>> getProjectDetailStats(@PathVariable Long id) {
         return ApiResult.success(projectService.getProjectDetailStats(id));

@@ -296,6 +296,11 @@ export async function getTodayStats() {
   return res.data;
 }
 
+export async function getFinancialOverview() {
+  const res = await api.get('/admin/projects/financial-overview');
+  return res.data;
+}
+
 export async function getWorkerAttendanceRecords(params: Record<string, unknown>) {
   const res = await api.get('/admin/attendance/worker-records', { params });
   return res.data;

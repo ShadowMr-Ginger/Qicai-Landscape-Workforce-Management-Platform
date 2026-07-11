@@ -34,6 +34,11 @@ public interface ProjectService {
     Map<String, Object> getTodayStats();
 
     /**
+     * 获取财务概览：今日/本月/本年营业、待付工资、净利润及月度趋势
+     */
+    Map<String, Object> getFinancialOverview();
+
+    /**
      * 获取项目详情页统计：总工数、今日工数、待发工资累计
      */
     Map<String, Object> getProjectDetailStats(Long projectId);

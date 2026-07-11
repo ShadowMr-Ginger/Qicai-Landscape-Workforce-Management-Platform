@@ -456,6 +456,80 @@ public class ProjectServiceImpl implements ProjectService {
         return result;
     }
 
+    @Override
+    public Map<String, Object> getFinancialOverview() {
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+
+        Map<String, Object> todayStats = calcPeriodStats(today, today);
+
+        LocalDate monthStart = today.withDayOfMonth(1);
+        LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+        Map<String, Object> monthStats = calcPeriodStats(monthStart, monthEnd);
+
+        LocalDate yearStart = today.withDayOfYear(1);
+        LocalDate yearEnd = today.withDayOfYear(today.lengthOfYear());
+        Map<String, Object> yearStats = calcPeriodStats(yearStart, yearEnd);
+
+        List<Map<String, Object>> monthlyTrend = new ArrayList<>();
+        for (int m = 1; m <= 12; m++) {
+            LocalDate start = LocalDate.of(today.getYear(), m, 1);
+            LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+            Map<String, Object> stats = calcPeriodStats(start, end);
+            stats.put("month", m);
+            monthlyTrend.add(stats);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("today", todayStats);
+        result.put("month", monthStats);
+        result.put("year", yearStats);
+        result.put("monthlyTrend", monthlyTrend);
+        return result;
+    }
+
+    private Map<String, Object> calcPeriodStats(LocalDate start, LocalDate end) {
+        List<LedgerEntity> ledgers = ledgerMapper.selectList(
+            new QueryWrapper<LedgerEntity>()
+                .ge("record_date", start)
+                .le("record_date", end)
+        );
+        BigDecimal revenue = ledgers.stream()
+            .map(LedgerEntity::getTotalAmount)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        List<WorkerAttendanceRecordEntity> workerRecords = workerAttendanceRecordMapper.selectList(
+            new QueryWrapper<WorkerAttendanceRecordEntity>()
+                .ge("attendance_date", start)
+                .le("attendance_date", end)
+        );
+        BigDecimal workerWage = workerRecords.stream()
+            .map(WorkerAttendanceRecordEntity::getTotalWage)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        List<DriverAttendanceRecordEntity> driverRecords = driverAttendanceRecordMapper.selectList(
+            new QueryWrapper<DriverAttendanceRecordEntity>()
+                .ge("attendance_date", start)
+                .le("attendance_date", end)
+        );
+        BigDecimal driverWage = driverRecords.stream()
+            .map(DriverAttendanceRecordEntity::getTotalWage)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal payableWage = workerWage.add(driverWage);
+        BigDecimal netProfit = revenue.subtract(payableWage);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("revenue", revenue);
+        result.put("workerWage", workerWage);
+        result.put("driverWage", driverWage);
+        result.put("payableWage", payableWage);
+        result.put("netProfit", netProfit);
+        return result;
+    }
+
     private Map<Long, BigDecimal> calcNetProfitForProjects(List<Long> projectIds) {
         if (projectIds == null || projectIds.isEmpty()) {
             return Collections.emptyMap();
