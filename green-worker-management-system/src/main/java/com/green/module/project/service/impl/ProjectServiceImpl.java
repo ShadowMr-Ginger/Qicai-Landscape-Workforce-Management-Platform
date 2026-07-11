@@ -9,6 +9,8 @@ import com.green.module.attendance.entity.DriverAttendanceRecordEntity;
 import com.green.module.attendance.entity.WorkerAttendanceRecordEntity;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
 import com.green.module.attendance.mapper.WorkerAttendanceRecordMapper;
+import com.green.module.ledger.entity.LedgerEntity;
+import com.green.module.ledger.mapper.LedgerMapper;
 import com.green.module.project.dto.CreateProjectDTO;
 import com.green.module.project.dto.UpdateProjectDTO;
 import com.green.module.project.entity.ProjectEntity;
@@ -29,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final WorkerAttendanceRecordMapper workerAttendanceRecordMapper;
     private final DriverAttendanceRecordMapper driverAttendanceRecordMapper;
     private final WorkerMapper workerMapper;
+    private final LedgerMapper ledgerMapper;
 
     @Override
     public IPage<ProjectVO> list(int pageNum, int pageSize, String keyword) {
@@ -365,7 +369,17 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Map<String, Object> getTodayStats() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+
+        // 今日营业额 = 中国时间当天所有台账记录的 totalAmount 之和
+        List<LedgerEntity> ledgers = ledgerMapper.selectList(
+            new QueryWrapper<LedgerEntity>()
+                .eq("record_date", today)
+        );
+        BigDecimal totalRevenue = ledgers.stream()
+            .map(LedgerEntity::getTotalAmount)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // 今日工人考勤记录
         List<WorkerAttendanceRecordEntity> workerRecords = workerAttendanceRecordMapper.selectList(
@@ -391,7 +405,6 @@ public class ProjectServiceImpl implements ProjectService {
             workerMapper.selectList(new QueryWrapper<WorkerEntity>().in("id", workerIds))
                 .stream().collect(Collectors.toMap(WorkerEntity::getId, w -> w));
 
-        BigDecimal totalRevenue = BigDecimal.ZERO;
         BigDecimal totalProfit = BigDecimal.ZERO;
         BigDecimal totalWorkerWage = BigDecimal.ZERO;
 
@@ -408,8 +421,6 @@ public class ProjectServiceImpl implements ProjectService {
             BigDecimal dailyRevenue = (worker.getGender() != null && worker.getGender() == 1)
                 ? project.getMaleDailyRevenue() : project.getFemaleDailyRevenue();
             if (dailyRevenue == null) dailyRevenue = BigDecimal.ZERO;
-
-            totalRevenue = totalRevenue.add(dailyRevenue);
 
             if (project.getGrossMargin() != null) {
                 totalProfit = totalProfit.add(dailyRevenue.multiply(project.getGrossMargin()));
