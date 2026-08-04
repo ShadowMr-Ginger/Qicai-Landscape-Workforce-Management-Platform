@@ -305,9 +305,11 @@ public class ExpenseRecordServiceImpl implements ExpenseRecordService {
     }
 
     private void validateProjectAndExpenseItem(Long projectId, Long expenseItemId) {
-        ProjectEntity project = projectMapper.selectById(projectId);
-        if (project == null) {
-            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "关联项目不存在");
+        if (projectId != null) {
+            ProjectEntity project = projectMapper.selectById(projectId);
+            if (project == null) {
+                throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "关联项目不存在");
+            }
         }
         ExpenseItemEntity item = expenseItemMapper.selectById(expenseItemId);
         if (item == null) {

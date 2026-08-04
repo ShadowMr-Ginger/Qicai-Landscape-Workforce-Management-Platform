@@ -571,7 +571,7 @@ export async function exportLedgers(params: {
 // ==================== 开销记录与开支项目管理 ====================
 
 export interface ExpenseItemPayload {
-  projectId: number;
+  projectId?: number;
   itemName: string;
   description?: string;
 }

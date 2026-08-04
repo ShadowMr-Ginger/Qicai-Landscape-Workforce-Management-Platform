@@ -39,7 +39,7 @@ import {
 export interface ExpenseItemOption {
   id: number;
   itemName: string;
-  projectId: number;
+  projectId?: number;
 }
 
 interface ExpenseItemForm {
@@ -236,7 +236,7 @@ export default function ExpenseRecordDialog({
     expenseItems.find((p) => p.id === expenseItemId)?.itemName || "";
 
   const selectedProjectId =
-    expenseItems.find((p) => p.id === expenseItemId)?.projectId || null;
+    expenseItems.find((p) => p.id === expenseItemId)?.projectId;
 
   const canLock = recordDate && expenseItemId;
 
@@ -353,7 +353,7 @@ export default function ExpenseRecordDialog({
       toast.error("请先锁定日期和开支项目");
       return;
     }
-    if (!recordDate || !expenseItemId || !selectedProjectId) {
+    if (!recordDate || !expenseItemId) {
       toast.error("日期、开支项目不能为空");
       return;
     }
@@ -361,8 +361,7 @@ export default function ExpenseRecordDialog({
       toast.error("请至少添加一条单项开支");
       return;
     }
-    const payload = {
-      projectId: selectedProjectId,
+    const payload: any = {
       expenseItemId,
       recordDate,
       items: items.map((it) => ({
@@ -372,6 +371,9 @@ export default function ExpenseRecordDialog({
         remark: it.remark,
       })),
     };
+    if (selectedProjectId) {
+      payload.projectId = selectedProjectId;
+    }
     try {
       setLoading(true);
       if (editingId) {

@@ -18,7 +18,7 @@ public class ExpenseRecordDTO {
 
     private Long id;
 
-    @NotNull(message = "项目不能为空")
+    /** 关联项目ID（可选） */
     private Long projectId;
 
     @NotNull(message = "开支项目不能为空")

@@ -7,7 +7,7 @@
 -- 15. 开支项目表 (expense_items)
 CREATE TABLE IF NOT EXISTS `expense_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `project_id` BIGINT NOT NULL COMMENT '关联项目ID',
+    `project_id` BIGINT DEFAULT NULL COMMENT '关联项目ID（可选）',
     `item_name` VARCHAR(100) NOT NULL COMMENT '开支项目名称',
     `description` VARCHAR(255) DEFAULT NULL COMMENT '描述',
     `total_expense` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总开销(元)',
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `expense_item_common_remarks` (
 -- 18. 开销记录主表 (expense_records)
 CREATE TABLE IF NOT EXISTS `expense_records` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `project_id` BIGINT NOT NULL COMMENT '关联项目ID',
+    `project_id` BIGINT DEFAULT NULL COMMENT '关联项目ID（可选）',
     `expense_item_id` BIGINT NOT NULL COMMENT '开支项目ID',
     `record_date` DATE NOT NULL COMMENT '记录日期',
     `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 COMMENT '总金额(元)',

@@ -17,7 +17,7 @@ public class ExpenseItemDTO {
 
     private Long id;
 
-    @NotNull(message = "关联项目不能为空")
+    /** 关联项目ID（可选） */
     private Long projectId;
 
     @NotEmpty(message = "开支项目名称不能为空")

@@ -115,7 +115,6 @@ public class ExpenseItemServiceImpl implements ExpenseItemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(ExpenseItemDTO dto) {
-        validateProject(dto.getProjectId());
         ExpenseItemEntity entity = new ExpenseItemEntity();
         entity.setProjectId(dto.getProjectId());
         entity.setItemName(dto.getItemName().trim());
@@ -132,7 +131,6 @@ public class ExpenseItemServiceImpl implements ExpenseItemService {
         if (entity == null) {
             throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "开支项目不存在");
         }
-        validateProject(dto.getProjectId());
         entity.setProjectId(dto.getProjectId());
         entity.setItemName(dto.getItemName().trim());
         entity.setDescription(dto.getDescription());
@@ -269,10 +267,4 @@ public class ExpenseItemServiceImpl implements ExpenseItemService {
         }).collect(Collectors.toList());
     }
 
-    private void validateProject(Long projectId) {
-        ProjectEntity project = projectMapper.selectById(projectId);
-        if (project == null) {
-            throw new BusinessException(ResultCodeEnum.DATA_NOT_FOUND, "关联项目不存在");
-        }
-    }
 }

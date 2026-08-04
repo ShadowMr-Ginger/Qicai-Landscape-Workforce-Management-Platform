@@ -15,8 +15,8 @@ import {
   Eye,
   Wrench,
   MessageSquare,
-  ArrowLeft,
   Wallet,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Dialog,
@@ -38,7 +38,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  getProjectList,
   getExpenseItemList,
   createExpenseItem,
   updateExpenseItem,
@@ -54,15 +53,10 @@ import {
 } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
-interface ProjectOption {
-  id: number;
-  projectName: string;
-}
-
 interface ExpenseItem {
   id: number;
-  projectId: number;
-  projectName: string;
+  projectId?: number;
+  projectName?: string;
   itemName: string;
   description?: string;
   totalExpense: number;
@@ -103,7 +97,6 @@ export default function ExpenseItemsPage() {
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [manageMode, setManageMode] = useState(false);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
 
   // 弹窗状态
   const [detailOpen, setDetailOpen] = useState(false);
@@ -115,7 +108,7 @@ export default function ExpenseItemsPage() {
   // 新增/编辑开支项目
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ExpenseItem | null>(null);
-  const [form, setForm] = useState({ projectId: "", itemName: "", description: "" });
+  const [form, setForm] = useState({ itemName: "", description: "" });
 
   // 常用主体/备注编辑
   const [subjectSheetOpen, setSubjectSheetOpen] = useState(false);
@@ -129,17 +122,6 @@ export default function ExpenseItemsPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [total, setTotal] = useState(0);
-
-  const fetchProjects = useCallback(async () => {
-    try {
-      const res = await getProjectList({ pageNum: 1, pageSize: 100 });
-      if (res.code === 200 && res.data?.records) {
-        setProjects(res.data.records);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const fetchItems = useCallback(async (currentPage = page) => {
     setLoading(true);
@@ -161,7 +143,6 @@ export default function ExpenseItemsPage() {
   }, [keyword, page, pageSize]);
 
   useEffect(() => {
-    fetchProjects();
     const timer = setTimeout(() => fetchItems(), 0);
     return () => clearTimeout(timer);
   }, []);
@@ -183,14 +164,13 @@ export default function ExpenseItemsPage() {
 
   const openCreate = () => {
     setEditingItem(null);
-    setForm({ projectId: "", itemName: "", description: "" });
+    setForm({ itemName: "", description: "" });
     setFormOpen(true);
   };
 
   const openEdit = (item: ExpenseItem) => {
     setEditingItem(item);
     setForm({
-      projectId: String(item.projectId),
       itemName: item.itemName,
       description: item.description || "",
     });
@@ -198,17 +178,12 @@ export default function ExpenseItemsPage() {
   };
 
   const handleSaveItem = async () => {
-    if (!form.projectId) {
-      toast.error("请选择所属项目");
-      return;
-    }
     if (!form.itemName.trim()) {
       toast.error("请输入开支项目名称");
       return;
     }
     try {
       const payload = {
-        projectId: Number(form.projectId),
         itemName: form.itemName.trim(),
         description: form.description || undefined,
       };
@@ -369,19 +344,19 @@ export default function ExpenseItemsPage() {
       {/* 头部 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-lg"
-            onClick={() => router.push("/ledgers/expense-records")}
-            title="返回开销记录"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
           <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
           <h2 className="text-lg font-semibold text-foreground">开支项目管理</h2>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-lg"
+            onClick={() => router.push("/ledgers/expense-records")}
+          >
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            返回开销记录
+          </Button>
           <Button
             variant={manageMode ? "default" : "outline"}
             size="sm"
@@ -547,19 +522,6 @@ export default function ExpenseItemsPage() {
             <DialogTitle className="text-lg">{editingItem ? "编辑开支项目" : "新增开支项目"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>所属项目 <span className="text-red-500">*</span></Label>
-              <select
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
-                value={form.projectId}
-                onChange={(e) => setForm({ ...form, projectId: e.target.value })}
-              >
-                <option value="">请选择项目</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>{p.projectName}</option>
-                ))}
-              </select>
-            </div>
             <div className="space-y-1.5">
               <Label>项目名称 <span className="text-red-500">*</span></Label>
               <Input
