@@ -112,6 +112,7 @@ export default function DashboardPage() {
   const [todayPayableWage, setTodayPayableWage] = useState(0);
   const [todayNetProfit, setTodayNetProfit] = useState(0);
   const [todayProfit, setTodayProfit] = useState(0);
+  const [todayExpense, setTodayExpense] = useState(0);
 
   useEffect(() => {
     getSystemConfig("start_work_date").then((res) => {
@@ -143,6 +144,7 @@ export default function DashboardPage() {
         setTodayPayableWage(statsRes.data.todayPayableWage ?? 0);
         setTodayNetProfit(statsRes.data.todayNetProfit ?? 0);
         setTodayProfit(statsRes.data.todayProfit ?? 0);
+        setTodayExpense(statsRes.data.todayExpense ?? 0);
       }
     }).catch(() => { /* ignore */ });
   }, []);
@@ -213,7 +215,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-green-600 dark:text-green-400 mb-1 font-medium">今日营业额</p>
                 <p className="text-3xl font-bold text-foreground">¥{todayRevenue.toFixed(2)}</p>
                 <p className="text-sm text-green-600/80 dark:text-green-400/80 mt-1 font-medium">
-                  毛利润 ¥{todayProfit.toFixed(2)}
+                  毛利润 ¥{todayProfit.toFixed(2)}（开销 ¥{todayExpense.toFixed(2)}）
                 </p>
               </div>
               <div className="w-11 h-11 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center">

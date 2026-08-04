@@ -35,6 +35,7 @@ interface PeriodStats {
   workerWage: number;
   driverWage: number;
   netProfit: number;
+  expense: number;
 }
 
 interface MonthlyStats extends PeriodStats {
@@ -48,6 +49,7 @@ interface DailyStat {
   driverWage: number;
   payableWage: number;
   netProfit: number;
+  expense: number;
 }
 
 interface FinancialOverviewData {
@@ -187,6 +189,9 @@ function MonthCalendar({
                     <p className="text-orange-600 dark:text-orange-400 break-all">
                       工 {formatMoney(day.payableWage)}
                     </p>
+                    <p className="text-purple-600 dark:text-purple-400 break-all">
+                      销 {formatMoney(day.expense)}
+                    </p>
                     <p
                       className={cn(
                         "break-all",
@@ -310,7 +315,7 @@ export default function FinancialOverviewPage() {
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/40">
+                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border/40">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">待付工资</p>
                     {loading || !stats ? (
@@ -318,6 +323,16 @@ export default function FinancialOverviewPage() {
                     ) : (
                       <p className="text-sm font-semibold text-foreground">
                         {formatMoney(stats.payableWage)}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">开销</p>
+                    {loading || !stats ? (
+                      <Skeleton className="h-5 w-20" />
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatMoney(stats.expense)}
                       </p>
                     )}
                   </div>

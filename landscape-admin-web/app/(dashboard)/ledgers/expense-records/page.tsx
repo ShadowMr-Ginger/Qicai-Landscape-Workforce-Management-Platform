@@ -1,0 +1,457 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Plus,
+  Search,
+  RotateCcw,
+  Eye,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Settings2,
+  CircleDollarSign,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  getExpenseRecords,
+  deleteExpenseRecord,
+  getExpenseItemsAll,
+} from "@/lib/api";
+import ExpenseRecordDialog, { ExpenseItemOption } from "./expense-record-dialog";
+
+interface ExpenseRecordItem {
+  id: number;
+  subjectName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  remark: string;
+  sortOrder: number;
+}
+
+interface ExpenseRecord {
+  id: number;
+  projectId: number;
+  projectName: string;
+  expenseItemId: number;
+  expenseItemName: string;
+  recordDate: string;
+  totalAmount: number;
+  items: ExpenseRecordItem[];
+}
+
+function getToday(): string {
+  const now = new Date();
+  const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  return chinaTime.toISOString().split("T")[0];
+}
+
+function getMonthAgo(): string {
+  const now = new Date();
+  const chinaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  chinaTime.setMonth(chinaTime.getMonth() - 1);
+  return chinaTime.toISOString().split("T")[0];
+}
+
+export default function ExpenseRecordsPage() {
+  const router = useRouter();
+  const [records, setRecords] = useState<ExpenseRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [expenseItems, setExpenseItems] = useState<ExpenseItemOption[]>([]);
+  const [expenseItemId, setExpenseItemId] = useState("");
+  const [dateFrom, setDateFrom] = useState(getMonthAgo());
+  const [dateTo, setDateTo] = useState(getToday());
+
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detail, setDetail] = useState<ExpenseRecord | null>(null);
+
+  const [manageMode, setManageMode] = useState(false);
+
+  useEffect(() => {
+    fetchExpenseItems();
+    fetchRecords();
+  }, []);
+
+  const fetchExpenseItems = async () => {
+    try {
+      const res = await getExpenseItemsAll();
+      if (res.code === 200 && res.data) {
+        setExpenseItems(res.data);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const fetchRecords = async (
+    currentPage = page,
+    overrides: Partial<{
+      expenseItemId: string;
+      dateFrom: string;
+      dateTo: string;
+    }> = {}
+  ) => {
+    const filterExpenseItemId = overrides.expenseItemId ?? expenseItemId;
+    const filterDateFrom = overrides.dateFrom ?? dateFrom;
+    const filterDateTo = overrides.dateTo ?? dateTo;
+
+    try {
+      setLoading(true);
+      const params: any = {
+        pageNum: currentPage,
+        pageSize,
+      };
+      if (filterExpenseItemId) params.expenseItemId = Number(filterExpenseItemId);
+      if (filterDateFrom) params.startDate = filterDateFrom;
+      if (filterDateTo) params.endDate = filterDateTo;
+      const res = await getExpenseRecords(params);
+      if (res.code === 200 && res.data) {
+        setRecords(res.data.records || []);
+        setTotal(res.data.total || 0);
+      } else {
+        toast.error(res.message || "加载失败");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "加载开销记录失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchRecords(1);
+  };
+
+  const handleReset = () => {
+    const resetDateFrom = getMonthAgo();
+    const resetDateTo = getToday();
+    setExpenseItemId("");
+    setDateFrom(resetDateFrom);
+    setDateTo(resetDateTo);
+    setPage(1);
+    fetchRecords(1, {
+      expenseItemId: "",
+      dateFrom: resetDateFrom,
+      dateTo: resetDateTo,
+    });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    fetchRecords(newPage);
+  };
+
+  const openCreate = () => {
+    setEditingId(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (record: ExpenseRecord) => {
+    setEditingId(record.id);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (record: ExpenseRecord) => {
+    if (!confirm(`确定删除 ${record.recordDate} 的开销记录吗？`)) return;
+    try {
+      await deleteExpenseRecord(record.id);
+      toast.success("删除成功");
+      fetchRecords();
+    } catch (err: any) {
+      toast.error(err?.message || "删除失败");
+    }
+  };
+
+  const openDetail = (record: ExpenseRecord) => {
+    setDetail(record);
+    setDetailOpen(true);
+  };
+
+  const formatExpenseContent = (items: ExpenseRecordItem[]): string => {
+    if (!items || items.length === 0) return "-";
+    const first = items[0];
+    let text = `${first.subjectName}×${first.quantity}`;
+    if (first.remark) {
+      text += `·${first.remark}`;
+    }
+    if (items.length > 1) {
+      text += ` 等${items.length}条记录`;
+    }
+    return text;
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">开销记录</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => router.push("/ledgers/expense-items")}
+          >
+            <CircleDollarSign className="w-4 h-4 mr-1" />
+            常用开支项目
+          </Button>
+          <Button
+            variant={manageMode ? "secondary" : "outline"}
+            className="rounded-lg"
+            onClick={() => setManageMode(!manageMode)}
+          >
+            <Settings2 className="w-4 h-4 mr-1" />
+            {manageMode ? "退出管理" : "管理"}
+          </Button>
+          <Button
+            className="rounded-lg bg-green-600 hover:bg-green-700"
+            onClick={openCreate}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            新增开销记录
+          </Button>
+        </div>
+      </div>
+
+      {/* 筛选块 */}
+      <Card className="rounded-2xl border-border/60">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1.5">
+              <LabelWrap>开始日期</LabelWrap>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="rounded-lg w-40"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <LabelWrap>结束日期</LabelWrap>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="rounded-lg w-40"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <LabelWrap>开支项目</LabelWrap>
+              <select
+                className="h-10 rounded-lg border border-input bg-background px-3 text-sm w-48"
+                value={expenseItemId}
+                onChange={(e) => setExpenseItemId(e.target.value)}
+              >
+                <option value="">全部项目</option>
+                {expenseItems.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.itemName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                variant="outline"
+                className="rounded-lg"
+                onClick={handleReset}
+              >
+                <RotateCcw className="w-4 h-4 mr-1" />
+                重置
+              </Button>
+              <Button
+                className="rounded-lg bg-green-600 hover:bg-green-700"
+                onClick={handleSearch}
+                disabled={loading}
+              >
+                <Search className="w-4 h-4 mr-1" />
+                查询
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 列表 */}
+      <Card className="rounded-2xl border-border/60 overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-36">日期</TableHead>
+                <TableHead>项目</TableHead>
+                <TableHead>内容</TableHead>
+                <TableHead className="w-28 text-center">记录数</TableHead>
+                <TableHead className="w-32 text-right">总金额</TableHead>
+                <TableHead className="w-40 text-center">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {records.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    暂无开销记录
+                  </TableCell>
+                </TableRow>
+              ) : (
+                records.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>{record.recordDate}</TableCell>
+                    <TableCell>{record.expenseItemName || record.projectName || "-"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
+                      {formatExpenseContent(record.items)}
+                    </TableCell>
+                    <TableCell className="text-center">{record.items?.length || 0}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      ¥{record.totalAmount.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-8 h-8 rounded-lg"
+                          onClick={() => openDetail(record)}
+                          title="查看"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {manageMode && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => openEdit(record)}
+                              title="编辑"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDelete(record)}
+                              title="删除"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* 分页 */}
+        {records.length > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t">
+            <div className="text-sm text-muted-foreground">
+              共 {total} 条，第 {page} / {totalPages} 页
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={page <= 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* 新增/编辑对话框 */}
+      <ExpenseRecordDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={() => fetchRecords()}
+        editingId={editingId}
+        expenseItems={expenseItems}
+      />
+
+      {/* 详情弹窗 */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg">
+              开销明细 · {detail?.recordDate}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {(detail?.items || []).map((item, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-xl border border-border p-3"
+              >
+                <div>
+                  <div className="text-sm font-medium">{item.subjectName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {item.quantity} × ¥{item.unitPrice.toFixed(2)}
+                  </div>
+                  {item.remark && (
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      备注：{item.remark}
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm font-bold">¥{item.totalPrice.toFixed(2)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end text-sm font-bold pt-2">
+            合计：¥{detail?.totalAmount.toFixed(2)}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function LabelWrap({ children }: { children: React.ReactNode }) {
+  return <div className="text-xs font-medium text-muted-foreground mb-1">{children}</div>;
+}

@@ -71,7 +71,7 @@ function getMonthAgo(): string {
   return chinaTime.toISOString().split("T")[0];
 }
 
-export default function LedgersPage() {
+export default function BusinessRecordsPage() {
   const [records, setRecords] = useState<LedgerRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<{ id: number; projectName: string }[]>([]);
@@ -215,7 +215,7 @@ export default function LedgersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">记录台账</h2>
+        <h2 className="text-xl font-bold">业务记录</h2>
         <div className="flex items-center gap-2">
           <Button
             variant={manageMode ? "secondary" : "outline"}

@@ -9,6 +9,7 @@ import com.green.module.attendance.entity.DriverAttendanceRecordEntity;
 import com.green.module.attendance.entity.WorkerAttendanceRecordEntity;
 import com.green.module.attendance.mapper.DriverAttendanceRecordMapper;
 import com.green.module.attendance.mapper.WorkerAttendanceRecordMapper;
+import com.green.module.expense.service.ExpenseRecordService;
 import com.green.module.ledger.entity.LedgerEntity;
 import com.green.module.ledger.mapper.LedgerMapper;
 import com.green.module.project.dto.CreateProjectDTO;
@@ -47,6 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final DriverAttendanceRecordMapper driverAttendanceRecordMapper;
     private final WorkerMapper workerMapper;
     private final LedgerMapper ledgerMapper;
+    private final ExpenseRecordService expenseRecordService;
 
     @Override
     public IPage<ProjectVO> list(int pageNum, int pageSize, String keyword) {
@@ -444,11 +446,17 @@ public class ProjectServiceImpl implements ProjectService {
         BigDecimal totalPayableWage = totalWorkerWage.add(totalDriverWage);
         BigDecimal netProfit = totalRevenue.subtract(totalPayableWage);
 
+        // 扣减当天开销
+        BigDecimal todayExpense = expenseRecordService.sumAmountByDate(today);
+        totalProfit = totalProfit.subtract(todayExpense);
+        netProfit = netProfit.subtract(todayExpense);
+
         Map<String, Object> result = new HashMap<>();
         result.put("todayRevenue", totalRevenue);
         result.put("todayPayableWage", totalPayableWage);
         result.put("todayNetProfit", netProfit);
         result.put("todayProfit", totalProfit);
+        result.put("todayExpense", todayExpense);
         result.put("todayWorkerWage", totalWorkerWage);
         result.put("todayDriverWage", totalDriverWage);
         result.put("workerCount", workerRecords.size());
@@ -531,13 +539,16 @@ public class ProjectServiceImpl implements ProjectService {
                 Collectors.reducing(BigDecimal.ZERO, DriverAttendanceRecordEntity::getTotalWage, BigDecimal::add)
             ));
 
+        Map<LocalDate, BigDecimal> expenseMap = expenseRecordService.sumAmountByDateRange(start, end);
+
         List<Map<String, Object>> days = new ArrayList<>();
         for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
             BigDecimal revenue = revenueMap.getOrDefault(d, BigDecimal.ZERO);
             BigDecimal workerWage = workerWageMap.getOrDefault(d, BigDecimal.ZERO);
             BigDecimal driverWage = driverWageMap.getOrDefault(d, BigDecimal.ZERO);
             BigDecimal payableWage = workerWage.add(driverWage);
-            BigDecimal netProfit = revenue.subtract(payableWage);
+            BigDecimal expense = expenseMap.getOrDefault(d, BigDecimal.ZERO);
+            BigDecimal netProfit = revenue.subtract(payableWage).subtract(expense);
 
             Map<String, Object> dayStat = new HashMap<>();
             dayStat.put("date", d.toString());
@@ -545,6 +556,7 @@ public class ProjectServiceImpl implements ProjectService {
             dayStat.put("workerWage", workerWage);
             dayStat.put("driverWage", driverWage);
             dayStat.put("payableWage", payableWage);
+            dayStat.put("expense", expense);
             dayStat.put("netProfit", netProfit);
             days.add(dayStat);
         }
@@ -590,12 +602,19 @@ public class ProjectServiceImpl implements ProjectService {
         BigDecimal payableWage = workerWage.add(driverWage);
         BigDecimal netProfit = revenue.subtract(payableWage);
 
+        // 扣减区间内开销
+        BigDecimal expense = expenseRecordService.sumAmountByDateRange(start, end).values()
+                .stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        netProfit = netProfit.subtract(expense);
+
         Map<String, Object> result = new HashMap<>();
         result.put("revenue", revenue);
         result.put("workerWage", workerWage);
         result.put("driverWage", driverWage);
         result.put("payableWage", payableWage);
         result.put("netProfit", netProfit);
+        result.put("expense", expense);
         return result;
     }
 

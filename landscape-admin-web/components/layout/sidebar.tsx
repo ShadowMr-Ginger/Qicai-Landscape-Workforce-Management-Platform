@@ -67,7 +67,14 @@ const navItems: NavItem[] = [
       { title: "作业类型", href: "/work-types" },
     ],
   },
-  { title: "记录台账", href: "/ledgers", icon: BookText },
+  {
+    title: "记录台账",
+    icon: BookText,
+    children: [
+      { title: "业务记录", href: "/ledgers/business-records" },
+      { title: "开销记录", href: "/ledgers/expense-records" },
+    ],
+  },
   { title: "工资结算", href: "/wages", icon: Wallet },
   {
     title: "项目管理",
@@ -101,6 +108,7 @@ export function Sidebar() {
     "工人管理": pathname === "/workers" || pathname === "/groups",
     "司机管理": pathname === "/drivers" || pathname === "/drivers/salary-defaults",
     "项目管理": pathname === "/projects" || pathname === "/projects/common-services",
+    "记录台账": pathname.startsWith("/ledgers"),
     "报表导出": pathname.startsWith("/reports"),
   });
 

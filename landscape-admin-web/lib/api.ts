@@ -568,6 +568,146 @@ export async function exportLedgers(params: {
   return res;
 }
 
+// ==================== 开销记录与开支项目管理 ====================
+
+export interface ExpenseItemPayload {
+  projectId: number;
+  itemName: string;
+  description?: string;
+}
+
+export interface ExpenseRecordItemPayload {
+  subjectName: string;
+  quantity: number;
+  unitPrice: number;
+  remark?: string;
+}
+
+export interface ExpenseRecordPayload {
+  projectId: number;
+  expenseItemId: number;
+  recordDate: string;
+  items: ExpenseRecordItemPayload[];
+}
+
+export async function getExpenseItemList(params: {
+  keyword?: string;
+  pageNum?: number;
+  pageSize?: number;
+}) {
+  const res = await api.get('/admin/expense-items/list', { params });
+  return res.data;
+}
+
+export async function getExpenseItemsAll() {
+  const res = await api.get('/admin/expense-items/all');
+  return res.data;
+}
+
+export async function getExpenseItemDetail(id: number) {
+  const res = await api.get(`/admin/expense-items/${id}`);
+  return res.data;
+}
+
+export async function createExpenseItem(data: ExpenseItemPayload) {
+  const res = await api.post('/admin/expense-items', data);
+  return res.data;
+}
+
+export async function updateExpenseItem(id: number, data: ExpenseItemPayload) {
+  const res = await api.put(`/admin/expense-items/${id}`, data);
+  return res.data;
+}
+
+export async function deleteExpenseItem(id: number) {
+  const res = await api.delete(`/admin/expense-items/${id}`);
+  return res.data;
+}
+
+export async function getExpenseItemCommonSubjects(id: number) {
+  const res = await api.get(`/admin/expense-items/${id}/common-subjects`);
+  return res.data;
+}
+
+export async function createExpenseItemCommonSubject(
+  id: number,
+  data: { subjectName: string }
+) {
+  const res = await api.post(`/admin/expense-items/${id}/common-subjects`, data);
+  return res.data;
+}
+
+export async function updateExpenseItemCommonSubject(
+  id: number,
+  data: { subjectName: string }
+) {
+  const res = await api.put(`/admin/expense-items/common-subjects/${id}`, data);
+  return res.data;
+}
+
+export async function deleteExpenseItemCommonSubject(id: number) {
+  const res = await api.delete(`/admin/expense-items/common-subjects/${id}`);
+  return res.data;
+}
+
+export async function getExpenseItemCommonRemarks(id: number) {
+  const res = await api.get(`/admin/expense-items/${id}/common-remarks`);
+  return res.data;
+}
+
+export async function createExpenseItemCommonRemark(
+  id: number,
+  data: { remarkName: string }
+) {
+  const res = await api.post(`/admin/expense-items/${id}/common-remarks`, data);
+  return res.data;
+}
+
+export async function updateExpenseItemCommonRemark(
+  id: number,
+  data: { remarkName: string }
+) {
+  const res = await api.put(`/admin/expense-items/common-remarks/${id}`, data);
+  return res.data;
+}
+
+export async function deleteExpenseItemCommonRemark(id: number) {
+  const res = await api.delete(`/admin/expense-items/common-remarks/${id}`);
+  return res.data;
+}
+
+export async function getExpenseRecords(params: {
+  projectId?: number;
+  expenseItemId?: number;
+  startDate?: string;
+  endDate?: string;
+  pageNum?: number;
+  pageSize?: number;
+}) {
+  const res = await api.get('/admin/expense-records', { params });
+  return res.data;
+}
+
+export async function getExpenseRecordDetail(id: number) {
+  const res = await api.get(`/admin/expense-records/${id}`);
+  return res.data;
+}
+
+export async function createExpenseRecord(data: ExpenseRecordPayload) {
+  const res = await api.post('/admin/expense-records', data);
+  return res.data;
+}
+
+export async function updateExpenseRecord(id: number, data: ExpenseRecordPayload) {
+  const res = await api.put(`/admin/expense-records/${id}`, data);
+  return res.data;
+}
+
+export async function deleteExpenseRecord(id: number) {
+  const res = await api.delete(`/admin/expense-records/${id}`);
+  return res.data;
+}
+
 export async function getProjectCommonServices(projectId: number) {
   const res = await api.get(`/admin/projects/${projectId}/common-services`);
   return res.data;
