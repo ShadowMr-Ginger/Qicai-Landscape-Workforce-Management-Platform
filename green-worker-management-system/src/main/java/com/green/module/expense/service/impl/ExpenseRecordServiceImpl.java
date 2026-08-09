@@ -93,7 +93,17 @@ public class ExpenseRecordServiceImpl implements ExpenseRecordService {
                 ).stream().collect(Collectors.toMap(ExpenseItemEntity::getId, ExpenseItemEntity::getItemName));
 
         List<ExpenseRecordVO> records = entityPage.getRecords().stream()
-                .map(e -> convertToVO(e, projectNameMap, itemNameMap))
+                .map(e -> {
+                    ExpenseRecordVO vo = convertToVO(e, projectNameMap, itemNameMap);
+                    List<ExpenseRecordItemEntity> items = expenseRecordItemMapper.selectList(
+                            new QueryWrapper<ExpenseRecordItemEntity>()
+                                    .eq("expense_record_id", e.getId())
+                                    .orderByAsc("sort_order", "create_time")
+                    );
+                    vo.setItems(items.stream().map(this::convertItemToVO).collect(Collectors.toList()));
+                    vo.setItemCount(items.size());
+                    return vo;
+                })
                 .collect(Collectors.toList());
 
         Page<ExpenseRecordVO> result = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
