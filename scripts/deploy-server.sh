@@ -21,6 +21,27 @@ if [ ! -d "$BACKUP_DIR" ]; then
   chmod 755 "$BACKUP_DIR"
 fi
 
+# 确保已安装 PDF 导出所需的中文字体
+INSTALL_FONTS=false
+if command -v fc-list >/dev/null 2>&1; then
+  if ! fc-list :lang=zh | grep -q .; then
+    INSTALL_FONTS=true
+  fi
+else
+  INSTALL_FONTS=true
+fi
+
+if [ "$INSTALL_FONTS" = true ]; then
+  echo "=== Installing Chinese fonts for PDF export ==="
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq
+    apt-get install -y -qq fonts-noto-cjk fonts-wqy-zenhei fontconfig || true
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y google-noto-sans-cjk-fonts wqy-zenhei-fonts fontconfig || true
+  fi
+  fc-cache -f >/dev/null 2>&1 || true
+fi
+
 # 停止服务
 echo "=== Stop services ==="
 systemctl stop qicai-backend qicai-frontend || true
