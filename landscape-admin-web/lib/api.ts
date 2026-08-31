@@ -559,7 +559,7 @@ export async function deleteLedger(id: number) {
 export async function exportLedgers(params: {
   startDate: string;
   endDate: string;
-  format: "word" | "excel";
+  format: "word" | "excel" | "pdf";
 }) {
   const res = await api.get("/admin/ledgers/export", {
     params,
@@ -754,7 +754,7 @@ export async function deleteProjectCommonRemark(id: number) {
   return res.data;
 }
 
-export async function exportProjectRevenueRecords(id: number, params: { startDate: string; endDate: string; format: string }) {
+export async function exportProjectRevenueRecords(id: number, params: { startDate: string; endDate: string; format: "word" | "excel" | "pdf" }) {
   const res = await api.get(`/admin/projects/${id}/revenue-records/export`, {
     params,
     responseType: 'blob',

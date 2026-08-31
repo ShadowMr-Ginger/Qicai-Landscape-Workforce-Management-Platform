@@ -1,6 +1,16 @@
 package com.green.module.project.util;
 
+import com.green.common.util.PdfFontUtil;
 import com.green.module.project.vo.RevenueRecordVO;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
@@ -15,6 +25,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVerticalJc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -203,6 +214,163 @@ public class RevenueRecordExportUtil {
             totalAmountCell.setCellStyle(createExcelMoneyStyle(wb, totalStyle));
 
             wb.write(out);
+        }
+    }
+
+    /**
+     * 导出 PDF
+     */
+    public static void exportPdf(List<RevenueRecordVO> records, String projectName,
+                                 LocalDate startDate, LocalDate endDate, OutputStream out) throws IOException {
+        List<RevenueRecordVO> sorted = sortByDate(records);
+        String title = buildTitle(startDate, endDate, projectName);
+
+        Document document = new Document(PageSize.A4, 72, 72, 72, 72);
+        PdfWriter.getInstance(document, out);
+        document.open();
+
+        PdfPTable currentTable = createPdfTable(title);
+        int currentPageRows = 0;
+        BigDecimal pageAmount = BigDecimal.ZERO;
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (RevenueRecordVO record : sorted) {
+            int recordRows = record.getItems() == null ? 0 : record.getItems().size();
+            if (recordRows == 0) continue;
+
+            // 如果当前页放不下这条记录，则结束本页并新建一页
+            if (currentPageRows > 0 && currentPageRows + recordRows > WORD_ROWS_PER_PAGE) {
+                addPdfPageTotalRow(currentTable, pageAmount);
+                document.add(currentTable);
+                document.newPage();
+                currentTable = createPdfTable(title);
+                currentPageRows = 0;
+                pageAmount = BigDecimal.ZERO;
+            }
+
+            List<RevenueRecordVO.RevenueRecordItemVO> items = record.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                RevenueRecordVO.RevenueRecordItemVO item = items.get(i);
+
+                // 日期：仅该记录第1行显示，使用 rowspan
+                if (i == 0) {
+                    PdfPCell dateCell = new PdfPCell(new Phrase(formatDate(record.getRecordDate()), PdfFontUtil.getNormalFont()));
+                    dateCell.setRowspan(recordRows);
+                    dateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    dateCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                    dateCell.setMinimumHeight(28.35f * recordRows);
+                    dateCell.setBorder(Rectangle.BOX);
+                    currentTable.addCell(dateCell);
+                }
+
+                String typeText = item.getWorkerTypeText() == null ? "" : item.getWorkerTypeText();
+                String serviceName = (item.getServiceName() == null ? "" : item.getServiceName()) + "    " + typeText;
+                currentTable.addCell(createPdfDataCell(serviceName, false));
+                currentTable.addCell(createPdfDataCell(item.getQuantity() == null ? "" : String.valueOf(item.getQuantity()), false));
+                currentTable.addCell(createPdfDataCell(item.getUnitPrice() == null ? "" : formatAmount(item.getUnitPrice()), false));
+                currentTable.addCell(createPdfDataCell(item.getTotalPrice() == null ? "" : formatAmount(item.getTotalPrice()), false));
+                currentTable.addCell(createPdfDataCell(item.getRemark() == null ? "" : item.getRemark(), false));
+
+                currentPageRows++;
+                pageAmount = pageAmount.add(item.getTotalPrice() == null ? BigDecimal.ZERO : item.getTotalPrice());
+                totalAmount = totalAmount.add(item.getTotalPrice() == null ? BigDecimal.ZERO : item.getTotalPrice());
+            }
+        }
+
+        // 最后一页：页计、空行、总计
+        addPdfPageTotalRow(currentTable, pageAmount);
+        addPdfEmptyRow(currentTable);
+        addPdfTotalRow(currentTable, totalAmount);
+
+        document.add(currentTable);
+        document.add(new Paragraph(" ", PdfFontUtil.getNormalFont()));
+        document.close();
+    }
+
+    private static PdfPTable createPdfTable(String title) {
+        PdfPTable table = new PdfPTable(HEADERS.length);
+        table.setWidthPercentage(100);
+        try {
+            table.setWidths(new float[]{0.14f, 0.30f, 0.10f, 0.12f, 0.12f, 0.22f});
+        } catch (Exception ignored) {
+        }
+
+        // 标题行
+        PdfPCell titleCell = new PdfPCell(new Phrase(title, PdfFontUtil.getTitleFont()));
+        titleCell.setColspan(HEADERS.length);
+        titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        titleCell.setMinimumHeight(28.35f);
+        titleCell.setBorder(Rectangle.BOX);
+        table.addCell(titleCell);
+
+        // 表头行
+        for (String header : HEADERS) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, PdfFontUtil.getBoldFont()));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cell.setMinimumHeight(28.35f);
+            cell.setBorder(Rectangle.BOX);
+            cell.setBackgroundColor(new Color(240, 240, 240));
+            table.addCell(cell);
+        }
+        return table;
+    }
+
+    private static PdfPCell createPdfDataCell(String text, boolean bold) {
+        PdfPCell cell = new PdfPCell(new Phrase(text == null ? "" : text,
+                bold ? PdfFontUtil.getBoldFont() : PdfFontUtil.getNormalFont()));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setMinimumHeight(28.35f);
+        cell.setBorder(Rectangle.BOX);
+        cell.setPadding(4);
+        return cell;
+    }
+
+    private static void addPdfPageTotalRow(PdfPTable table, BigDecimal pageAmount) {
+        table.addCell(createPdfDataCell("", false));
+        PdfPCell labelCell = new PdfPCell(new Phrase("页计", PdfFontUtil.getBoldFont()));
+        labelCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        labelCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        labelCell.setMinimumHeight(28.35f);
+        labelCell.setBorder(Rectangle.BOX);
+        table.addCell(labelCell);
+        table.addCell(createPdfDataCell("", false));
+        table.addCell(createPdfDataCell("", false));
+        PdfPCell amountCell = new PdfPCell(new Phrase(formatAmount(pageAmount), PdfFontUtil.getBoldFont()));
+        amountCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        amountCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        amountCell.setMinimumHeight(28.35f);
+        amountCell.setBorder(Rectangle.BOX);
+        table.addCell(amountCell);
+        table.addCell(createPdfDataCell("", false));
+    }
+
+    private static void addPdfTotalRow(PdfPTable table, BigDecimal totalAmount) {
+        table.addCell(createPdfDataCell("", false));
+        PdfPCell labelCell = new PdfPCell(new Phrase("总计", PdfFontUtil.getTitleFont()));
+        labelCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        labelCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        labelCell.setMinimumHeight(28.35f);
+        labelCell.setBorder(Rectangle.BOX);
+        table.addCell(labelCell);
+        PdfPCell emptyCell = new PdfPCell(new Phrase("", PdfFontUtil.getNormalFont()));
+        emptyCell.setColspan(2);
+        emptyCell.setBorder(Rectangle.BOX);
+        table.addCell(emptyCell);
+        PdfPCell amountCell = new PdfPCell(new Phrase(formatAmount(totalAmount), PdfFontUtil.getTitleFont()));
+        amountCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        amountCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        amountCell.setMinimumHeight(28.35f);
+        amountCell.setBorder(Rectangle.BOX);
+        table.addCell(amountCell);
+        table.addCell(createPdfDataCell("", false));
+    }
+
+    private static void addPdfEmptyRow(PdfPTable table) {
+        for (int i = 0; i < HEADERS.length; i++) {
+            table.addCell(createPdfDataCell("", false));
         }
     }
 

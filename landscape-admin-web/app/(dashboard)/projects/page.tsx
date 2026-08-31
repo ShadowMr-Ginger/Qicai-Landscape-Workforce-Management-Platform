@@ -223,7 +223,11 @@ export default function ProjectsPage() {
 
   // 营业记录导出
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportForm, setExportForm] = useState({
+  const [exportForm, setExportForm] = useState<{
+    startDate: string;
+    endDate: string;
+    format: "word" | "excel" | "pdf";
+  }>({
     startDate: "",
     endDate: "",
     format: "word",
@@ -586,14 +590,21 @@ export default function ProjectsPage() {
         endDate: exportForm.endDate,
         format: exportForm.format,
       });
-      const blob = new Blob([res.data], {
-        type: exportForm.format === "excel"
-          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
+      let mimeType: string;
+      let ext: string;
+      if (exportForm.format === "excel") {
+        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        ext = "xlsx";
+      } else if (exportForm.format === "pdf") {
+        mimeType = "application/pdf";
+        ext = "pdf";
+      } else {
+        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        ext = "docx";
+      }
+      const blob = new Blob([res.data], { type: mimeType });
 
       // 前端按标题格式生成文件名，避免依赖后端响应头
-      const ext = exportForm.format === "excel" ? "xlsx" : "docx";
       const fileName = `${exportForm.startDate.replace(/-/g, ".")}~${exportForm.endDate.replace(/-/g, ".")} - ${selectedProject.projectName} - 绿化用工.${ext}`;
 
       const url = window.URL.createObjectURL(blob);
@@ -1630,7 +1641,7 @@ export default function ProjectsPage() {
                     name="exportFormat"
                     value="word"
                     checked={exportForm.format === "word"}
-                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value })}
+                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value as "word" | "excel" | "pdf" })}
                   />
                   Word
                 </label>
@@ -1640,9 +1651,19 @@ export default function ProjectsPage() {
                     name="exportFormat"
                     value="excel"
                     checked={exportForm.format === "excel"}
-                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value })}
+                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value as "word" | "excel" | "pdf" })}
                   />
                   Excel
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    value="pdf"
+                    checked={exportForm.format === "pdf"}
+                    onChange={(e) => setExportForm({ ...exportForm, format: e.target.value as "word" | "excel" | "pdf" })}
+                  />
+                  PDF
                 </label>
               </div>
             </div>

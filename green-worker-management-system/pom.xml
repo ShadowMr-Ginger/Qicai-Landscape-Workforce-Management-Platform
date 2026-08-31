@@ -122,6 +122,13 @@
             <version>5.2.5</version>
         </dependency>
 
+        <!-- OpenPDF：PDF 导出 -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
         <!-- JWT：无状态 Token 认证 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

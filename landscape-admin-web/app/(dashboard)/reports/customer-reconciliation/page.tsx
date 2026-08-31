@@ -12,7 +12,7 @@ import {
   exportProjectRevenueRecords,
 } from "@/lib/api";
 import { toast } from "sonner";
-import { FileText, FileSpreadsheet, CalendarDays, Building2 } from "lucide-react";
+import { FileText, FileSpreadsheet, CalendarDays, Building2, FileType } from "lucide-react";
 
 interface ProjectOption {
   id: number;
@@ -118,7 +118,7 @@ export default function CustomerReconciliationPage() {
     [records]
   );
 
-  const handleExport = async (format: "word" | "excel") => {
+  const handleExport = async (format: "word" | "excel" | "pdf") => {
     if (!selectedProject) {
       toast.error("请选择项目");
       return;
@@ -138,13 +138,19 @@ export default function CustomerReconciliationPage() {
         endDate,
         format,
       });
-      const blob = new Blob([res.data], {
-        type:
-          format === "excel"
-            ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
-      const ext = format === "excel" ? "xlsx" : "docx";
+      let mimeType: string;
+      let ext: string;
+      if (format === "excel") {
+        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        ext = "xlsx";
+      } else if (format === "pdf") {
+        mimeType = "application/pdf";
+        ext = "pdf";
+      } else {
+        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        ext = "docx";
+      }
+      const blob = new Blob([res.data], { type: mimeType });
       const fileName = `${startDate.replace(/-/g, ".")}~${endDate.replace(/-/g, ".")} - ${selectedProject.projectName} - 绿化用工.${ext}`;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -216,6 +222,14 @@ export default function CustomerReconciliationPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <Button
+              className="rounded-lg bg-fuchsia-600 hover:bg-fuchsia-700"
+              onClick={() => handleExport("pdf")}
+              disabled={exporting || !selectedProjectId}
+            >
+              <FileType className="w-4 h-4 mr-1.5" />
+              导出 PDF
+            </Button>
             <Button
               className="rounded-lg bg-green-600 hover:bg-green-700"
               onClick={() => handleExport("word")}

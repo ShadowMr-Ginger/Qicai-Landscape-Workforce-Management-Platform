@@ -123,23 +123,34 @@ public class LedgerServiceImpl implements LedgerService {
     public void exportLedgers(LocalDate startDate, LocalDate endDate, String format,
                               jakarta.servlet.http.HttpServletResponse response) throws IOException {
         List<LedgerVO> records = listByDateRange(startDate, endDate);
-        boolean isExcel = "excel".equalsIgnoreCase(format);
+        String ext;
+        String mimeType;
+        if ("excel".equalsIgnoreCase(format)) {
+            ext = ".xlsx";
+            mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        } else if ("pdf".equalsIgnoreCase(format)) {
+            ext = ".pdf";
+            mimeType = "application/pdf";
+        } else {
+            ext = ".docx";
+            mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
         String title = startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "~"
                 + endDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + " - 台账导出";
-        String encodedName = URLEncoder.encode(title + (isExcel ? ".xlsx" : ".docx"), StandardCharsets.UTF_8)
+        String encodedName = URLEncoder.encode(title + ext, StandardCharsets.UTF_8)
                 .replaceAll("\\+", "%20")
                 .replace("%7E", "~")
                 .replace("%2D", "-")
                 .replace("%5F", "_")
                 .replace("%2E", ".");
-        response.setContentType(isExcel
-                ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                : "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        response.setContentType(mimeType);
         response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedName + "\"; filename*=UTF-8''" + encodedName);
 
         try (OutputStream out = response.getOutputStream()) {
-            if (isExcel) {
+            if ("excel".equalsIgnoreCase(format)) {
                 LedgerExportUtil.exportExcel(records, startDate, endDate, out);
+            } else if ("pdf".equalsIgnoreCase(format)) {
+                LedgerExportUtil.exportPdf(records, startDate, endDate, out);
             } else {
                 LedgerExportUtil.exportWord(records, startDate, endDate, out);
             }

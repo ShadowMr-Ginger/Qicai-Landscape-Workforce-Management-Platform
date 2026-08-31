@@ -1,6 +1,16 @@
 package com.green.module.ledger.util;
 
+import com.green.common.util.PdfFontUtil;
 import com.green.module.ledger.vo.LedgerVO;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
@@ -15,6 +25,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVerticalJc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -139,6 +150,91 @@ public class LedgerExportUtil {
 
             wb.write(out);
         }
+    }
+
+    /**
+     * 导出 PDF
+     */
+    public static void exportPdf(List<LedgerVO> records, LocalDate startDate,
+                                 LocalDate endDate, OutputStream out) throws IOException {
+        List<LedgerVO> sorted = sortByDate(records);
+        String title = buildTitle(startDate, endDate);
+
+        Document document = new Document(PageSize.A4, 72, 72, 72, 72);
+        PdfWriter.getInstance(document, out);
+        document.open();
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        try {
+            table.setWidths(new float[]{0.15f, 0.40f, 0.25f, 0.20f});
+        } catch (Exception ignored) {
+        }
+        table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        // 标题行
+        PdfPCell titleCell = new PdfPCell(new Phrase(title, PdfFontUtil.getTitleFont()));
+        titleCell.setColspan(4);
+        titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        titleCell.setMinimumHeight(28.35f);
+        titleCell.setBorder(Rectangle.BOX);
+        table.addCell(titleCell);
+
+        // 表头
+        for (String header : HEADERS) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, PdfFontUtil.getBoldFont()));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cell.setMinimumHeight(28.35f);
+            cell.setBorder(Rectangle.BOX);
+            cell.setBackgroundColor(new Color(240, 240, 240));
+            table.addCell(cell);
+        }
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (LedgerVO record : sorted) {
+            if (record.getItems() == null || record.getItems().isEmpty()) {
+                continue;
+            }
+            table.addCell(createDataCell(formatDate(record.getRecordDate()), false));
+            table.addCell(createDataCell(buildContent(record), false));
+            table.addCell(createDataCell(buildTurnover(record), false));
+            table.addCell(createDataCell(buildRemark(record), false));
+            totalAmount = totalAmount.add(record.getTotalAmount() == null ? BigDecimal.ZERO : record.getTotalAmount());
+        }
+
+        // 合计行
+        table.addCell(createDataCell("", false));
+        PdfPCell totalLabelCell = new PdfPCell(new Phrase("合计", PdfFontUtil.getBoldFont()));
+        totalLabelCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        totalLabelCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        totalLabelCell.setMinimumHeight(28.35f);
+        totalLabelCell.setBorder(Rectangle.BOX);
+        table.addCell(totalLabelCell);
+        PdfPCell totalAmountCell = new PdfPCell(new Phrase(formatAmount(totalAmount), PdfFontUtil.getBoldFont()));
+        totalAmountCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        totalAmountCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        totalAmountCell.setMinimumHeight(28.35f);
+        totalAmountCell.setBorder(Rectangle.BOX);
+        table.addCell(totalAmountCell);
+        table.addCell(createDataCell("", false));
+
+        document.add(table);
+        document.add(new Paragraph(" ", PdfFontUtil.getNormalFont()));
+        document.close();
+    }
+
+    private static PdfPCell createDataCell(String text, boolean bold) {
+        PdfPCell cell = new PdfPCell(new Phrase(text == null ? "" : text,
+                bold ? PdfFontUtil.getBoldFont() : PdfFontUtil.getNormalFont()));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setMinimumHeight(28.35f);
+        cell.setBorder(Rectangle.BOX);
+        cell.setPadding(4);
+        return cell;
     }
 
     private static String buildContent(LedgerVO record) {
