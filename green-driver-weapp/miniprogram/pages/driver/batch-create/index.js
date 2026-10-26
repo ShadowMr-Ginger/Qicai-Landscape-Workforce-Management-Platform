@@ -131,7 +131,8 @@ Page({
     },
     // ==================== 批次设置 ====================
     onAttendanceTypeChange(e) {
-        const value = parseInt(e.detail.value);
+        // picker 返回下标：0=半天，1=全天；系统约定 1=半天，2=全天
+        const value = parseInt(e.detail.value) === 1 ? 2 : 1;
         this.setData({ attendanceType: value });
         // 更新所有已选工人的出勤类型
         const selectedWorkers = this.data.selectedWorkers.map((w) => (Object.assign(Object.assign({}, w), { attendanceType: value })));
@@ -244,7 +245,8 @@ Page({
         this.setData({ showWorkerPicker: false, editingWorkerIndex: -1 });
     },
     onEditAttendanceChange(e) {
-        this.setData({ editAttendanceType: parseInt(e.detail.value) });
+        // picker 返回下标：0=半天，1=全天；系统约定 1=半天，2=全天
+        this.setData({ editAttendanceType: parseInt(e.detail.value) === 1 ? 2 : 1 });
     },
     onEditOvertimeChange(e) {
         const index = parseInt(e.detail.value) || 0;

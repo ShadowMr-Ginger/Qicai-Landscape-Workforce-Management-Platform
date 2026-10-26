@@ -34,6 +34,8 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
     [report, type]
   );
 
+  const fileName = useMemo(() => `${title}-${report.groupName}`, [title, report.groupName]);
+
   const exportDateStr = useMemo(
     () =>
       `${exportDate.getFullYear()}年${String(exportDate.getMonth() + 1).padStart(2, "0")}月${String(
@@ -292,7 +294,7 @@ export function AttendanceTable({ report, exportDate, type }: AttendanceTablePro
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${title}.docx`;
+    a.download = `${fileName}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

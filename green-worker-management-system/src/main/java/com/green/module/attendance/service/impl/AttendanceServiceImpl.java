@@ -220,7 +220,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
             record.setAttendanceDate(batch.getBatchDate());
-            record.setAttendanceType(dto.getAttendanceType());
+            record.setAttendanceType(normalizeAttendanceType(dto.getAttendanceType()));
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
             record.setDailyWage(dailyWage);
@@ -280,7 +280,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
             record.setAttendanceDate(batch.getBatchDate());
-            record.setAttendanceType(dto.getAttendanceType());
+            record.setAttendanceType(normalizeAttendanceType(dto.getAttendanceType()));
             record.setOvertimeHours(dto.getOvertimeHours() != null ? dto.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(dto.getWorkTypeId());
             record.setDailyWage(dailyWage);
@@ -361,7 +361,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                     record.setProjectId(item.getProjectId());
                 }
                 if (item.getAttendanceType() != null) {
-                    record.setAttendanceType(item.getAttendanceType());
+                    record.setAttendanceType(normalizeAttendanceType(item.getAttendanceType()));
                 }
                 if (item.getOvertimeHours() != null) {
                     record.setOvertimeHours(item.getOvertimeHours());
@@ -565,7 +565,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         record.setWorkerId(dto.getWorkerId());
         record.setAttendanceDate(dto.getAttendanceDate());
-        record.setAttendanceType(dto.getAttendanceType());
+        record.setAttendanceType(normalizeAttendanceType(dto.getAttendanceType()));
         record.setOvertimeHours(dto.getOvertimeHours());
         record.setDailyWage(dto.getDailyWage());
         record.setOvertimeWage(dto.getOvertimeWage() != null ? dto.getOvertimeWage() : BigDecimal.ZERO);
@@ -733,7 +733,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         record.setDriverId(dto.getDriverId());
         record.setAttendanceDate(dto.getAttendanceDate());
-        record.setAttendanceType(dto.getAttendanceType());
+        record.setAttendanceType(normalizeAttendanceType(dto.getAttendanceType()));
         record.setOvertimeHours(dto.getOvertimeHours());
         record.setDailyWage(dto.getDailyWage());
         record.setOvertimeWage(dto.getOvertimeWage() != null ? dto.getOvertimeWage() : BigDecimal.ZERO);
@@ -898,7 +898,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         rec.setWorkerId(item.getWorkerId());
         rec.setProjectId(item.getProjectId());
         rec.setAttendanceDate(item.getAttendanceDate() != null ? item.getAttendanceDate() : batch.getBatchDate());
-        rec.setAttendanceType(item.getAttendanceType());
+        rec.setAttendanceType(normalizeAttendanceType(item.getAttendanceType()));
         rec.setOvertimeHours(item.getOvertimeHours());
         rec.setWorkTypeId(item.getWorkTypeId());
         rec.setDailyWage(item.getDailyWage());
@@ -1063,7 +1063,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             record.setWorkerId(item.getWorkerId());
             record.setProjectId(item.getProjectId());
             record.setAttendanceDate(item.getAttendanceDate() != null ? item.getAttendanceDate() : batch.getBatchDate());
-            record.setAttendanceType(item.getAttendanceType());
+            record.setAttendanceType(normalizeAttendanceType(item.getAttendanceType()));
             record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
             record.setWorkTypeId(item.getWorkTypeId());
             record.setDailyWage(item.getDailyWage());
@@ -1094,7 +1094,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         record.setDriverId(item.getDriverId());
         record.setProjectId(item.getProjectId());
         record.setAttendanceDate(item.getAttendanceDate());
-        record.setAttendanceType(item.getAttendanceType());
+        record.setAttendanceType(normalizeAttendanceType(item.getAttendanceType()));
         record.setOvertimeHours(item.getOvertimeHours() != null ? item.getOvertimeHours() : BigDecimal.ZERO);
         record.setWorkTypeId(null);
         record.setDailyWage(item.getDailyWage());
@@ -1571,13 +1571,21 @@ public class AttendanceServiceImpl implements AttendanceService {
     private BigDecimal calculateAttendanceDays(Collection<WorkerAttendanceRecordEntity> records) {
         BigDecimal days = BigDecimal.ZERO;
         for (WorkerAttendanceRecordEntity rec : records) {
+            // 记录存在即出勤：1=半天；其余（含历史异常值 0/null）按全天统计，与工资计算口径一致
             if (rec.getAttendanceType() != null && rec.getAttendanceType() == 1) {
                 days = days.add(new BigDecimal("0.5"));
-            } else if (rec.getAttendanceType() != null && rec.getAttendanceType() == 2) {
+            } else {
                 days = days.add(BigDecimal.ONE);
             }
         }
         return days;
+    }
+
+    /**
+     * 归一化出勤类型：仅 1 表示半天，其余一律按全天(2)入库，防止异常值（如 0）进入数据库
+     */
+    private Integer normalizeAttendanceType(Integer attendanceType) {
+        return attendanceType != null && attendanceType == 1 ? 1 : 2;
     }
 
     private <T> BigDecimal sumOvertimeHours(Collection<T> records, java.util.function.Function<T, BigDecimal> extractor) {
