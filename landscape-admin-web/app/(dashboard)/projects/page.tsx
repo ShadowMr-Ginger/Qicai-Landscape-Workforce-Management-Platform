@@ -176,7 +176,7 @@ export default function ProjectsPage() {
   const [createForm, setCreateForm] = useState({
     projectName: "",
     projectAddress: "",
-    grossMargin: "",
+    grossMargin: "1",
     startDate: getToday(),
   });
 
@@ -335,7 +335,7 @@ export default function ProjectsPage() {
       });
       toast.success("新增项目成功");
       setCreateOpen(false);
-      setCreateForm({ projectName: "", projectAddress: "", grossMargin: "", startDate: getToday() });
+      setCreateForm({ projectName: "", projectAddress: "", grossMargin: "1", startDate: getToday() });
       fetchProjects();
     } catch (err: unknown) {
       toast.error(getErrorMessage(err, "新增失败"));

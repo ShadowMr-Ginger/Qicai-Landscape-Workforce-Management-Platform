@@ -96,6 +96,10 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectEntity entity = new ProjectEntity();
         BeanUtils.copyProperties(dto, entity);
         entity.setProjectName(projectName);
+        // 毛利率缺省时默认 100%
+        if (entity.getGrossMargin() == null) {
+            entity.setGrossMargin(BigDecimal.ONE);
+        }
         entity.setStatus(1);
         entity.setIsSystem(0);
         entity.setIsClosed(0);

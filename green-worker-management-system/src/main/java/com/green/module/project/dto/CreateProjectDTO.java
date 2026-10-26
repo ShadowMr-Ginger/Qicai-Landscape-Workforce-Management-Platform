@@ -18,7 +18,6 @@ public class CreateProjectDTO {
     @NotBlank(message = "项目标题不能为空")
     private String projectName;
 
-    @NotNull(message = "毛利率不能为空")
     @DecimalMin(value = "0.00", message = "毛利率不能为负数")
     @DecimalMax(value = "1.00", message = "毛利率不能超过1")
     private BigDecimal grossMargin;
